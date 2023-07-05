@@ -1,7 +1,7 @@
 <script setup>
-import { ref, defineProps } from 'vue';
+import { defineProps, computed } from 'vue';
 import 'vue-json-pretty/lib/styles.css';
-import Checkbox from 'primevue/checkbox';
+import TriStateCheckbox from 'primevue/tristatecheckbox';
 
 const props = defineProps({
     scope: {
@@ -10,12 +10,14 @@ const props = defineProps({
     }
 });
 
-const isMemberNeeded = ref(props.scope?.member?.default == '*');
+const isMemberNeeded = computed(() => {
+    return props.scope?.member?.default == '*'
+});
 
 </script>
 
 <template>
     <p>Project: {{ scope.project.default }}</p>
     <p>Course: {{ scope.class.default }}</p>
-    <p>Will calculations by member be required? <Checkbox class="ml-2" v-model="isMemberNeeded" :binary="true" /></p>
+    <p>Will calculations by member be required? <TriStateCheckbox class="ml-2" v-model="isMemberNeeded" /></p>
 </template>

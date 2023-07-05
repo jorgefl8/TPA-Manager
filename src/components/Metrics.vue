@@ -38,7 +38,7 @@ defineExpose({
 
 <template>
     <!-- <VueJsonPretty class="mt-5" style="width: 1000px;" :data="props.data" :virtual="true" :height="250" :showLineNumber="true" :showLength="true" :editable="true" /> -->
-    <DataView :value="Object.entries(props.data)" dataKey="id">
+    <DataView :value="Object.entries(props.data)" dataKey="id" class="pr-1">
         <template #list="slotProps">
             <Fieldset :legend="slotProps.data[0]" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12 my-2" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
                 <div class="flex flex-column xl:flex-row xl:align-items-start gap-4">

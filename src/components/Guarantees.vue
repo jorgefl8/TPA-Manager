@@ -1,11 +1,11 @@
 <script setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, computed } from 'vue';
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import DataView from 'primevue/dataview';
-import Checkbox from 'primevue/checkbox';
 import Tag from 'primevue/tag';
 import Fieldset from 'primevue/fieldset';
+import TriStateCheckbox from 'primevue/tristatecheckbox';
 
 const props = defineProps({
     data: {
@@ -14,11 +14,13 @@ const props = defineProps({
     }
 });
 
-const isGuaranteeByMember = ref([]);
-
-for (const guarantee of props.data) {
-    isGuaranteeByMember.value[guarantee.id] = guarantee.scope?.member == "*";
-}
+const isGuaranteeByMember = computed(() => {
+    const result = [];
+    for (const guarantee of props.data) {
+        result[guarantee.id] = guarantee.scope?.member == "*";
+    }
+    return result;
+});
 
 const collapsed = ref(props.data.map((value, index) => {
     return { [index]: false };
@@ -44,7 +46,7 @@ defineExpose({
 
 <template>
     <!-- <VueJsonPretty class="mt-5" style="width: 1000px;" :data="props.data" :virtual="true" :height="250" :showLineNumber="true" :showLength="true" :editable="true" /> -->
-    <DataView :value="props.data" dataKey="id">
+    <DataView :value="props.data" dataKey="id" class="pr-2">
         <template #list="slotProps">
             <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12 my-2" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
                 <div class="flex flex-column xl:flex-row xl:align-items-start gap-4">
@@ -68,7 +70,7 @@ defineExpose({
                                 <span class="flex align-items-center gap-2">
                                     <i class="pi pi-users"></i>
                                     <span class="font-semibold">Is guarantee by member?</span>
-                                    <Checkbox v-model="isGuaranteeByMember[slotProps.data.id]" :binary="true" />
+                                    <TriStateCheckbox v-model="isGuaranteeByMember[slotProps.data.id]" />
                                 </span>
                             </div>
                             <div class="flex align-items-center gap-3">
