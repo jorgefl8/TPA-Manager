@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, computed } from 'vue';
+import { ref, computed } from 'vue';
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import DataView from 'primevue/dataview';

@@ -1,22 +1,33 @@
 <script setup>
-// import VueJsonPretty from 'vue-json-pretty';
-// import 'vue-json-pretty/lib/styles.css';
-import { ref, onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import axios from 'axios'
+import { useRouter, useRoute } from 'vue-router';
+
+import Scope from '../components/Scope.vue';
+import Dashboard from '../components/Dashboard.vue';
+import Guarantees from '../components/Guarantees.vue';
+import Metrics from '../components/Metrics.vue';
+
 import Button from 'primevue/button'
-import Scope from './Scope.vue';
-import Dashboard from './Dashboard.vue';
-import Guarantees from './Guarantees.vue';
-import Metrics from './Metrics.vue';
 import Dropdown from 'primevue/dropdown';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import ToggleButton from 'primevue/togglebutton';
 import Divider from 'primevue/divider';
 
+const router = useRouter();
+const route = useRoute();
+
+const modes = ref([
+  { label: 'Visualization', value: 'Visualization Mode' },
+  { label: 'Edition', value: 'Edition Mode' },
+  { label: 'Catalogue', value: 'TPs Catalogue' }
+]);
+const selectedMode = ref("Visualization Mode");
+const courseId = ref(route.params.courseId || '');
+const projectId = ref(route.params.projectId || '');
 const courses = ref([]);
-const selectedCourse = ref("");
-const projectId = ref("");
+const selectedCourse = ref();
 const agreement = ref();
 const dashboardBlocks = ref();
 const guarantees = ref();
@@ -24,6 +35,14 @@ const metrics = ref();
 const expandedDashboardBlocks = ref(false);
 const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);
+
+
+watch([courseId, projectId], ([selectedCourse, selectedProject]) => {
+  const routeParams = {};
+  if (selectedCourse) routeParams.courseId = selectedCourse.classId;
+  if (selectedProject) routeParams.projectId = selectedProject;
+  router.push({ name: 'visualization', params: routeParams });
+});
 
 function getCourses() {
   axios.get("http://localhost:5700/api/v1/scopes/development/courses")
@@ -34,6 +53,8 @@ function getCourses() {
           return a.projectId.localeCompare(b.projectId);
         });
       }
+      if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
+      if (selectedCourse.value && projectId.value) getAgreement();
     })
     .catch(error => {
       console.log("Error: ", error);
@@ -48,6 +69,16 @@ function getAgreement() {
     .catch(error => {
       console.log("Error: ", error);
     });
+}
+
+function changeViewByMode() {
+  if (selectedMode.value === "Visualization Mode") {
+    router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: projectId.value } });
+  } else if (selectedMode.value === "Edition Mode") {
+    router.push({ name: 'edition', params: { courseId: courseId.value, projectId: projectId.value } });
+  } else if (selectedMode.value === "TPs Catalogue") {
+    router.push({ name: 'catalogue' });
+  }
 }
 
 function toggleExpandedDashboardBlocks() {
@@ -95,16 +126,19 @@ onMounted(() => {
   </div>
 
   <div class="flex flex-column align-items-center" v-if="agreement">
-
-    
     <div class="flex flex-column align-items-center" style="width: 80svw;">
-      
       <div class="card align-self-start">
         
         <div id="topbar-container" class="flex">
           <div id="topbar" class="card flex align-items-start justify-content-between overflow-auto" style="width: 100%">
             <div class="mr-3 align-self-center">
-              <h2 class="mb-0">Visualization Mode</h2>
+              <Dropdown class="mr-2 align-self-center border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" @change="changeViewByMode">
+                <template #value="slotProps">
+                  <h1 class="mb-0">
+                    {{slotProps.value}}
+                  </h1>
+                </template>
+              </Dropdown>
             </div>
     
             <Divider layout="vertical"/>
@@ -127,10 +161,11 @@ onMounted(() => {
               <Button label="Collapse all" @click="collapseAll" icon="pi pi-angle-double-up" />
               <Button label="Expand all" @click="expandAll" icon="pi pi-angle-double-down" />
             </div>
+            
           </div>
         </div>
 
-        <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 78svh;">
+        <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 77svh;">
 
           <h2>Scope</h2>
           <Scope :scope="agreement.context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
@@ -154,14 +189,15 @@ onMounted(() => {
           <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
   
           <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
+
         </ScrollPanel>
+        
       </div>
-  
     </div>
   </div>
 </template>
 
-<style scoped>
+<style>
 
 #topbar::before, #topbar::after {
   content: "";
@@ -185,13 +221,6 @@ onMounted(() => {
 ::v-deep(.custom-scrolltop .p-scrolltop-icon) {
     font-size: 1.5rem;
     color: var(--primary-color-text);
-}
-
-.p-divider-solid.p-divider-horizontal:before {
-  border-top-style: solid !important;
-}
-.p-divider-solid.p-divider-vertical:before {
-  border-left-style: solid !important;
 }
 </style>
 <!-- Añadir un marco y un título a la aplicación para que quede más bonita -->

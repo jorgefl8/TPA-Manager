@@ -1,47 +1,18 @@
 <script setup>
-import { ref } from "vue";
-import HelloWorld from './components/HelloWorld.vue'
-
-const items = ref([
-    {
-        label: 'Home',
-        icon: 'pi pi-fw pi-home',
-        to: '/'
-    },
-    {
-        label: 'Calendar',
-        icon: 'pi pi-fw pi-calendar',
-        to: '/calendar'
-    },
-    {
-        label: 'Edit',
-        icon: 'pi pi-fw pi-pencil',
-        to: '/edit'
-    },
-    {
-        label: 'Documentation',
-        icon: 'pi pi-fw pi-file',
-        to: '/documentation'
-    },
-    {
-        label: 'Settings',
-        icon: 'pi pi-fw pi-cog',
-        to: '/settings'
-    }
-]);
 </script>
 
 <template>
   <main>
     <div class="wrapper">
-      <!-- <TabMenu :model="items" /> -->
-      <!-- <router-view /> -->
-      <HelloWorld />
+      <router-view />
     </div>
   </main>
 </template>
 
-<style scoped>
+<style>
+/* @import url('https://fonts.googleapis.com/css?family=Abel'); */
+@import url('https://fonts.googleapis.com/css?family=Didact Gothic');
+
 main {
   margin: 0;
   padding: 0;
@@ -53,5 +24,12 @@ main {
 
 .wrapper{
   padding: 1rem 2rem 0rem 2rem;
+}
+
+.p-divider-solid.p-divider-horizontal:before {
+  border-top-style: solid !important;
+}
+.p-divider-solid.p-divider-vertical:before {
+  border-left-style: solid !important;
 }
 </style>
