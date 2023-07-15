@@ -1,34 +1,36 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import axios from 'axios'
-import { useRouter, useRoute } from 'vue-router';
+import { ref, /* watch, onMounted,*/ computed } from 'vue'
+// import { useRouter, useRoute } from 'vue-router';
+// import axios from 'axios'
 
 import Scope from '../components/Scope.vue';
 import Dashboard from '../components/Dashboard.vue';
 import Guarantees from '../components/Guarantees.vue';
 import Metrics from '../components/Metrics.vue';
+import SelectTPA from '../components/SelectTPA.vue';
 
-import Button from 'primevue/button'
-import Dropdown from 'primevue/dropdown';
+// import Button from 'primevue/button'
+// import Dropdown from 'primevue/dropdown';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import ToggleButton from 'primevue/togglebutton';
-import Divider from 'primevue/divider';
+// import Divider from 'primevue/divider';
 
-const router = useRouter();
-const route = useRoute();
+// const router = useRouter();
+// const route = useRoute();
 
-const modes = ref([
-  { label: 'Visualization', value: 'Visualization Mode' },
-  { label: 'Edition', value: 'Edition Mode' },
-  { label: 'Catalogue', value: 'TPs Catalogue' }
-]);
-const selectedMode = ref("Visualization Mode");
-const courseId = ref(route.params.courseId || '');
-const projectId = ref(route.params.projectId || '');
-const courses = ref([]);
-const selectedCourse = ref();
-const agreement = ref();
+// const modes = ref([
+//   { label: 'Home', value: 'Home'},
+//   { label: 'Visualization', value: 'Visualization Mode' },
+//   { label: 'Edition', value: 'Edition Mode' },
+//   { label: 'Catalogue', value: 'TPs Catalogue' }
+// ]);
+// const selectedMode = ref("Visualization Mode");
+// const courseId = ref(route.params.courseId || '');
+// const projectId = ref(route.params.projectId || '');
+// const courses = ref([]);
+// const selectedCourse = ref();
+const selectTpa = ref();
 const dashboardBlocks = ref();
 const guarantees = ref();
 const metrics = ref();
@@ -36,50 +38,52 @@ const expandedDashboardBlocks = ref(false);
 const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);
 
-
-watch([courseId, projectId], ([selectedCourse, selectedProject]) => {
-  const routeParams = {};
-  if (selectedCourse) routeParams.courseId = selectedCourse.classId;
-  if (selectedProject) routeParams.projectId = selectedProject;
-  router.push({ name: 'visualization', params: routeParams });
+const agreement = computed(() => {
+  if (selectTpa.value) return selectTpa.value.agreement;
+  return null;
 });
 
-function getCourses() {
-  axios.get("http://localhost:5700/api/v1/scopes/development/courses")
-    .then(response => {
-      courses.value = response.data.scope;
-      for (const course of courses.value) {
-        course.projects.sort((a, b) => {
-          return a.projectId.localeCompare(b.projectId);
-        });
-      }
-      if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
-      if (selectedCourse.value && projectId.value) getAgreement();
-    })
-    .catch(error => {
-      console.log("Error: ", error);
-    });
-}
+// watch([courseId, projectId], ([selectedCourse, selectedProject]) => {
+//   const routeParams = {};
+//   if (selectedCourse) routeParams.courseId = selectedCourse.classId;
+//   if (selectedProject) routeParams.projectId = selectedProject;
+//   router.push({ name: 'visualization', params: routeParams });
+// });
 
-function getAgreement() {
-  axios.get(`http://localhost:5400/api/v6/agreements/tpa-${projectId.value}`)
-    .then(response => {
-      agreement.value = response.data;
-    })
-    .catch(error => {
-      console.log("Error: ", error);
-    });
-}
+// function getCourses() {
+//   axios.get("http://localhost:5700/api/v1/scopes/development/courses")
+//     .then(response => {
+//       courses.value = response.data.scope;
+//       for (const course of courses.value) {
+//         course.projects.sort((a, b) => {
+//           return a.projectId.localeCompare(b.projectId);
+//         });
+//       }
+//     })
+//     .catch(error => {
+//       console.log("Error: ", error);
+//     });
+// }
 
-function changeViewByMode() {
-  if (selectedMode.value === "Visualization Mode") {
-    router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: projectId.value } });
-  } else if (selectedMode.value === "Edition Mode") {
-    router.push({ name: 'edition', params: { courseId: courseId.value, projectId: projectId.value } });
-  } else if (selectedMode.value === "TPs Catalogue") {
-    router.push({ name: 'catalogue' });
-  }
-}
+// function getAgreement() {
+//   axios.get(`http://localhost:5400/api/v6/agreements/tpa-${projectId.value}`)
+//     .then(response => {
+//       agreement.value = response.data;
+//     })
+//     .catch(error => {
+//       console.log("Error: ", error);
+//     });
+// }
+
+// function changeViewByMode() {
+//   if (selectedMode.value === "Visualization Mode") {
+//     router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: projectId.value } });
+//   } else if (selectedMode.value === "Edition Mode") {
+//     router.push({ name: 'edition', params: { courseId: courseId.value, projectId: projectId.value } });
+//   } else if (selectedMode.value === "TPs Catalogue") {
+//     router.push({ name: 'catalogue' });
+//   }
+// }
 
 function toggleExpandedDashboardBlocks() {
   expandedDashboardBlocks.value ? dashboardBlocks.value.expandAll() : dashboardBlocks.value.collapseAll();
@@ -111,90 +115,99 @@ function collapseAll() {
   metrics.value.collapseAll();
 }
 
-onMounted(() => {
-  getCourses();
-});
+// onMounted(() => {
+  // if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
+  // if (selectedCourse.value && projectId.value) getAgreement();
+  // getCourses();
+// });
 </script>
 
 <template>
 
-  <div class="card" v-if="!agreement">
-    <h1>TPA Visualization</h1>
-    <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter />
-    <Dropdown v-if="selectedCourse" class="mr-2" v-model="projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
-    <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
-  </div>
-
-  <div class="flex flex-column align-items-center" v-if="agreement">
-    <div class="flex flex-column align-items-center" style="width: 80svw;">
-      <div class="card align-self-start">
-        
-        <div id="topbar-container" class="flex">
-          <div id="topbar" class="card flex align-items-start justify-content-between overflow-auto" style="width: 100%">
-            <div class="mr-3 align-self-center">
-              <Dropdown class="mr-2 align-self-center border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" @change="changeViewByMode">
-                <template #value="slotProps">
-                  <h1 class="mb-0">
-                    {{slotProps.value}}
-                  </h1>
-                </template>
-              </Dropdown>
-            </div>
-    
-            <Divider layout="vertical"/>
-    
-            <div class="flex pt-4 align-items-baseline">
-              <div class="p-float-label">
-                  <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" inputId="dd-classId" optionLabel="classId" placeholder="Select a course" filter />
-                  <label for="dd-classId">Course</label>
-              </div>
-              <div class="p-float-label">
-                <Dropdown  class="mr-2" v-model="projectId" v-if="selectedCourse" inputId="dd-projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
-                <label for="dd-projectId" v-if="selectedCourse">Project</label>
-              </div>
-              <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
-            </div>
-    
-            <Divider layout="vertical"/>
-    
-            <div class="flex justify-content-center gap-3 pt-4 align-items-baseline">
-              <Button label="Collapse all" @click="collapseAll" icon="pi pi-angle-double-up" />
-              <Button label="Expand all" @click="expandAll" icon="pi pi-angle-double-down" />
-            </div>
-            
-          </div>
-        </div>
-
-        <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 77svh;">
-
-          <h2>Scope</h2>
-          <Scope :scope="agreement.context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
-      
-          <div class="flex align-items-baseline mt-4">
-            <h2>Dashboard blocks</h2>
-            <ToggleButton v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
-          </div>
-          <Dashboard ref="dashboardBlocks" :config="agreement.context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
-      
-          <div class="flex align-items-baseline mt-4">
-            <h2>Guarantees</h2>
-            <ToggleButton v-model="expandedGuarantees" @click="toggleExpandedGuarantees" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
-          </div>
-          <Guarantees ref="guarantees" :data="agreement.terms.guarantees" :key="agreement.terms.guarantees" />
-      
-          <div class="flex align-items-baseline mt-4">
-            <h2>Metrics</h2>
-            <ToggleButton v-model="expandedMetrics" @click="toggleExpandedMetrics" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
-          </div>
-          <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
+  <div class="grid">
+    <!-- <div class="card" v-if="!agreement">
+      <h1>TPA Visualization</h1>
+      <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter />
+      <Dropdown v-if="selectedCourse" class="mr-2" v-model="projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
+      <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
+    </div> -->
   
-          <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
-
-        </ScrollPanel>
+    <!-- <SelectTPA ref="selectTpaDialog" :isDialog="false" :isVisualizationMode="true" /> -->
+    <SelectTPA ref="selectTpa" :isDialog="false" :isVisualizationMode="true" @collapseAllClick="collapseAll" @expandAllClick="expandAll" />
+  
+    <div class="col-12 flex flex-column align-items-center" v-if="agreement">
+      <div class="flex flex-column align-items-center w-full">
+        <div class="card w-full">
+          
+  
+          <!-- <div id="topbar-container" class="flex">
+            <div id="topbar" class="card flex align-items-start justify-content-between overflow-auto" style="width: 100%">
+              <div class="mr-3 align-self-center">
+                <Dropdown class="mr-2 align-self-center border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" @change="changeViewByMode">
+                  <template #value="slotProps">
+                    <h1 class="mb-0">
+                      {{slotProps.value}}
+                    </h1>
+                  </template>
+                </Dropdown>
+              </div>
+      
+              <Divider layout="vertical"/>
+      
+              <div class="flex pt-4 align-items-baseline">
+                <div class="p-float-label">
+                    <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" inputId="dd-classId" optionLabel="classId" placeholder="Select a course" filter />
+                    <label for="dd-classId">Course</label>
+                </div>
+                <div class="p-float-label">
+                  <Dropdown  class="mr-2" v-model="projectId" v-if="selectedCourse" inputId="dd-projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
+                  <label for="dd-projectId" v-if="selectedCourse">Project</label>
+                </div>
+                <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
+              </div>
+      
+              <Divider layout="vertical"/>
+      
+              <div class="flex justify-content-center gap-3 pt-4 align-items-baseline">
+                <Button label="Collapse all" @click="collapseAll" icon="pi pi-angle-double-up" />
+                <Button label="Expand all" @click="expandAll" icon="pi pi-angle-double-down" />
+              </div>
+              
+            </div>
+          </div> -->
+  
+          <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
+  
+            <h2>Scope</h2>
+            <Scope :scope="agreement.context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
         
+            <div class="flex align-items-baseline mt-4">
+              <h2>Dashboard blocks</h2>
+              <ToggleButton v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+            </div>
+            <Dashboard ref="dashboardBlocks" :config="agreement.context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
+        
+            <div class="flex align-items-baseline mt-4">
+              <h2>Guarantees</h2>
+              <ToggleButton v-model="expandedGuarantees" @click="toggleExpandedGuarantees" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+            </div>
+            <Guarantees ref="guarantees" :data="agreement.terms.guarantees" :key="agreement.terms.guarantees" />
+        
+            <div class="flex align-items-baseline mt-4">
+              <h2>Metrics</h2>
+              <ToggleButton v-model="expandedMetrics" @click="toggleExpandedMetrics" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+            </div>
+            <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
+    
+            <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
+  
+          </ScrollPanel>
+          
+        </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <style>

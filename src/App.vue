@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <main>
+  <main >
     <div class="wrapper">
       <router-view />
     </div>
@@ -17,9 +17,9 @@ main {
   margin: 0;
   padding: 0;
   /* height: 100vh; */
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  /* display:flex; */
+  /* align-items:center; */
+  /* justify-content:center; */
 }
 
 .wrapper{
