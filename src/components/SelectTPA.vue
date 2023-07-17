@@ -39,10 +39,10 @@ const isProjectInvalid = ref(false);
 const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
 const modes = ref([
-  { label: 'Home', value: MODES.HOME},
-  { label: 'Visualization', value: MODES.VISUALIZATION },
-  { label: 'Edition', value: MODES.EDITION },
-  { label: 'Catalogue', value: MODES.CATALOGUE }
+  { label: '🏠 Home', value: MODES.HOME},
+  { label: '🔎 Visualization', value: MODES.VISUALIZATION },
+  { label: '✏️ Edition', value: MODES.EDITION },
+  { label: '📖 Catalogue', value: MODES.CATALOGUE }
 ]);
 
 defineExpose({
@@ -233,5 +233,9 @@ function clearSelectedProject() {
 <style scoped>
   h1 {
     font-size: clamp(1.5rem, 2vw, 10rem) !important;
+  }
+
+  #topbar::before, #topbar::after {
+    content: "";
   }
 </style>

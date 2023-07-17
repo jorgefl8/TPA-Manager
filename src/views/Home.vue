@@ -78,7 +78,7 @@ onDeactivated(() => {
                     and <a href="https://github.com/governify/governify-examples/tree/master/TPAs" target="_blank">TPAs</a> that can be used for reference as a starting point.
                     This catalogue can also be consulted inside the TPA Manager by clicking the button below.</p>
                 <div class="flex justify-content-center">
-                    <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" @click="catalogue" />
+                    <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" @click="$router.push({ name: 'catalogue' })" />
                 </div>
                 <p>
                     This tool has been developed following the guidelines of the <a href="https://www.governify.io/reference-guides/iAgree-5_2" target="_blank">iAgree Syntax (version 5.2)</a>.
@@ -89,20 +89,6 @@ onDeactivated(() => {
         </div>
     </div>
 </template>
-
-<style>
-    p, ul, li {
-        font-size: clamp(0.75rem, 1svw, 3rem);
-    }
-    
-    h1 {
-        font-size: clamp(1.5rem, 3vw, 10rem) !important;
-    }
-    
-    span {
-        font-size: clamp(0.75rem, 1svw, 3rem) !important;
-    }
-</style>
 
 <style scoped>
     p, ul, li {

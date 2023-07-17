@@ -1,1 +1,71 @@
 // Suggested location to add your overrides so that migration would be easy by just updating the SASS folder in the future
+
+:root, .p-component {
+    --font-family: Didact Gothic;
+    font-family: Didact Gothic;
+}
+
+html {
+    text-align: justify;
+}
+
+p, ul, li {
+    font-size: clamp(0.75rem, 1svw, 3rem);
+}
+
+h1 {
+    font-size: clamp(1.25rem, 3vw, 10rem) !important;
+}
+
+h2 {
+    font-size: clamp(1rem, 2vw, 8rem) !important;
+}
+
+span {
+    font-size: clamp(0.75rem, 1svw, 3rem) !important;
+}
+
+.p-button-label {
+    font-weight: 700;
+}
+
+.p-checkbox {
+    vertical-align: inherit;
+}
+
+.p-checkbox-box {
+    padding: 0.75svw;
+}
+
+.editableText {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+    color: var(--primary-color-text);
+    background-color: var(--primary-color);
+    transition: background-color 0.2s ease;
+    user-select: none;
+    outline: none;
+    font-size: inherit;
+    vertical-align: inherit;
+}
+
+.p-scrollpanel .p-scrollpanel-bar {
+    background-color: var(--primary-300);
+    opacity: 1;
+    transition: background-color 0.3s;
+}
+
+.p-scrollpanel .p-scrollpanel-bar:hover {
+    background-color: var(--primary-400);
+}
+
+.custom-scrolltop {
+    width: 3rem;
+    height: 3rem;
+}
+
+.custom-scrolltop .p-scrolltop-icon {
+    font-size: 1.5rem;
+    color: var(--primary-color-text);
+}

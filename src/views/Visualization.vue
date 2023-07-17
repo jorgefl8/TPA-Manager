@@ -1,7 +1,5 @@
 <script setup>
-import { ref, /* watch, onMounted,*/ computed } from 'vue'
-// import { useRouter, useRoute } from 'vue-router';
-// import axios from 'axios'
+import { ref, computed } from 'vue'
 
 import Scope from '../components/Scope.vue';
 import Dashboard from '../components/Dashboard.vue';
@@ -9,27 +7,10 @@ import Guarantees from '../components/Guarantees.vue';
 import Metrics from '../components/Metrics.vue';
 import SelectTPA from '../components/SelectTPA.vue';
 
-// import Button from 'primevue/button'
-// import Dropdown from 'primevue/dropdown';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import ToggleButton from 'primevue/togglebutton';
-// import Divider from 'primevue/divider';
 
-// const router = useRouter();
-// const route = useRoute();
-
-// const modes = ref([
-//   { label: 'Home', value: 'Home'},
-//   { label: 'Visualization', value: 'Visualization Mode' },
-//   { label: 'Edition', value: 'Edition Mode' },
-//   { label: 'Catalogue', value: 'TPs Catalogue' }
-// ]);
-// const selectedMode = ref("Visualization Mode");
-// const courseId = ref(route.params.courseId || '');
-// const projectId = ref(route.params.projectId || '');
-// const courses = ref([]);
-// const selectedCourse = ref();
 const selectTpa = ref();
 const dashboardBlocks = ref();
 const guarantees = ref();
@@ -42,48 +23,6 @@ const agreement = computed(() => {
   if (selectTpa.value) return selectTpa.value.agreement;
   return null;
 });
-
-// watch([courseId, projectId], ([selectedCourse, selectedProject]) => {
-//   const routeParams = {};
-//   if (selectedCourse) routeParams.courseId = selectedCourse.classId;
-//   if (selectedProject) routeParams.projectId = selectedProject;
-//   router.push({ name: 'visualization', params: routeParams });
-// });
-
-// function getCourses() {
-//   axios.get("http://localhost:5700/api/v1/scopes/development/courses")
-//     .then(response => {
-//       courses.value = response.data.scope;
-//       for (const course of courses.value) {
-//         course.projects.sort((a, b) => {
-//           return a.projectId.localeCompare(b.projectId);
-//         });
-//       }
-//     })
-//     .catch(error => {
-//       console.log("Error: ", error);
-//     });
-// }
-
-// function getAgreement() {
-//   axios.get(`http://localhost:5400/api/v6/agreements/tpa-${projectId.value}`)
-//     .then(response => {
-//       agreement.value = response.data;
-//     })
-//     .catch(error => {
-//       console.log("Error: ", error);
-//     });
-// }
-
-// function changeViewByMode() {
-//   if (selectedMode.value === "Visualization Mode") {
-//     router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: projectId.value } });
-//   } else if (selectedMode.value === "Edition Mode") {
-//     router.push({ name: 'edition', params: { courseId: courseId.value, projectId: projectId.value } });
-//   } else if (selectedMode.value === "TPs Catalogue") {
-//     router.push({ name: 'catalogue' });
-//   }
-// }
 
 function toggleExpandedDashboardBlocks() {
   expandedDashboardBlocks.value ? dashboardBlocks.value.expandAll() : dashboardBlocks.value.collapseAll();
@@ -114,68 +53,15 @@ function collapseAll() {
   guarantees.value.collapseAll();
   metrics.value.collapseAll();
 }
-
-// onMounted(() => {
-  // if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
-  // if (selectedCourse.value && projectId.value) getAgreement();
-  // getCourses();
-// });
 </script>
 
 <template>
-
   <div class="grid">
-    <!-- <div class="card" v-if="!agreement">
-      <h1>TPA Visualization</h1>
-      <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter />
-      <Dropdown v-if="selectedCourse" class="mr-2" v-model="projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
-      <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
-    </div> -->
-  
-    <!-- <SelectTPA ref="selectTpaDialog" :isDialog="false" :isVisualizationMode="true" /> -->
     <SelectTPA ref="selectTpa" :isDialog="false" :isVisualizationMode="true" @collapseAllClick="collapseAll" @expandAllClick="expandAll" />
   
     <div class="col-12 flex flex-column align-items-center" v-if="agreement">
       <div class="flex flex-column align-items-center w-full">
         <div class="card w-full">
-          
-  
-          <!-- <div id="topbar-container" class="flex">
-            <div id="topbar" class="card flex align-items-start justify-content-between overflow-auto" style="width: 100%">
-              <div class="mr-3 align-self-center">
-                <Dropdown class="mr-2 align-self-center border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" @change="changeViewByMode">
-                  <template #value="slotProps">
-                    <h1 class="mb-0">
-                      {{slotProps.value}}
-                    </h1>
-                  </template>
-                </Dropdown>
-              </div>
-      
-              <Divider layout="vertical"/>
-      
-              <div class="flex pt-4 align-items-baseline">
-                <div class="p-float-label">
-                    <Dropdown class="mr-2" v-model="selectedCourse" :options="courses" inputId="dd-classId" optionLabel="classId" placeholder="Select a course" filter />
-                    <label for="dd-classId">Course</label>
-                </div>
-                <div class="p-float-label">
-                  <Dropdown  class="mr-2" v-model="projectId" v-if="selectedCourse" inputId="dd-projectId" :options="selectedCourse.projects" optionLabel="projectId" optionValue="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" />
-                  <label for="dd-projectId" v-if="selectedCourse">Project</label>
-                </div>
-                <Button label="Display agreement" icon="pi pi-search" @click="getAgreement" />
-              </div>
-      
-              <Divider layout="vertical"/>
-      
-              <div class="flex justify-content-center gap-3 pt-4 align-items-baseline">
-                <Button label="Collapse all" @click="collapseAll" icon="pi pi-angle-double-up" />
-                <Button label="Expand all" @click="expandAll" icon="pi pi-angle-double-down" />
-              </div>
-              
-            </div>
-          </div> -->
-  
           <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
   
             <h2>Scope</h2>
@@ -202,40 +88,12 @@ function collapseAll() {
             <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
   
           </ScrollPanel>
-          
         </div>
       </div>
     </div>
   </div>
-
 </template>
 
-<style>
-
-#topbar::before, #topbar::after {
-  content: "";
-}
-
-::v-deep(.p-scrollpanel .p-scrollpanel-bar) {
-    background-color: var(--primary-300);
-    opacity: 1;
-    transition: background-color 0.3s;
-}
-
-::v-deep(.p-scrollpanel .p-scrollpanel-bar:hover) {
-    background-color: var(--primary-400);
-}
-
-::v-deep(.custom-scrolltop) {
-    width: 3rem;
-    height: 3rem;
-}
-
-::v-deep(.custom-scrolltop .p-scrolltop-icon) {
-    font-size: 1.5rem;
-    color: var(--primary-color-text);
-}
-</style>
 <!-- Añadir un marco y un título a la aplicación para que quede más bonita -->
 <!-- Cambiar los títulos y organizar los apartados mejor visualmente -->
 <!-- Añadir un ToggleButton para indicar si el TPA es para desarrollo o producción (básicamente, para decidir si los enlaces son con host.docker.internal:port o con URLs) -->

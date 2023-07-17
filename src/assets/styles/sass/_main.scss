@@ -2,15 +2,9 @@
     box-sizing: border-box;
 }
 
-:root, .p-component {
-    --font-family: Didact Gothic;
-    font-family: Didact Gothic;
-}
-
 html {
     height: 100%;
     font-size: $fontSize;
-    text-align: justify;
 }
 
 body {
