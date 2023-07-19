@@ -65,7 +65,7 @@ function collapseAll() {
           <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
   
             <h2>Scope</h2>
-            <Scope :scope="agreement.context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
+            <Scope :scope="agreement.context.definitions.scopes.development" scopeFieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
         
             <div class="flex align-items-baseline mt-4">
               <h2>Dashboard blocks</h2>

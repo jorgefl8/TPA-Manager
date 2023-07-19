@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { storeToRefs } from 'pinia'
+import { useTpaEditionStore } from '@/stores/tpaEdition';
 import axios from 'axios'
 
 import Button from 'primevue/button';
@@ -20,6 +22,8 @@ const props = defineProps({
 
 const router = useRouter();
 const route = useRoute();
+const tpaEditionStore = useTpaEditionStore();
+const { originalTpa, modifiedTpa} = storeToRefs(tpaEditionStore);
 
 const MODES = {
   HOME: "Home",
@@ -111,6 +115,7 @@ function getAgreement() {
     axios.get(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
     .then(response => {
       agreement.value = response.data;
+      tpaEditionStore.setInitialTpaData(agreement.value);
     })
     .catch(error => {
       console.log("Error: ", error);
@@ -165,11 +170,9 @@ function clearSelectedProject() {
 </script>
 
 <template>
-  <Dialog v-if="props.isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 40svw">
+  <Dialog v-if="props.isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 40svw">
     <template #header>
-      <div class="flex">
-        <h1>Select a TPA</h1>
-      </div>
+        <h1 class="mb-0">Select a TPA</h1>
     </template>
     
       <div class="flex">
@@ -228,6 +231,7 @@ function clearSelectedProject() {
       
     </div>
   </div>
+
 </template>
 
 <style scoped>

@@ -1,41 +1,43 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import 'vue-json-pretty/lib/styles.css';
+import EditContent from './EditContent.vue';
 
 import TriStateCheckbox from 'primevue/tristatecheckbox';
-import Button from 'primevue/button';
+import Checkbox from 'primevue/checkbox';
 
 const props = defineProps({
-    scope: {
-        type: Object,
-        required: true
-    },
-    editionMode: {
-        type: Boolean,
-    }
+  scope: {
+    type: Object,
+    required: true
+  },
+  editionMode: {
+    type: Boolean,
+  },
+  scopeFieldName: {
+    type: String
+  }
 });
 
-const isMemberNeeded = ref(props.scope?.member?.default == '*');
-const isMemberNeededComputed = computed(() => {
-    return props.scope?.member?.default == '*'
-});
-
-function handleEditContent(event) {
-    event.preventDefault();
-}
-
+const tpaEditionStore = useTpaEditionStore()
+const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.scopeFieldName)?.member?.default);
 </script>
 
 <template>
-    <template v-if="props.editionMode">
-        <p><span class="mr-1">Project: </span><Button class="editableText" @click="handleEditContent">{{ scope.project.default }}</Button></p>
-        <p><span class="mr-1">Course: </span><Button class="editableText" @click="handleEditContent">{{ scope.class.default }}</Button></p>
-        <p>Will calculations by member be required? <TriStateCheckbox class="ml-2" v-model="isMemberNeeded" /></p>
-    </template>
-    <template v-else>
-        <p>Project: <span>{{ scope.project.default }}</span></p>
-        <p>Course: <span>{{ scope.class.default }}</span></p>
-        <p>Will calculations by member be required? <TriStateCheckbox class="ml-2" v-model="isMemberNeededComputed" /></p>
-    </template>
+  <template v-if="editionMode">
+    <p><span class="mr-1">Project: </span><EditContent :fieldName="scopeFieldName + '.project.default'" /></p>
+    <p><span class="mr-1">Course: </span><EditContent :fieldName="scopeFieldName + '.class.default'" /></p>
+    <p>Will calculations by member be required?
+      <Checkbox class="ml-2" v-model="isMemberNeeded" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(scopeFieldName + '.member.default', isMemberNeeded)" />
+    </p>
+  </template>
+  <template v-else>
+    <p>Project: <span>{{ tpaEditionStore.getTpaField(scopeFieldName + '.project.default') }}</span></p>
+    <p>Course: <span>{{ tpaEditionStore.getTpaField(scopeFieldName + '.class.default') }}</span></p>
+    <p>Will calculations by member be required?
+      <Checkbox class="ml-2" v-model="isMemberNeeded" readonly :binary="true" trueValue="*" falseValue="null" />
+    </p>
+  </template>
 </template>

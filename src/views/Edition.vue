@@ -1,5 +1,7 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
+import { storeToRefs } from 'pinia';
+import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import Scope from '../components/Scope.vue';
 import Dashboard from '../components/Dashboard.vue';
@@ -22,6 +24,33 @@ const expandedMetrics = ref(false);
 const agreement = computed(() => {
   if (selectTpa.value) return selectTpa.value.agreement;
   return null;
+});
+
+const tpaEditionStore = useTpaEditionStore();
+const { originalTpa, modifiedTpa} = storeToRefs(tpaEditionStore);
+
+const handlePageReload = (event) => {
+  if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    event.preventDefault();
+    event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
+  }
+};
+
+const handlePageLeave = () => {
+  if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    if (confirm("There are unsaved changes. Do you want to save them before you leave?")) {
+      // Web apps can't prevent the user from leaving the page, so all we can do is save the changes if the user wants to
+      console.log("TODO: save changes")
+    }
+  }
+};
+
+// Attach the event listener when the component is mounted
+window.addEventListener('beforeunload', handlePageReload);
+
+onBeforeUnmount(() => {
+  handlePageLeave();
+  window.removeEventListener('beforeunload', handlePageReload);
 });
 
 function toggleExpandedDashboardBlocks() {
@@ -65,7 +94,7 @@ function collapseAll() {
           <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
   
             <h2>Scope</h2>
-            <Scope :editionMode="true" :scope="agreement.context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
+            <Scope :editionMode="true" :scope="agreement.context.definitions.scopes.development" scopeFieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
         
             <div class="flex align-items-baseline mt-4">
               <h2>Dashboard blocks</h2>
