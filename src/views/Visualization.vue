@@ -65,13 +65,13 @@ function collapseAll() {
           <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
   
             <h2>Scope</h2>
-            <Scope :scope="agreement.context.definitions.scopes.development" scopeFieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
+            <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
         
             <div class="flex align-items-baseline mt-4">
               <h2>Dashboard blocks</h2>
               <ToggleButton v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
             </div>
-            <Dashboard ref="dashboardBlocks" :config="agreement.context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
+            <Dashboard ref="dashboardBlocks" :config="agreement.context.definitions.dashboards.main.config" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
         
             <div class="flex align-items-baseline mt-4">
               <h2>Guarantees</h2>

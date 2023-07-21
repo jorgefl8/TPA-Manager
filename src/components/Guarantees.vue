@@ -1,7 +1,5 @@
 <script setup>
 import { ref, computed } from 'vue';
-import VueJsonPretty from 'vue-json-pretty';
-import 'vue-json-pretty/lib/styles.css';
 import DataView from 'primevue/dataview';
 import Tag from 'primevue/tag';
 import Fieldset from 'primevue/fieldset';
@@ -22,30 +20,23 @@ const isGuaranteeByMember = computed(() => {
     return result;
 });
 
-const collapsed = ref(props.data.map((value, index) => {
-    return { [index]: false };
-}) ?? []);
-
-function collapseAll() {
-    collapsed.value.map((value, index) => {
-        collapsed.value[index] = true;
-    });
-}
-
-function expandAll() {
-    collapsed.value.map((value, index) => {
-        collapsed.value[index] = false;
-    });
-}
+const collapsed = ref(new Array(props.data.length).fill(true));
 
 defineExpose({
     collapseAll,
     expandAll
 });
+
+function collapseAll() {
+    collapsed.value.map((value, index) => collapsed.value[index] = true);
+}
+
+function expandAll() {
+    collapsed.value.map((value, index) => collapsed.value[index] = false);
+}
 </script>
 
 <template>
-    <!-- <VueJsonPretty class="mt-5" style="width: 1000px;" :data="props.data" :virtual="true" :height="250" :showLineNumber="true" :showLength="true" :editable="true" /> -->
     <DataView :value="props.data" dataKey="id" class="pr-2">
         <template #list="slotProps">
             <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12 my-2" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
@@ -95,5 +86,5 @@ defineExpose({
     </DataView>
 </template>
 
-<!-- Poner un ToggleButton para alternar entre vista "bonita" y VueJsonPretty -->
+<!-- Poner un ToggleButton para alternar entre vista "bonita" y VueJson -->
 <!-- Añadir algún botón para añadir y eliminar garantías -->

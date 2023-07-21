@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import VueJsonPretty from 'vue-json-pretty';
-import 'vue-json-pretty/lib/styles.css';
 import DataView from 'primevue/dataview';
 import ToggleButton from 'primevue/togglebutton';
 import Fieldset from 'primevue/fieldset';
@@ -14,26 +12,20 @@ const props = defineProps({
 });
 
 const stepsToggles = ref({});
-const collapsed = ref(Object.entries(props.data).map((value, index) => {
-    return { [index]: false };
-}) ?? []);
-
-function collapseAll() {
-    collapsed.value.map((value, index) => {
-        collapsed.value[index] = true;
-    });
-}
-
-function expandAll() {
-    collapsed.value.map((value, index) => {
-        collapsed.value[index] = false;
-    });
-}
+const collapsed = ref(new Array(Object.keys(props.data).length).fill(true));
 
 defineExpose({
     collapseAll,
     expandAll
 });
+
+function collapseAll() {
+    collapsed.value.map((value, index) => collapsed.value[index] = true);
+}
+
+function expandAll() {
+    collapsed.value.map((value, index) => collapsed.value[index] = false);
+}
 </script>
 
 <template>
@@ -119,6 +111,6 @@ defineExpose({
     </DataView>
 </template>
 
-<!-- Poner un ToggleButton para alternar entre vista "bonita" y VueJsonPretty -->
+<!-- Poner un ToggleButton para alternar entre vista "bonita" y VueJson -->
 <!-- Añadir algún botón para añadir y eliminar garantías -->
 <!-- Poner un if en función de si la métrica es o no de GraphQL para visualizar de una forma u otra -->

@@ -1,4 +1,17 @@
 <script setup>
+import { onMounted } from 'vue';
+import { usePrimeVue } from 'primevue/config';
+
+const PrimeVue = usePrimeVue();
+
+onMounted(() => {
+  const appTheme = localStorage.getItem("appTheme");
+  if (appTheme === 'Dark') {
+    PrimeVue.changeTheme('lara-light-blue', 'arya-blue', 'theme-link', () => {});
+  } else {
+    PrimeVue.changeTheme('arya-blue', 'lara-light-blue', 'theme-link', () => {});
+  }
+});
 </script>
 
 <template>
@@ -26,10 +39,4 @@ main {
   padding: 1rem 2rem 0rem 2rem;
 }
 
-.p-divider-solid.p-divider-horizontal:before {
-  border-top-style: solid !important;
-}
-.p-divider-solid.p-divider-vertical:before {
-  border-left-style: solid !important;
-}
 </style>

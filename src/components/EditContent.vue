@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-// import { storeToRefs } from 'pinia'
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import Button from 'primevue/button';
@@ -15,7 +14,6 @@ const props = defineProps({
 });
 
 const tpaEditionStore = useTpaEditionStore()
-// const { originalTpa, modifiedTpa } = storeToRefs(tpaEditionStore);
 
 const valueBeforeEdit = ref(tpaEditionStore.getTpaField(props.fieldName));
 const valueAfterEdit = ref(tpaEditionStore.getTpaField(props.fieldName));

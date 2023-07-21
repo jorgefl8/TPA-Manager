@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { storeToRefs } from 'pinia'
+import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 import axios from 'axios'
 
@@ -22,8 +22,8 @@ const props = defineProps({
 
 const router = useRouter();
 const route = useRoute();
+const appThemeStore = useAppThemeStore();
 const tpaEditionStore = useTpaEditionStore();
-const { originalTpa, modifiedTpa} = storeToRefs(tpaEditionStore);
 
 const MODES = {
   HOME: "Home",
@@ -227,6 +227,7 @@ function clearSelectedProject() {
       <div class="flex py-2 justify-content-center gap-3">
         <Button label="Collapse all" @click="$emit('collapseAllClick')" icon="pi pi-angle-double-up" />
         <Button label="Expand all" @click="$emit('expandAllClick')" icon="pi pi-angle-double-down" />
+        <Button label="Theme" @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
       </div>
       
     </div>
@@ -236,7 +237,7 @@ function clearSelectedProject() {
 
 <style scoped>
   h1 {
-    font-size: clamp(1.5rem, 2vw, 10rem) !important;
+    font-size: clamp(1.5rem, 1.75vw, 10rem) !important;
   }
 
   #topbar::before, #topbar::after {

@@ -1,41 +1,36 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
-import 'vue-json-pretty/lib/styles.css';
 import EditContent from './EditContent.vue';
 
-import TriStateCheckbox from 'primevue/tristatecheckbox';
 import Checkbox from 'primevue/checkbox';
 
 const props = defineProps({
-  scope: {
-    type: Object,
-    required: true
-  },
-  editionMode: {
-    type: Boolean,
-  },
-  scopeFieldName: {
+  fieldName: {
     type: String
   }
 });
 
+const router = useRouter();
 const tpaEditionStore = useTpaEditionStore()
-const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.scopeFieldName)?.member?.default);
+
+const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
+const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.fieldName)?.member?.default);
 </script>
 
 <template>
-  <template v-if="editionMode">
-    <p><span class="mr-1">Project: </span><EditContent :fieldName="scopeFieldName + '.project.default'" /></p>
-    <p><span class="mr-1">Course: </span><EditContent :fieldName="scopeFieldName + '.class.default'" /></p>
+  <template v-if="isEditionMode">
+    <p><span class="mr-1">Project: </span><EditContent :fieldName="fieldName + '.project.default'" /></p>
+    <p><span class="mr-1">Course: </span><EditContent :fieldName="fieldName + '.class.default'" /></p>
     <p>Will calculations by member be required?
-      <Checkbox class="ml-2" v-model="isMemberNeeded" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(scopeFieldName + '.member.default', isMemberNeeded)" />
+      <Checkbox class="ml-2" v-model="isMemberNeeded" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(fieldName + '.member.default', isMemberNeeded)" />
     </p>
   </template>
   <template v-else>
-    <p>Project: <span>{{ tpaEditionStore.getTpaField(scopeFieldName + '.project.default') }}</span></p>
-    <p>Course: <span>{{ tpaEditionStore.getTpaField(scopeFieldName + '.class.default') }}</span></p>
+    <p>Project: <span>{{ tpaEditionStore.getTpaField(fieldName + '.project.default') }}</span></p>
+    <p>Course: <span>{{ tpaEditionStore.getTpaField(fieldName + '.class.default') }}</span></p>
     <p>Will calculations by member be required?
       <Checkbox class="ml-2" v-model="isMemberNeeded" readonly :binary="true" trueValue="*" falseValue="null" />
     </p>
