@@ -15,9 +15,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <main >
+  <main>
     <div class="wrapper">
-      <router-view />
+      <RouterView />
     </div>
   </main>
 </template>
@@ -35,7 +35,7 @@ main {
   /* justify-content:center; */
 }
 
-.wrapper{
+.wrapper {
   padding: 1rem 2rem 0rem 2rem;
 }
 

@@ -28,11 +28,11 @@ const routes = [
         name: "catalogue",
         component: () => import("../views/Catalogue.vue"),
     },
-    // {
-    //     path: "/:catchAll(.*)",
-    //     name: "notFound",
-    //     component: () => import("../views/NotFound.vue"),
-    // },
+    {
+        path: "/:catchAll(.*)",
+        name: "notFound",
+        component: () => import("../views/NotFound.vue"),
+    },
 ]
 
 const router = createRouter({

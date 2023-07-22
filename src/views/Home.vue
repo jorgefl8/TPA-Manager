@@ -1,10 +1,13 @@
 <script setup>
 import { ref, onMounted, onDeactivated, computed } from 'vue'
+import { useAppThemeStore } from '@/stores/appTheme';
 
 import Button from 'primevue/button'
 import Divider from 'primevue/divider';
 
 import SelectTPA from '../components/SelectTPA.vue';
+
+const appThemeStore = useAppThemeStore();
 
 const selectTpaDialog = ref();
 const isSelectTpaVisualizationMode = ref(true);
@@ -31,6 +34,7 @@ onDeactivated(() => {
 
 <template>
     <div style="display: grid; justify-items: center;">
+        <Button class="absolute m-3 right-0 top-0" @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
         <div class="card flex flex-column align-items-center md:px-5 lg:px-7 py-5 mb-0">
             <h1 class="mb-5">Welcome to the TPA Manager!</h1>
 

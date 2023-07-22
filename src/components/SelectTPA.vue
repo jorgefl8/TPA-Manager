@@ -195,26 +195,25 @@ function clearSelectedProject() {
   </Dialog>
 
   <div id="topbar-container" class="col-12 flex" v-if="!props.isDialog">
-    <div id="topbar" class="card flex align-items-end justify-content-between overflow-auto" style="width: 100%">
-      <div class="mr-3 align-self-center">
-        <Dropdown class="mr-2 align-self-center border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
-          <template #value="slotProps">
-            <h1 class="mb-0">
-              {{slotProps.value}}
-            </h1>
-          </template>
-        </Dropdown>
-      </div>
+    <div id="topbar" class="card" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto auto 1fr auto auto; align-items: end; overflow: auto;">
+      
+      <Dropdown class="border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
+        <template #value="slotProps">
+          <h1 class="mb-0">
+            {{slotProps.value}}
+          </h1>
+        </template>
+      </Dropdown>
 
       <Divider layout="vertical"/>
 
-      <div class="flex py-2 align-items-end justify-content-around">
-        <div class="flex flex-column" style="width: 20%;">
+      <div class="flex justify-content-around gap-3" style="align-items: inherit;">
+        <div style="display: grid; gap: 0.25rem;">
           <label for="dd-classId">Course</label>
           <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearSelectedProject" />
           <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
         </div>
-        <div class="flex flex-column" style="width: 50%;">
+        <div style="display: grid; gap: 0.25rem;">
           <label for="dd-projectId">Project</label>
           <Dropdown inputId="dd-projectId" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid'), 'mr-2'].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
           <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
@@ -224,10 +223,10 @@ function clearSelectedProject() {
 
       <Divider layout="vertical"/>
 
-      <div class="flex py-2 justify-content-center gap-3">
+      <div class="flex justify-content-center gap-3">
         <Button label="Collapse all" @click="$emit('collapseAllClick')" icon="pi pi-angle-double-up" />
         <Button label="Expand all" @click="$emit('expandAllClick')" icon="pi pi-angle-double-down" />
-        <Button label="Theme" @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
+        <Button @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
       </div>
       
     </div>
