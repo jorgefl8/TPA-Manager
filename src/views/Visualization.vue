@@ -71,7 +71,7 @@ function collapseAll() {
               <h2>Dashboard blocks</h2>
               <ToggleButton v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
             </div>
-            <Dashboard ref="dashboardBlocks" :config="agreement.context.definitions.dashboards.main.config" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
+            <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
         
             <div class="flex align-items-baseline mt-4">
               <h2>Guarantees</h2>

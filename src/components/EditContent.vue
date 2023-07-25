@@ -36,7 +36,7 @@ function confirmEdit() {
 <template>
   <Button class="editableText" @click="showEditContent()">{{ valueBeforeEdit }}</Button>
   
-  <Dialog v-model:visible="displayDialog" header="Edit value" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 40svw">
+  <Dialog v-model:visible="displayDialog" header="Edit value" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
       <h2 class="mb-0 font-bold">Edit value</h2>
     </template>
