@@ -17,8 +17,8 @@ onMounted(() => {
     <h1 id="title">404</h1>
     <p id="subtitle" class="mb-5">Oops! Page not found.</p>
     <div class="flex gap-3">
-      <RouterLink to="/"><Button icon="pi pi-home" label="Home" severity="danger" /></RouterLink>
-      <Button icon="pi pi-undo" label="Back" severity="danger" @click="router.go(-1)" />
+      <RouterLink to="/"><Button icon="pi pi-home" label="Home" severity="secondary" /></RouterLink>
+      <Button icon="pi pi-undo" label="Back" severity="secondary" @click="router.go(-1)" />
     </div>
   </div>
 </template>

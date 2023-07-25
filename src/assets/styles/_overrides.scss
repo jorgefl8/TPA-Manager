@@ -10,19 +10,27 @@ html {
 }
 
 p, ul, li, span, label, small, .p-inputtext {
-    font-size: clamp(0.75rem, 1svw, 3rem) !important;
+    font-size: 16px !important;
 }
 
 b {
-    font-size: clamp(1rem, 1.2svw, 3.5rem) !important;
+    font-size: 18px !important;
 }
 
 h1 {
-    font-size: clamp(1.25rem, 3vw, 10rem) !important;
+    font-size: 48px !important;
 }
 
 h2 {
-    font-size: clamp(1rem, 2vw, 8rem) !important;
+    font-size: 40px !important;
+}
+
+pre {
+    width: fit-content;
+    white-space: break-spaces;
+    background-color: var(--highlight-bg);
+    border-radius: 12px;
+    padding: 6px;
 }
 
 .p-inputtext {
@@ -44,16 +52,9 @@ h2 {
 }
 
 .editableText {
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 0.75rem;
-    color: var(--primary-color-text);
-    background-color: var(--primary-color);
-    transition: background-color 0.2s ease;
-    user-select: none;
-    outline: none;
-    font-size: inherit;
-    vertical-align: inherit;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+    vertical-align: inherit !important;
 }
 
 .p-scrollpanel .p-scrollpanel-bar {
@@ -67,32 +68,43 @@ h2 {
 }
 
 .custom-scrolltop {
-    width: clamp(25px, 3.75vw, 300px);
-    height: clamp(25px, 3.75vw, 300px);
+    width: clamp(25px, 3.5vw, 300px);
+    height: clamp(25px, 3.5vw, 300px);
 }
 
 .custom-scrolltop .p-scrolltop-icon {
-    font-size: 1.5rem;
+    font-size: 1.75svw !important;
     color: var(--primary-color-text);
+}
+
+.p-dialog {
+    background-color: var(--primary-color);
+    border: 10px solid var(--primary-color);
+    border-radius: 12px;
 }
 
 .p-dialog-header {
     background-color: var(--primary-color) !important;
     color: var(--primary-color-text) !important;
+    padding: 1rem !important;
 }
 
 .p-dialog-content {
     padding: 1rem 1.5rem 0rem 1.5rem !important;
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
 }
 
 .p-dialog-footer {
-    padding: 1rem 1.5rem 1.5rem 1.5rem !important;
+    padding: 1rem !important;
+    border-bottom-left-radius: 12px !important;
+    border-bottom-right-radius: 12px !important;
 }
 
 .p-dropdown .p-dropdown-trigger {
     width: 3rem;
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 .editDropdown .p-dropdown-trigger {
@@ -110,9 +122,36 @@ h2 {
     padding: 1.25rem 0;
 }
 
-// .p-divider-solid.p-divider-horizontal:before {
-//     border-top-style: solid !important;
-// }
-// .p-divider-solid.p-divider-vertical:before {
-//     border-left-style: solid !important;
-// }
+.jse-menu {
+    padding: 6px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background-color: var(--primary-color) !important;
+}
+
+.jse-button {
+    border-color: var(--primary-color-text) !important;
+    background-color: var(--primary-color) !important;
+    color: var(--primary-color-text) !important;
+}
+
+.jse-selected {
+    background-color: var(--primary-color-text) !important;
+    color: var(--primary-color) !important;
+}
+
+.jse-first {
+    border-top-left-radius: 12px !important;
+    border-bottom-left-radius: 12px !important;
+}
+
+.jse-last {
+    border-top-right-radius: 12px !important;
+    border-bottom-right-radius: 12px !important;
+}
+
+.jse-status-bar {
+    padding: 6px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}

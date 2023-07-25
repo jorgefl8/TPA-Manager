@@ -1,1 +1,2 @@
-# TPA-Editor
+# TPA Manager
+The JSON Editor used is [JsonEditorVue](https://github.com/cloydlau/json-editor-vue), a wrapper of [JSONEditor](https://github.com/josdejong/svelte-jsoneditor). Configuration parameters can be found in the [JSONEditor documentation](https://github.com/josdejong/svelte-jsoneditor#properties).

@@ -34,7 +34,7 @@ onDeactivated(() => {
 
 <template>
     <div style="display: grid; justify-items: center;">
-        <Button class="absolute m-3 right-0 top-0" @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
+        <Button class="absolute m-3 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" />
         <div class="card flex flex-column align-items-center md:px-5 lg:px-7 py-5 mb-0">
             <h1 class="mb-5">Welcome to the TPA Manager!</h1>
 
@@ -71,7 +71,7 @@ onDeactivated(() => {
                     <div style="display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; gap: 0.5rem; align-items: center;"> 
                             <Button class="mr-3" label="Display" icon="pi pi-search" @click="openSelectTpaDialog(true)" />
                             <span>View an existing TPA</span>
-                            <Button class="mr-3" label="Edit" icon="pi pi-pencil" @click="openSelectTpaDialog(false)" />
+                            <Button class="mr-3" label="Edit" icon="pi pi-pencil" severity="warning" @click="openSelectTpaDialog(false)" />
                             <span>Edit an existing TPA</span>
                     </div>
                 </div>
@@ -82,7 +82,7 @@ onDeactivated(() => {
                     and <a href="https://github.com/governify/governify-examples/tree/master/TPAs" target="_blank">TPAs</a> that can be used for reference as a starting point.
                     This catalogue can also be consulted inside the TPA Manager by clicking the button below.</p>
                 <div class="flex justify-content-center">
-                    <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" @click="$router.push({ name: 'catalogue' })" />
+                    <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" severity="secondary" @click="$router.push({ name: 'catalogue' })" />
                 </div>
                 <p>
                     This tool has been developed following the guidelines of the <a href="https://www.governify.io/reference-guides/iAgree-5_2" target="_blank">iAgree Syntax (version 5.2)</a>.

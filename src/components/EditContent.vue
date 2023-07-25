@@ -38,7 +38,7 @@ function confirmEdit() {
   
   <Dialog v-model:visible="displayDialog" header="Edit value" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 40svw">
     <template #header>
-      <h1 class="mb-0">Edit value</h1>
+      <h2 class="mb-0 font-bold">Edit value</h2>
     </template>
     
     <div class="mb-1" style="display: grid; gap: 1rem;">
@@ -54,8 +54,8 @@ function confirmEdit() {
     
     <template #footer>
       <div class="flex justify-content-end">
-        <Button label="Save" icon="pi pi-check" @click="confirmEdit" />
-        <Button label="Cancel" icon="pi pi-times" @click="displayDialog = false" />
+        <Button icon="pi pi-check" label="Save" severity="success" @click="confirmEdit" />
+        <Button icon="pi pi-times" label="Cancel" severity="danger" @click="displayDialog = false" />
       </div>
     </template>
   </Dialog>

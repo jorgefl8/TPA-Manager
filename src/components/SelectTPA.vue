@@ -26,10 +26,10 @@ const appThemeStore = useAppThemeStore();
 const tpaEditionStore = useTpaEditionStore();
 
 const MODES = {
-  HOME: "Home",
-  VISUALIZATION: "🔎 Visualization Mode",
-  EDITION: "✏️ Edition Mode",
-  CATALOGUE: "TPs Catalogue"
+  HOME: "🏠 Home",
+  VISUALIZATION: "🔎 Visualization",
+  EDITION: "✏️ Edition",
+  CATALOGUE: "📖 TPs Catalogue"
 };
 
 const courses = ref([]);
@@ -170,76 +170,64 @@ function clearSelectedProject() {
 </script>
 
 <template>
-  <Dialog v-if="props.isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 40svw">
+  <Dialog v-if="props.isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
-        <h1 class="mb-0">Select a TPA</h1>
+        <h2 class="mb-0 font-bold">Select a TPA</h2>
     </template>
     
-      <div class="flex">
-        <div class="flex flex-column mr-2" style="min-width: 33%;">
-          <Dropdown :class="isCourseInvalid && 'p-invalid'" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearErrors" />
+      <div style="display: grid; gap: 0.5rem;">
+          <Dropdown class="overflow-hidden" :class="isCourseInvalid && 'p-invalid'" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearErrors" />
           <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
-        </div>
-        <div class="flex flex-column" style="min-width: 66%;">
-          <Dropdown :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid')].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
+          <Dropdown class="overflow-hidden" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid')].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
           <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
-        </div>
       </div>
       
       <template #footer>
         <div class="flex justify-content-end">
-        <Button :label="(props.isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" @click="submit" />
-        <Button label="Cancel" icon="pi pi-times" @click="displayDialog = false" />
+        <Button :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" :label="(props.isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" severity="success" @click="submit" />
+        <Button icon="pi pi-times" label="Cancel" severity="danger" @click="displayDialog = false" />
       </div>
     </template>
   </Dialog>
 
-  <div id="topbar-container" class="col-12 flex" v-if="!props.isDialog">
-    <div id="topbar" class="card" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto auto 1fr auto auto; align-items: end; overflow: auto;">
+  <div id="topbar-container" class="col-12 flex pt-2 p-0" v-if="!props.isDialog">
+    <div id="topbar" class="card p-3 mb-2" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto 1fr auto auto; align-items: end; overflow: auto;">
       
       <Dropdown class="border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
         <template #value="slotProps">
-          <h1 class="mb-0">
+          <h2 class="mb-0">
             {{slotProps.value}}
-          </h1>
+          </h2>
         </template>
       </Dropdown>
 
       <Divider layout="vertical"/>
 
-      <div class="flex justify-content-around gap-3" style="align-items: inherit;">
-        <div style="display: grid; gap: 0.25rem;">
+      <div class="flex" style="align-items: inherit;">
+        <div style="display: grid; gap: 0.25rem; flex: 1 1 auto;">
           <label for="dd-classId">Course</label>
           <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearSelectedProject" />
           <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
         </div>
-        <div style="display: grid; gap: 0.25rem;">
+        <div style="display: grid; gap: 0.25rem; flex: 1 1 auto;">
           <label for="dd-projectId">Project</label>
           <Dropdown inputId="dd-projectId" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid'), 'mr-2'].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
           <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
         </div>
-        <Button :label="(props.isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" @click="getAgreement" />
+        <Button :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" severity="warning" @click="getAgreement" />
       </div>
 
       <Divider layout="vertical"/>
 
-      <div class="flex justify-content-center gap-3">
-        <Button label="Collapse all" @click="$emit('collapseAllClick')" icon="pi pi-angle-double-up" />
-        <Button label="Expand all" @click="$emit('expandAllClick')" icon="pi pi-angle-double-down" />
-        <Button @click="appThemeStore.toggleAppTheme()" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" />
+      <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll toggleTheme' 'discardChanges expandAll toggleTheme'; align-items: center;">
+        <Button title="Save changes" icon="pi pi-save" severity="success" @click="$emit('saveChangesClick')" style="grid-area: saveChanges;" />
+        <Button title="Discard changes" icon="pi pi-times" severity="danger" @click="$emit('discardChangesClick')" style="grid-area: discardChanges;" />
+        <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
+        <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
+        <Button title="Toggle theme" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" style="grid-area: toggleTheme;" />
       </div>
       
     </div>
   </div>
 
 </template>
-
-<style scoped>
-  h1 {
-    font-size: clamp(1.5rem, 1.75vw, 10rem) !important;
-  }
-
-  #topbar::before, #topbar::after {
-    content: "";
-  }
-</style>

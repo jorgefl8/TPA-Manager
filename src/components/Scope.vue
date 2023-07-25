@@ -32,7 +32,7 @@ const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.fieldName)?.member?
     <p>Project: <span>{{ tpaEditionStore.getTpaField(fieldName + '.project.default') }}</span></p>
     <p>Course: <span>{{ tpaEditionStore.getTpaField(fieldName + '.class.default') }}</span></p>
     <p>Will calculations by member be required?
-      <Checkbox class="ml-2" v-model="isMemberNeeded" readonly :binary="true" trueValue="*" falseValue="null" />
+      <Checkbox class="ml-2" v-model="isMemberNeeded" disabled readonly :binary="true" trueValue="*" falseValue="null" />
     </p>
   </template>
 </template>

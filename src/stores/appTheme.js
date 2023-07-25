@@ -8,7 +8,7 @@ export const useAppThemeStore = defineStore('appTheme', () => {
 
   const isDarkModeOn = computed(() => appTheme.value === 'Dark');
   
-  function toggleAppTheme() {
+  function toggleTheme() {
     if (appTheme.value === 'Dark') {
       appTheme.value = 'Light';
       localStorage.setItem("appTheme", "Light");
@@ -20,5 +20,5 @@ export const useAppThemeStore = defineStore('appTheme', () => {
     }
   }
   
-  return { appTheme, isDarkModeOn, toggleAppTheme }
+  return { appTheme, isDarkModeOn, toggleTheme }
 });
