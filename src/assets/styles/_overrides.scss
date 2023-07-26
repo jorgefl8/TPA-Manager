@@ -47,14 +47,20 @@ pre {
     font-weight: 700;
 }
 
-.p-checkbox-box {
-    vertical-align: inherit !important;
+.expandButton {
+    width: 40px;
+    height: 15px;
 }
 
 .editableText {
     padding: 0.5rem !important;
     border-radius: 12px !important;
-    vertical-align: inherit !important;
+    color: var(--color-text) !important;
+    background-color: unset !important;
+}
+
+.editableText:hover {
+    background-color: var(--highlight-bg) !important;
 }
 
 .p-scrollpanel .p-scrollpanel-bar {
@@ -68,12 +74,12 @@ pre {
 }
 
 .custom-scrolltop {
-    width: clamp(25px, 3.5vw, 300px);
-    height: clamp(25px, 3.5vw, 300px);
+    width: clamp(25px, 3vw, 300px);
+    height: clamp(25px, 3vw, 300px);
 }
 
 .custom-scrolltop .p-scrolltop-icon {
-    font-size: 1.75svw !important;
+    font-size: 1.5svw !important;
     color: var(--primary-color-text);
 }
 
@@ -99,6 +105,10 @@ pre {
     padding: 1rem !important;
     border-bottom-left-radius: 12px !important;
     border-bottom-right-radius: 12px !important;
+}
+
+.p-dropdown, .p-dropdown-panel {
+    border-radius: 6px !important;
 }
 
 .p-dropdown .p-dropdown-trigger {

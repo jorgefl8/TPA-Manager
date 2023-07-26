@@ -39,7 +39,7 @@ const handlePageReload = (event) => {
 const handlePageLeave = () => {
   if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
     if (confirm("There are unsaved changes. Do you want to save them before you leave?")) {
-      // Web apps can't prevent the user from leaving the page, so all we can do is save the changes if the user wants to
+      // Web apps cannot prevent the user from leaving the page, so all we can do is save the changes if the user wants to
       console.log("TODO: save changes")
     }
   }
@@ -91,28 +91,36 @@ function collapseAll() {
     <div class="col-12 flex flex-column align-items-center" v-if="agreement">
       <div class="flex flex-column align-items-center w-full">
         <div class="card w-full">
-          <ScrollPanel class="pt-0 p-2" style="width: 100%; height: 70svh;">
+          <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">
   
-            <h2>Scope</h2>
-            <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
-        
-            <div class="flex align-items-baseline mt-4">
-              <h2>Dashboard blocks</h2>
-              <ToggleButton v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+            <div>
+              <h2>Scope</h2>
+              <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
             </div>
-            <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
         
-            <div class="flex align-items-baseline mt-4">
-              <h2>Guarantees</h2>
-              <ToggleButton v-model="expandedGuarantees" @click="toggleExpandedGuarantees" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+            <div>
+              <div class="flex align-items-center gap-2">
+                <h2>Dashboard blocks</h2>
+                <ToggleButton class="expandButton" v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+              </div>
+              <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
             </div>
-            <Guarantees ref="guarantees" :data="agreement.terms.guarantees" :key="agreement.terms.guarantees" />
-        
-            <div class="flex align-items-baseline mt-4">
-              <h2>Metrics</h2>
-              <ToggleButton v-model="expandedMetrics" @click="toggleExpandedMetrics" style="width: 40px; height: 15px;" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" class="ml-2" />
+
+            <div>
+              <div class="flex align-items-baseline gap-2">
+                <h2>Guarantees</h2>
+                <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+              </div>
+              <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
             </div>
-            <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
+
+            <div>
+              <div class="flex align-items-baseline gap-2">
+                <h2>Metrics</h2>
+                <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+              </div>
+              <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
+            </div>
     
             <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
   
@@ -122,3 +130,16 @@ function collapseAll() {
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.p-scrollpanel-content) {
+  display: grid !important;
+  gap: 1rem !important;
+}
+</style>
+
+<!-- Unificar componentes de Edition y Visualization -->
+<!-- Permitir edición tanto en JSON como con la interfaz (ToggleButton, por ejemplo) -->
+<!-- Añadir un ToggleButton para indicar si el TPA es para desarrollo o producción (básicamente, para decidir si los enlaces son con host.docker.internal:port o con URLs) -->
+<!-- La creación de métricas y garantías sería a modo de wizard, preguntando paso a paso al usuario qué desea medir, en qué aplicación, en qué periodo, etc. -->
+<!-- Añadir un modo de depuración para comprobar las evidencias que devuelven las métricas (como Postman llamando al endpoint de /computations) -->

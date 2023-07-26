@@ -69,10 +69,10 @@ onDeactivated(() => {
                     <Divider layout="vertical" />
                     
                     <div style="display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; gap: 0.5rem; align-items: center;"> 
-                            <Button class="mr-3" label="Display" icon="pi pi-search" @click="openSelectTpaDialog(true)" />
-                            <span>View an existing TPA</span>
-                            <Button class="mr-3" label="Edit" icon="pi pi-pencil" severity="warning" @click="openSelectTpaDialog(false)" />
-                            <span>Edit an existing TPA</span>
+                        <Button class="mr-3" label="Display" icon="pi pi-search" @click="openSelectTpaDialog(true)" />
+                        <span>View an existing TPA</span>
+                        <Button class="mr-3" label="Edit" icon="pi pi-pencil" severity="warning" @click="openSelectTpaDialog(false)" />
+                        <span>Edit an existing TPA</span>
                     </div>
                 </div>
 

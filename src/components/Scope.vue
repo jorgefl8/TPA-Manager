@@ -18,21 +18,28 @@ const tpaEditionStore = useTpaEditionStore()
 
 const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
 const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.fieldName)?.member?.default);
+
 </script>
 
 <template>
-  <template v-if="isEditionMode">
-    <p><span class="mr-1">Project: </span><EditContent :fieldName="fieldName + '.project.default'" /></p>
-    <p><span class="mr-1">Course: </span><EditContent :fieldName="fieldName + '.class.default'" /></p>
-    <p>Will calculations by member be required?
-      <Checkbox class="ml-2" v-model="isMemberNeeded" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(fieldName + '.member.default', isMemberNeeded)" />
-    </p>
-  </template>
-  <template v-else>
-    <p>Project: <span>{{ tpaEditionStore.getTpaField(fieldName + '.project.default') }}</span></p>
-    <p>Course: <span>{{ tpaEditionStore.getTpaField(fieldName + '.class.default') }}</span></p>
-    <p>Will calculations by member be required?
-      <Checkbox class="ml-2" v-model="isMemberNeeded" disabled readonly :binary="true" trueValue="*" falseValue="null" />
-    </p>
-  </template>
+
+  <div class="flex flex-column gap-2">
+    <div class="flex align-items-center gap-2">
+      <span>Project:</span>
+      <EditContent v-if="isEditionMode" :fieldName="fieldName + '.project.default'" />
+      <span v-else>{{ tpaEditionStore.getTpaField(fieldName + '.project.default') }}</span>
+    </div>
+
+    <div class="flex align-items-center gap-2">
+      <span>Course:</span>
+      <EditContent v-if="isEditionMode" :fieldName="fieldName + '.class.default'" />
+      <span v-else>{{ tpaEditionStore.getTpaField(fieldName + '.class.default') }}</span>
+    </div>
+    
+    <div class="flex gap-2">
+      <span>Will calculations by member be required?</span>
+      <Checkbox v-model="isMemberNeeded" :disabled="!isEditionMode" :readonly="!isEditionMode" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(fieldName + '.member.default', isMemberNeeded)" />
+    </div>
+  </div>
+
 </template>

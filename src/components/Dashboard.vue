@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
+import _ from 'lodash';
 
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 import JsonEditorVue from 'json-editor-vue'
@@ -34,7 +35,6 @@ const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
 const dashboardBlocks = ref(Object.values(tpaEditionStore.getTpaField(props.fieldName)?.blocks ?? {}));
 const useDefaultDashboard = ref(!dashboardBlocks.value);
 const dashboardBlocksCache = ref(JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}")?.[projectId] || dashboardBlocks.value);
-
 const collapsed = ref(new Array(dashboardBlocks.value.length).fill(true));
 
 defineExpose({
@@ -50,6 +50,7 @@ function expandAll() {
   collapsed.value.map((value, index) => collapsed.value[index] = false);
 }
 
+// Used to refresh the local storage cache when the user changes the "use default dashboard" checkbox
 function refreshLocalStorageInfo() {
   if (useDefaultDashboard.value) {
     let currentCache = JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}");
@@ -86,7 +87,7 @@ function validateBlockTypeChange(blockData) {
   blockData.config = parseDashboardBlockConfig(blockData.config);
 
   if (BLOCKS_WITHOUT_GUARANTEES.includes(blockData.type)) {
-    delete blockData['guarantee']
+    _.unset(blockData, 'guarantee');
   } else {
     blockData.guarantee ??= null;
   } 
@@ -96,21 +97,21 @@ function validateBlockTypeChange(blockData) {
     blockData.config['y-axis-metric'] ??= "metric_[metric-name-here]";
     blockData.config['not-zero-metric'] ??= "metric_[metric-name-here]";
   } else {
-    delete blockData.config['x-axis-metric'];
-    delete blockData.config['y-axis-metric'];
-    delete blockData.config['not-zero-metric'];
+    _.unset(blockData.config, 'x-axis-metric');
+    _.unset(blockData.config, 'y-axis-metric');
+    _.unset(blockData.config, 'not-zero-metric');
   }
 
   if (BLOCKS_WITH_TIME_INTERVAL_CONFIG.includes(blockData.type)) {
     blockData.config['time-interval'] ??= "[1d/1w/...]"
   } else {
-    delete blockData.config['time-interval'];
+    _.unset(blockData.config, 'time-interval');
   }
 
   if (BLOCKS_WITH_AGGREGATION_CONFIG.includes(blockData.type)) {
     blockData.config['aggregation'] ??= "[sum/avg/...]"
   } else {
-    delete blockData.config['aggregation'];
+    _.unset(blockData.config, 'aggregation');
   }
   
 }
@@ -125,16 +126,15 @@ function parseDashboardBlockConfig(objectOrJsonString) {
 
 function addNewBlock() {
 
-  let configObject = {
+  dashboardBlocks.value.push({
     type: null,
     guarantee: null,
     config: {
       "[title-field-name-here]": "Default title",
       "scope-class": tpaEditionStore.getTpaField('context.definitions.scopes.development.class.default')
     }
-  };
+  });
 
-  dashboardBlocks.value.push(configObject);
   collapsed.value.push(false);
 }
 
@@ -148,7 +148,7 @@ function deleteBlock(index) {
 <template>
   
   <div class="flex gap-2">
-    <p>Use the default dashboard blocks?</p>
+    <p>Use the default dashboard?</p>
     <Checkbox v-model="useDefaultDashboard" :binary="true" :disabled="!isEditionMode" :readonly="!isEditionMode" @change="refreshLocalStorageInfo" />
   </div>
   
@@ -169,7 +169,7 @@ function deleteBlock(index) {
               <i class="pi pi-tag"></i>
               <span class="font-semibold">Guarantee</span>
             </span>
-            <Tag v-if="!isEditionMode" :value="slotProps.data.guarantee"></Tag>
+            <Tag v-if="!isEditionMode" :value="slotProps.data.guarantee" style="word-break: break-all;"></Tag>
             <Dropdown v-else v-model="slotProps.data.guarantee" class="editDropdown" :options="tpaEditionStore.getTpaField('terms.guarantees').map(guarantee => guarantee.id)" placeholder="Select a guarantee" />
           </template>
             
@@ -186,13 +186,13 @@ function deleteBlock(index) {
           
         </div>
 
-        <Button v-if="isEditionMode" class="mt-2" label="Delete block" icon="pi pi-trash" severity="danger" @click="deleteBlock(slotProps.index)" />
+        <Button v-if="isEditionMode" class="mt-2" icon="pi pi-trash" severity="danger" @click="deleteBlock(slotProps.index)" />
 
       </Fieldset>
     </template>
 
-    <template #footer>
-      <Button v-if="isEditionMode && !useDefaultDashboard" class="mt-2" label="Add new block" icon="pi pi-plus" @click="addNewBlock" />
+    <template #footer v-if="isEditionMode">
+      <Button class="mt-2" label="Add new block" icon="pi pi-plus" @click="addNewBlock" />
     </template>
   </DataView>
 </template>
@@ -206,9 +206,3 @@ function deleteBlock(index) {
     grid-template-areas: 'auto configTitle' 'auto configEdit' 'auto configEdit';
   }
 </style>
-
-<!-- Establecer el valor de la "scope-class" de las "config" de cada block con el curso al que pertenece el proyecto del acuerdo -->
-<!-- Establecer una serie de convenios (como el identificador del título del block) ayudaría a generalizar todo -->
-<!-- Hacer un estudio de cada uno de los blocks actuales para ver qué tipo de parámetros de configuración aceptan, para poder así facilitar al usuario 
-  la interacción con los mismos. Ejemplo: "x-axis-metric", "y-axis-metric" y "not-zero-metric" podrían tener un Dropdown con las métricas que se 
-  encuentran definidas actualmente en la garantía para poder elegir entre las mismas. -->

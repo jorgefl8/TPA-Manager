@@ -27,7 +27,7 @@ const tpaEditionStore = useTpaEditionStore();
 
 const MODES = {
   HOME: "🏠 Home",
-  VISUALIZATION: "🔎 Visualization",
+  VISUALIZATION: "🔍 Visualization",
   EDITION: "✏️ Edition",
   CATALOGUE: "📖 TPs Catalogue"
 };
@@ -44,7 +44,7 @@ const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
 const modes = ref([
   { label: '🏠 Home', value: MODES.HOME},
-  { label: '🔎 Visualization', value: MODES.VISUALIZATION },
+  { label: '🔍 Visualization', value: MODES.VISUALIZATION },
   { label: '✏️ Edition', value: MODES.EDITION },
   { label: '📖 Catalogue', value: MODES.CATALOGUE }
 ]);
@@ -170,7 +170,7 @@ function clearSelectedProject() {
 </script>
 
 <template>
-  <Dialog v-if="props.isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
+  <Dialog v-if="isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
         <h2 class="mb-0 font-bold">Select a TPA</h2>
     </template>
@@ -184,13 +184,13 @@ function clearSelectedProject() {
       
       <template #footer>
         <div class="flex justify-content-end">
-        <Button :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" :label="(props.isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" severity="success" @click="submit" />
+        <Button :icon="'pi pi-' + (isVisualizationMode ? 'search' : 'pencil')" :label="(isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" :severity="isVisualizationMode ? 'primary' : 'warning'" @click="submit" />
         <Button icon="pi pi-times" label="Cancel" severity="danger" @click="displayDialog = false" />
       </div>
     </template>
   </Dialog>
 
-  <div id="topbar-container" class="col-12 flex pt-2 p-0" v-if="!props.isDialog">
+  <div id="topbar-container" class="col-12 flex pt-2 p-0" v-if="!isDialog">
     <div id="topbar" class="card p-3 mb-2" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto 1fr auto auto; align-items: end; overflow: auto;">
       
       <Dropdown class="border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
@@ -214,7 +214,7 @@ function clearSelectedProject() {
           <Dropdown inputId="dd-projectId" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid'), 'mr-2'].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
           <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
         </div>
-        <Button :icon="'pi pi-' + (props.isVisualizationMode ? 'search' : 'pencil')" severity="warning" @click="getAgreement" />
+        <Button :icon="'pi pi-' + (isVisualizationMode ? 'search' : 'pencil')" :severity="isVisualizationMode ? 'primary' : 'warning'" @click="getAgreement" />
       </div>
 
       <Divider layout="vertical"/>
