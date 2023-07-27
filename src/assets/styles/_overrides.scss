@@ -26,11 +26,12 @@ h2 {
 }
 
 pre {
+    margin: 0;
+    padding: 6px;
+    border-radius: 12px;
     width: fit-content;
     white-space: break-spaces;
     background-color: var(--highlight-bg);
-    border-radius: 12px;
-    padding: 6px;
 }
 
 .p-inputtext {
@@ -120,6 +121,10 @@ pre {
 .editDropdown .p-dropdown-trigger {
     background: var(--primary-color) !important;
     color: var(--primary-color-text) !important;
+}
+
+.p-grid {
+    gap: 1.25rem;
 }
 
 .p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {

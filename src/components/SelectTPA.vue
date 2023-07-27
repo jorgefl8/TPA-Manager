@@ -219,11 +219,14 @@ function clearSelectedProject() {
 
       <Divider layout="vertical"/>
 
-      <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll toggleTheme' 'discardChanges expandAll toggleTheme'; align-items: center;">
+      <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll viewTpaJson' 'discardChanges expandAll toggleTheme'; align-items: center;">
         <Button title="Save changes" icon="pi pi-save" severity="success" @click="$emit('saveChangesClick')" style="grid-area: saveChanges;" />
         <Button title="Discard changes" icon="pi pi-times" severity="danger" @click="$emit('discardChangesClick')" style="grid-area: discardChanges;" />
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
+        <a :href="'http://localhost:5400/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
+          <Button title="View TPA in JSON" icon="pi pi-eye" severity="secondary" />
+        </a>
         <Button title="Toggle theme" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" style="grid-area: toggleTheme;" />
       </div>
       

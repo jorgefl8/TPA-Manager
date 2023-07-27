@@ -154,7 +154,7 @@ function deleteBlock(index) {
   
   <DataView v-if="!useDefaultDashboard" :value="dashboardBlocks" dataKey="id" class="pr-2">
     <template #list="slotProps">
-      <Fieldset class="col-12 my-2" :legend="deepFindKey('title', parseDashboardBlockConfig(slotProps.data.config))" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
+      <Fieldset class="col-12" :legend="deepFindKey('title', parseDashboardBlockConfig(slotProps.data.config))" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
         <div style="display: grid; gap: 1rem; align-items: center; grid-template-columns: 30% auto" :class="!BLOCKS_WITHOUT_GUARANTEES.includes(slotProps.data.type) ? 'gridWithGuarantee' : 'gridWithoutGuarantee'">
           
           <span class="flex align-items-center gap-2">

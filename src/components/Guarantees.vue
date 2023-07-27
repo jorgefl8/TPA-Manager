@@ -112,7 +112,7 @@ function updateGuaranteeMember(index) {
   
   <DataView :value="guarantees" dataKey="id" class="pr-2">
     <template #list="slotProps">
-      <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12 my-2" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
+      <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
         
         <div class="flex flex-column align-items-start gap-3">
           <span v-if="isEditionMode" class="flex align-items-center gap-2">

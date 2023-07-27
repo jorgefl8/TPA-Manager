@@ -119,7 +119,7 @@ function collapseAll() {
                 <h2>Metrics</h2>
                 <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
               </div>
-              <Metrics ref="metrics" :data="agreement.terms.metrics" :key="agreement.terms.metrics" />
+              <Metrics ref="metrics" fieldName="terms.metrics" :key="agreement.terms.metrics" />
             </div>
     
             <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
