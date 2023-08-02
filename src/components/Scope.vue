@@ -26,7 +26,7 @@ const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.fieldName)?.member?
   <div class="flex flex-column gap-2">
     <div class="flex align-items-center gap-2">
       <span>Project:</span>
-      <EditContent v-if="isEditionMode" :fieldName="fieldName + '.project.default'" />
+      <EditContent v-if="isEditionMode" :fieldName="fieldName + '.project.default'" :key="fieldName + '.project.default'" />
       <span v-else>{{ tpaEditionStore.getTpaField(fieldName + '.project.default') }}</span>
     </div>
 

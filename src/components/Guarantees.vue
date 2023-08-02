@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-// import { storeToRefs } from 'pinia';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import EditContent from './EditContent.vue';
@@ -22,7 +21,6 @@ const props = defineProps({
 
 const router = useRouter();
 const tpaEditionStore = useTpaEditionStore();
-// const { modifiedTpa } = storeToRefs(tpaEditionStore);
 
 const WINDOW_PERIOD_OPTIONS = [
   { label: 'Hourly', value: 'hourly' },
@@ -110,7 +108,7 @@ function updateGuaranteeMember(index) {
 
 <template>
   
-  <DataView :value="guarantees" dataKey="id" class="pr-2">
+  <DataView :value="guarantees" dataKey="id">
     <template #list="slotProps">
       <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
         
@@ -163,7 +161,7 @@ function updateGuaranteeMember(index) {
     </template>
     
     <template #footer v-if="isEditionMode">
-      <Button class="mt-2" label="Add new guarantee" icon="pi pi-plus" @click="addNewGuarantee" />
+      <Button label="Add new guarantee" icon="pi pi-plus" @click="addNewGuarantee" />
     </template>
   </DataView>
   

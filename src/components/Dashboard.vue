@@ -1,9 +1,9 @@
 <script setup>
+import _ from 'lodash';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
-import _ from 'lodash';
 
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 import JsonEditorVue from 'json-editor-vue'
@@ -35,6 +35,7 @@ const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
 const dashboardBlocks = ref(Object.values(tpaEditionStore.getTpaField(props.fieldName)?.blocks ?? {}));
 const useDefaultDashboard = ref(!dashboardBlocks.value);
 const dashboardBlocksCache = ref(JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}")?.[projectId] || dashboardBlocks.value);
+const currentlyEditingConfig = ref(new Array(dashboardBlocks.value.length).fill(false));
 const collapsed = ref(new Array(dashboardBlocks.value.length).fill(true));
 
 defineExpose({
@@ -69,12 +70,12 @@ function refreshLocalStorageInfo() {
 
 // Deep search in an object for a key that includes the given keyword in its name
 function deepFindKey(keyword, obj) {
-  for (var key in obj) {
+  for (let key in obj) {
     if (key.includes(keyword)) {
       return obj[key];
     }
     if (typeof obj[key] === "object") {
-      var result = deepFindKey(keyword, obj[key]);
+      let result = deepFindKey(keyword, obj[key]);
       if (result) {
         return result;
       }
@@ -150,11 +151,12 @@ function deleteBlock(index) {
   <div class="flex gap-2">
     <p>Use the default dashboard?</p>
     <Checkbox v-model="useDefaultDashboard" :binary="true" :disabled="!isEditionMode" :readonly="!isEditionMode" @change="refreshLocalStorageInfo" />
+    <!-- Hacer que el TPA se actualice como corresponde al darle al botón de guardar con respecto al dashboard por defecto -->
   </div>
   
-  <DataView v-if="!useDefaultDashboard" :value="dashboardBlocks" dataKey="id" class="pr-2">
+  <DataView v-if="!useDefaultDashboard" :value="dashboardBlocks" dataKey="id">
     <template #list="slotProps">
-      <Fieldset class="col-12" :legend="deepFindKey('title', parseDashboardBlockConfig(slotProps.data.config))" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
+      <Fieldset class="col-12" :legend="currentlyEditingConfig[slotProps.index] ? 'Editing config...' : deepFindKey('title', slotProps.data.config)" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]" key="index">
         <div style="display: grid; gap: 1rem; align-items: center; grid-template-columns: 30% auto" :class="!BLOCKS_WITHOUT_GUARANTEES.includes(slotProps.data.type) ? 'gridWithGuarantee' : 'gridWithoutGuarantee'">
           
           <span class="flex align-items-center gap-2">
@@ -181,23 +183,22 @@ function deleteBlock(index) {
             <ul v-if="!isEditionMode" class="my-0">
               <li class="text-md font-bold text-700" v-for="(value, key) in slotProps.data.config" :key="key">{{ key }}: {{ value }}</li>
             </ul>
-            <JsonEditorVue v-else :class="appThemeStore.isDarkModeOn && 'jse-theme-dark'" v-model="slotProps.data.config" mode="text" :key="slotProps.data.type" />
+            <JsonEditorVue v-else :class="appThemeStore.isDarkModeOn && 'jse-theme-dark'" v-model="slotProps.data.config" @click="currentlyEditingConfig[slotProps.index] = true" @blur="slotProps.data.config = parseDashboardBlockConfig(slotProps.data.config); currentlyEditingConfig[slotProps.index] = false" mode="text" :key="slotProps.data.type" />
           </div>
           
+          <Button v-if="isEditionMode" icon="pi pi-trash" severity="danger" @click="deleteBlock(slotProps.index)" />
         </div>
-
-        <Button v-if="isEditionMode" class="mt-2" icon="pi pi-trash" severity="danger" @click="deleteBlock(slotProps.index)" />
 
       </Fieldset>
     </template>
 
     <template #footer v-if="isEditionMode">
-      <Button class="mt-2" label="Add new block" icon="pi pi-plus" @click="addNewBlock" />
+      <Button label="Add new block" icon="pi pi-plus" @click="addNewBlock" />
     </template>
   </DataView>
 </template>
   
-  <style scoped>
+<style scoped>
   .gridWithGuarantee {
     grid-template-areas: 'auto configTitle' 'auto configEdit' 'auto configEdit' 'auto configEdit';
   }

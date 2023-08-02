@@ -1,10 +1,13 @@
+import _ from 'lodash'
+import axios from 'axios'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import _ from 'lodash'
 
 export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
   const modifiedTpa = ref(null)
+  const discardButtonClicked = ref(false)
+  const isProductionEnvironment = ref(false)
 
   const BLOCK_TYPES = [
     'correlated',
@@ -39,18 +42,26 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     modifiedTpa.value = _.cloneDeep(tpa)
   }
 
-  function saveTpaChanges() {
-    originalTpa.value = modifiedTpa
+  async function saveTpaChanges() {
+    originalTpa.value = modifiedTpa.value
+
+    try {
+      await axios.delete(`http://localhost:5400/api/v6/agreements/${modifiedTpa.value.id}`)
+      await axios.post(`http://localhost:5400/api/v6/agreements`, modifiedTpa.value)
+    } catch (error) {
+      console.log("Error: ", error)
+    }
   }
 
   function discardTpaChanges() {
-    modifiedTpa.value = originalTpa
+    discardButtonClicked.value = true
+    window.location.reload();
   }
 
   function getTpaField(fieldPath) {
     return _.get(modifiedTpa.value, fieldPath)
   }
-  
+
   function updateTpaField(fieldPath, value) {
     _.set(modifiedTpa.value, fieldPath, value)
   }
@@ -59,5 +70,8 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     _.unset(modifiedTpa.value, fieldPath)
   }
 
-  return { originalTpa, modifiedTpa, BLOCK_TYPES, setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField }
+  return { 
+    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, BLOCK_TYPES,
+    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField
+  }
 })

@@ -25,6 +25,10 @@ h2 {
     font-size: 40px !important;
 }
 
+h3 {
+    font-size: 32px !important;
+}
+
 pre {
     margin: 0;
     padding: 6px;
@@ -32,6 +36,10 @@ pre {
     width: fit-content;
     white-space: break-spaces;
     background-color: var(--highlight-bg);
+}
+
+.card {
+    border: 1px solid var(--primary-500) !important;
 }
 
 .p-inputtext {
@@ -46,6 +54,11 @@ pre {
 
 .p-button-label {
     font-weight: 700;
+}
+
+#selectEnvironmentButton {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
 }
 
 .expandButton {
@@ -125,6 +138,20 @@ pre {
 
 .p-grid {
     gap: 1.25rem;
+}
+
+.p-dataview-list {
+    background-color: var(--surface-hover);
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.p-dataview-content, .p-dataview-footer {
+    background: none !important;
+}
+
+.grid-nogutter > .col, .grid-nogutter > [class*=col-] {
+    padding: revert;
 }
 
 .p-fieldset.p-fieldset-toggleable .p-fieldset-legend a {

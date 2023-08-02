@@ -59,7 +59,7 @@ function collapseAll() {
   <div class="grid">
     <SelectTPA ref="selectTpa" :isDialog="false" :isVisualizationMode="true" @collapseAllClick="collapseAll" @expandAllClick="expandAll" />
 
-    <div class="col-12 flex flex-column align-items-center" v-if="agreement">
+    <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement">
       <div class="flex flex-column align-items-center w-full">
         <div class="card w-full">
           <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">

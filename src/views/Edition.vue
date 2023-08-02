@@ -27,16 +27,16 @@ const agreement = computed(() => {
 });
 
 const tpaEditionStore = useTpaEditionStore();
-const { originalTpa, modifiedTpa} = storeToRefs(tpaEditionStore);
+const { originalTpa, modifiedTpa, discardButtonClicked} = storeToRefs(tpaEditionStore);
 
-const handlePageReload = (event) => {
-  if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+function handlePageReload(event) {
+  if (!discardButtonClicked && originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
     event.preventDefault();
     event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
   }
 };
 
-const handlePageLeave = () => {
+function handlePageLeave() {
   if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
     if (confirm("There are unsaved changes. Do you want to save them before you leave?")) {
       // Web apps cannot prevent the user from leaving the page, so all we can do is save the changes if the user wants to
@@ -88,7 +88,7 @@ function collapseAll() {
   <div class="grid">
     <SelectTPA ref="selectTpa" :isDialog="false" :isVisualizationMode="false" @collapseAllClick="collapseAll" @expandAllClick="expandAll" />
 
-    <div class="col-12 flex flex-column align-items-center" v-if="agreement">
+    <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement">
       <div class="flex flex-column align-items-center w-full">
         <div class="card w-full">
           <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">
@@ -138,8 +138,9 @@ function collapseAll() {
 }
 </style>
 
+<!-- Actualizar el archivo /public/favicon.ico -->
 <!-- Unificar componentes de Edition y Visualization -->
-<!-- Permitir edición tanto en JSON como con la interfaz (ToggleButton, por ejemplo) -->
-<!-- Añadir un ToggleButton para indicar si el TPA es para desarrollo o producción (básicamente, para decidir si los enlaces son con host.docker.internal:port o con URLs) -->
+<!-- Crear una carpeta y archivo "utils/utils.js para importar en los distintos componentes las funciones compartidas como el 'deepFind'" -->
+<!-- Propuesta: unificar el nombre que da título a cada block en los dashboards para evitar usar la función de deepFind, lo cual, mejoraría el rendimiento -->
 <!-- La creación de métricas y garantías sería a modo de wizard, preguntando paso a paso al usuario qué desea medir, en qué aplicación, en qué periodo, etc. -->
 <!-- Añadir un modo de depuración para comprobar las evidencias que devuelven las métricas (como Postman llamando al endpoint de /computations) -->

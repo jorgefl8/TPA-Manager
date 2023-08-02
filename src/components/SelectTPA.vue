@@ -6,9 +6,10 @@ import { useTpaEditionStore } from '@/stores/tpaEdition';
 import axios from 'axios'
 
 import Button from 'primevue/button';
-import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
+import Dropdown from 'primevue/dropdown';
+import ToggleButton from 'primevue/togglebutton';
 
 const props = defineProps({
   isDialog: {
@@ -42,6 +43,7 @@ const isCourseInvalid = ref(false);
 const isProjectInvalid = ref(false);
 const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
+const showDiscardChangesDialog = ref(false);
 const modes = ref([
   { label: '🏠 Home', value: MODES.HOME},
   { label: '🔍 Visualization', value: MODES.VISUALIZATION },
@@ -167,6 +169,10 @@ function clearSelectedProject() {
   }
 };
 
+function showDiscardTpaChangesDialog() {
+  showDiscardChangesDialog.value = true;
+}
+
 </script>
 
 <template>
@@ -190,16 +196,20 @@ function clearSelectedProject() {
     </template>
   </Dialog>
 
-  <div id="topbar-container" class="col-12 flex pt-2 p-0" v-if="!isDialog">
-    <div id="topbar" class="card p-3 mb-2" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto 1fr auto auto; align-items: end; overflow: auto;">
+  <div class="col-12 flex pt-2 p-0" v-if="!isDialog">
+    <div class="card p-3 mb-2" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto 1fr auto auto; align-items: end; overflow: auto;">
       
-      <Dropdown class="border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
-        <template #value="slotProps">
-          <h2 class="mb-0">
-            {{slotProps.value}}
-          </h2>
-        </template>
-      </Dropdown>
+      <div class="flex flex-column gap-2">
+        <Dropdown class="border-none border-bottom-3" v-model="selectedMode" :options="modes" optionLabel="label" optionValue="value" placeholder="Select a mode" scrollHeight="300px" @change="changeViewByMode">
+          <template #value="slotProps">
+            <h3 class="mb-0">
+              {{slotProps.value}}
+            </h3>
+          </template>
+        </Dropdown>
+
+        <ToggleButton v-if="!isVisualizationMode" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" />
+      </div>
 
       <Divider layout="vertical"/>
 
@@ -220,8 +230,8 @@ function clearSelectedProject() {
       <Divider layout="vertical"/>
 
       <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll viewTpaJson' 'discardChanges expandAll toggleTheme'; align-items: center;">
-        <Button title="Save changes" icon="pi pi-save" severity="success" @click="$emit('saveChangesClick')" style="grid-area: saveChanges;" />
-        <Button title="Discard changes" icon="pi pi-times" severity="danger" @click="$emit('discardChangesClick')" style="grid-area: discardChanges;" />
+        <Button v-if="!isVisualizationMode" title="Save changes" icon="pi pi-save" severity="success" @click="tpaEditionStore.saveTpaChanges" style="grid-area: saveChanges;" />
+        <Button v-if="!isVisualizationMode" title="Discard changes" icon="pi pi-times" severity="danger" @click="showDiscardTpaChangesDialog" style="grid-area: discardChanges;" />
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
         <a :href="'http://localhost:5400/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
@@ -232,5 +242,24 @@ function clearSelectedProject() {
       
     </div>
   </div>
+
+  <Dialog v-if="showDiscardChangesDialog" v-model:visible="showDiscardChangesDialog" header="Discard changes" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
+    <template #header>
+      <h2 class="mb-0 font-bold">Discard changes</h2>
+    </template>
+    
+    <div class="mb-1" style="display: grid; gap: 1rem;">
+      <div>
+        <p class="mb-1"><b>Are you sure you want to discard the changes?</b></p>
+      </div>
+    </div>
+    
+    <template #footer>
+      <div class="flex justify-content-end">
+        <Button icon="pi pi-check" label="Yes" severity="success" @click="tpaEditionStore.discardTpaChanges" />
+        <Button icon="pi pi-times" label="No" severity="danger" @click="showDiscardChangesDialog = false" />
+      </div>
+    </template>
+  </Dialog>
 
 </template>
