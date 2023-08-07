@@ -140,7 +140,5 @@ function collapseAll() {
 
 <!-- Actualizar el archivo /public/favicon.ico -->
 <!-- Unificar componentes de Edition y Visualization -->
-<!-- Crear una carpeta y archivo "utils/utils.js para importar en los distintos componentes las funciones compartidas como el 'deepFind'" -->
-<!-- Propuesta: unificar el nombre que da título a cada block en los dashboards para evitar usar la función de deepFind, lo cual, mejoraría el rendimiento -->
+<!-- Propuesta: unificar el nombre que da título a cada block en los dashboards para evitar usar la función de deepFindKeyword, lo cual, mejoraría el rendimiento -->
 <!-- La creación de métricas y garantías sería a modo de wizard, preguntando paso a paso al usuario qué desea medir, en qué aplicación, en qué periodo, etc. -->
-<!-- Añadir un modo de depuración para comprobar las evidencias que devuelven las métricas (como Postman llamando al endpoint de /computations) -->

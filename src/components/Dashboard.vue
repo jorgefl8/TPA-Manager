@@ -1,7 +1,8 @@
 <script setup>
 import _ from 'lodash';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { deepFindKeyword, parseJsonEditorContent } from '../utils/utils';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
@@ -33,10 +34,17 @@ const BLOCKS_WITH_AGGREGATION_CONFIG = ["time-graph2-member-groupby"]
 const projectId = tpaEditionStore.getTpaField('context.definitions.scopes.development.project.default');
 const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
 const dashboardBlocks = ref(Object.values(tpaEditionStore.getTpaField(props.fieldName)?.blocks ?? {}));
-const useDefaultDashboard = ref(!dashboardBlocks.value);
+const useDefaultDashboard = ref(dashboardBlocks.value.length === 0);
 const dashboardBlocksCache = ref(JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}")?.[projectId] || dashboardBlocks.value);
 const currentlyEditingConfig = ref(new Array(dashboardBlocks.value.length).fill(false));
 const collapsed = ref(new Array(dashboardBlocks.value.length).fill(true));
+
+// Update the TPA edition store when dashboard config is modified
+watch(dashboardBlocks.value, (newValue) => {
+  if (!useDefaultDashboard.value) {
+    tpaEditionStore.updateTpaField(props.fieldName, {configDashboard: true, blocks: newValue});
+  }
+});
 
 defineExpose({
   collapseAll,
@@ -68,24 +76,9 @@ function refreshLocalStorageInfo() {
   }
 }
 
-// Deep search in an object for a key that includes the given keyword in its name
-function deepFindKey(keyword, obj) {
-  for (let key in obj) {
-    if (key.includes(keyword)) {
-      return obj[key];
-    }
-    if (typeof obj[key] === "object") {
-      let result = deepFindKey(keyword, obj[key]);
-      if (result) {
-        return result;
-      }
-    }
-  }
-}
-
 function validateBlockTypeChange(blockData) {
 
-  blockData.config = parseDashboardBlockConfig(blockData.config);
+  blockData.config = parseJsonEditorContent(blockData.config);
 
   if (BLOCKS_WITHOUT_GUARANTEES.includes(blockData.type)) {
     _.unset(blockData, 'guarantee');
@@ -117,14 +110,6 @@ function validateBlockTypeChange(blockData) {
   
 }
 
-function parseDashboardBlockConfig(objectOrJsonString) {
-  if (typeof objectOrJsonString === 'string') {
-    return JSON.parse(objectOrJsonString);
-  }
-  
-  return objectOrJsonString;
-}
-
 function addNewBlock() {
 
   dashboardBlocks.value.push({
@@ -151,12 +136,11 @@ function deleteBlock(index) {
   <div class="flex gap-2">
     <p>Use the default dashboard?</p>
     <Checkbox v-model="useDefaultDashboard" :binary="true" :disabled="!isEditionMode" :readonly="!isEditionMode" @change="refreshLocalStorageInfo" />
-    <!-- Hacer que el TPA se actualice como corresponde al darle al botón de guardar con respecto al dashboard por defecto -->
   </div>
   
   <DataView v-if="!useDefaultDashboard" :value="dashboardBlocks" dataKey="id">
     <template #list="slotProps">
-      <Fieldset class="col-12" :legend="currentlyEditingConfig[slotProps.index] ? 'Editing config...' : deepFindKey('title', slotProps.data.config)" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]" key="index">
+      <Fieldset class="col-12" :legend="currentlyEditingConfig[slotProps.index] ? 'Editing config...' : deepFindKeyword('title', slotProps.data.config)" :toggleable="true" :collapsed="collapsed[slotProps.index]" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]" key="index">
         <div style="display: grid; gap: 1rem; align-items: center; grid-template-columns: 30% auto" :class="!BLOCKS_WITHOUT_GUARANTEES.includes(slotProps.data.type) ? 'gridWithGuarantee' : 'gridWithoutGuarantee'">
           
           <span class="flex align-items-center gap-2">
@@ -183,7 +167,7 @@ function deleteBlock(index) {
             <ul v-if="!isEditionMode" class="my-0">
               <li class="text-md font-bold text-700" v-for="(value, key) in slotProps.data.config" :key="key">{{ key }}: {{ value }}</li>
             </ul>
-            <JsonEditorVue v-else :class="appThemeStore.isDarkModeOn && 'jse-theme-dark'" v-model="slotProps.data.config" @click="currentlyEditingConfig[slotProps.index] = true" @blur="slotProps.data.config = parseDashboardBlockConfig(slotProps.data.config); currentlyEditingConfig[slotProps.index] = false" mode="text" :key="slotProps.data.type" />
+            <JsonEditorVue v-else :class="appThemeStore.isDarkModeOn && 'jse-theme-dark'" v-model="slotProps.data.config" @click="currentlyEditingConfig[slotProps.index] = true" @blur="slotProps.data.config = parseJsonEditorContent(slotProps.data.config); currentlyEditingConfig[slotProps.index] = false" mode="text" :key="slotProps.data.type" />
           </div>
           
           <Button v-if="isEditionMode" icon="pi pi-trash" severity="danger" @click="deleteBlock(slotProps.index)" />

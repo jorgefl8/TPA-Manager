@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { deepFindKeyword } from '../utils/utils';
 
 import Tag from 'primevue/tag';
 import Fieldset from 'primevue/fieldset';
@@ -13,23 +14,8 @@ const props = defineProps({
 })
 
 const stepsToggle = ref({});
-const steps = ref(deepFindKey('steps', props.data));
-const componentLegend = ref(deepFindKey('title', props.data));
-
-// Deep search in an object for a key that includes the given keyword in its name
-function deepFindKey(keyword, obj) {
-  for (let key in obj) {
-    if (key.includes(keyword)) {
-      return obj[key];
-    }
-    if (typeof obj[key] === "object") {
-      let result = deepFindKey(keyword, obj[key]);
-      if (result) {
-        return result;
-      }
-    }
-  }
-}
+const steps = ref(deepFindKeyword('steps', props.data));
+const componentLegend = ref(deepFindKeyword('title', props.data));
 
 </script>
 

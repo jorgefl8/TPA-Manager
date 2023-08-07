@@ -3,12 +3,17 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
+import { useConfirm } from "primevue/useconfirm";
+import { useToast } from "primevue/usetoast";
+import { storeToRefs } from 'pinia';
 import axios from 'axios'
 
+import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
 import Dropdown from 'primevue/dropdown';
+import ConfirmPopup from 'primevue/confirmpopup';
 import ToggleButton from 'primevue/togglebutton';
 
 const props = defineProps({
@@ -23,8 +28,12 @@ const props = defineProps({
 
 const router = useRouter();
 const route = useRoute();
+const toast = useToast();
+const confirm = useConfirm();
 const appThemeStore = useAppThemeStore();
 const tpaEditionStore = useTpaEditionStore();
+const { isProductionEnvironment } = storeToRefs(tpaEditionStore);
+
 
 const MODES = {
   HOME: "🏠 Home",
@@ -43,7 +52,6 @@ const isCourseInvalid = ref(false);
 const isProjectInvalid = ref(false);
 const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
-const showDiscardChangesDialog = ref(false);
 const modes = ref([
   { label: '🏠 Home', value: MODES.HOME},
   { label: '🔍 Visualization', value: MODES.VISUALIZATION },
@@ -96,8 +104,10 @@ function getCourses() {
       if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
       if (projectId.value) selectedProject.value = selectedCourse.value.projects.find(project => project.projectId === projectId.value);
       if (selectedCourse.value && selectedProject.value) getAgreement();
-      if (!selectedCourse.value && !props.isDialog) isCourseInvalid.value = true;
-      if (!selectedProject.value && !props.isDialog) isProjectInvalid.value = true;
+      if (!props.isDialog) {
+        if (!selectedCourse.value) isCourseInvalid.value = true;
+        if (!selectedProject.value) isProjectInvalid.value = true;
+      }
       
       for (const course of courses.value) {
         course.projects.sort((a, b) => {
@@ -169,13 +179,45 @@ function clearSelectedProject() {
   }
 };
 
-function showDiscardTpaChangesDialog() {
-  showDiscardChangesDialog.value = true;
+function confirmSaveTpaChanges(event) {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Do you wish to save the current changes?',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      tpaEditionStore.saveTpaChanges().then(() => {
+        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
+      }).catch(error => {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
+      });
+    }
+  });
+}
+
+function confirmDiscardTpaChanges(event) {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Are you sure you want to discard the current changes?',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      tpaEditionStore.discardTpaChanges().catch(error => {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be discarded.', life: 3000 });
+      });
+    }
+  });
+}
+
+function updateLocalStorageEnvironment() {
+  localStorage.setItem('isProductionEnvironment', isProductionEnvironment.value);
 }
 
 </script>
 
 <template>
+
+  <Toast position="bottom-right" />
+  <ConfirmPopup></ConfirmPopup>
+
   <Dialog v-if="isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
         <h2 class="mb-0 font-bold">Select a TPA</h2>
@@ -208,7 +250,7 @@ function showDiscardTpaChangesDialog() {
           </template>
         </Dropdown>
 
-        <ToggleButton v-if="!isVisualizationMode" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" />
+        <ToggleButton v-if="!isVisualizationMode" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" />
       </div>
 
       <Divider layout="vertical"/>
@@ -230,8 +272,8 @@ function showDiscardTpaChangesDialog() {
       <Divider layout="vertical"/>
 
       <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll viewTpaJson' 'discardChanges expandAll toggleTheme'; align-items: center;">
-        <Button v-if="!isVisualizationMode" title="Save changes" icon="pi pi-save" severity="success" @click="tpaEditionStore.saveTpaChanges" style="grid-area: saveChanges;" />
-        <Button v-if="!isVisualizationMode" title="Discard changes" icon="pi pi-times" severity="danger" @click="showDiscardTpaChangesDialog" style="grid-area: discardChanges;" />
+        <Button v-if="!isVisualizationMode" title="Save changes" icon="pi pi-save" severity="success" @click="confirmSaveTpaChanges($event)" style="grid-area: saveChanges;" />
+        <Button v-if="!isVisualizationMode" title="Discard changes" icon="pi pi-times" severity="danger" @click="confirmDiscardTpaChanges" style="grid-area: discardChanges;" />
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
         <a :href="'http://localhost:5400/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
@@ -242,24 +284,5 @@ function showDiscardTpaChangesDialog() {
       
     </div>
   </div>
-
-  <Dialog v-if="showDiscardChangesDialog" v-model:visible="showDiscardChangesDialog" header="Discard changes" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
-    <template #header>
-      <h2 class="mb-0 font-bold">Discard changes</h2>
-    </template>
-    
-    <div class="mb-1" style="display: grid; gap: 1rem;">
-      <div>
-        <p class="mb-1"><b>Are you sure you want to discard the changes?</b></p>
-      </div>
-    </div>
-    
-    <template #footer>
-      <div class="flex justify-content-end">
-        <Button icon="pi pi-check" label="Yes" severity="success" @click="tpaEditionStore.discardTpaChanges" />
-        <Button icon="pi pi-times" label="No" severity="danger" @click="showDiscardChangesDialog = false" />
-      </div>
-    </template>
-  </Dialog>
 
 </template>
