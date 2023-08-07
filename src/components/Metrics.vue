@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
+import { parseJsonEditorContent } from '../utils/utils';
 
 import StepDisplay from './StepDisplay.vue';
 
@@ -42,14 +43,6 @@ function collapseAll() {
 
 function expandAll() {
     collapsed.value.map((value, index) => collapsed.value[index] = false);
-}
-
-function parseJsonEditorContent(objectOrJsonString) {
-  if (typeof objectOrJsonString === 'string') {
-    return JSON.parse(objectOrJsonString);
-  }
-
-  return objectOrJsonString;
 }
 
 function addNewMetric() {

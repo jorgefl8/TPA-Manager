@@ -7,7 +7,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
   const modifiedTpa = ref(null)
   const discardButtonClicked = ref(false)
-  const isProductionEnvironment = ref(false)
+  const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true' ?? false)
 
   const BLOCK_TYPES = [
     'correlated',
@@ -43,13 +43,36 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   }
 
   async function saveTpaChanges() {
-    originalTpa.value = modifiedTpa.value
 
+    // Remove "member" from scope if checkbox is not checked
+    if (modifiedTpa.value.context.definitions.scopes.development.member.default !== "*") {
+      deleteTpaField('context.definitions.scopes.development.member')
+    }
+
+    // Production or development environment transformation
+    modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value).replace(/http:\/\/(host\.docker\.internal:5700|bluejay-scope-manager)/g, isProductionEnvironment.value ? "http://bluejay-scope-manager" : "http://host.docker.internal:5700"))
+    modifiedTpa.value.context.definitions.dashboards.main.base = modifiedTpa.value.context.definitions.dashboards.main.base.replace(/http:\/\/(host\.docker\.internal:5200|[^\/]+-assets-manager)/g, isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200")
+    modifiedTpa.value.context.definitions.dashboards.main.modifier = modifiedTpa.value.context.definitions.dashboards.main.modifier.replace(/http:\/\/(host\.docker\.internal:5200|[^\/]+-assets-manager)/g, isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200")
+    modifiedTpa.value.context.definitions.dashboards.main.overlay = modifiedTpa.value.context.definitions.dashboards.main.overlay.replace(/http:\/\/(host\.docker\.internal:5200|[^\/]+-assets-manager)/g, isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200")
+    
     try {
-      await axios.delete(`http://localhost:5400/api/v6/agreements/${modifiedTpa.value.id}`)
-      await axios.post(`http://localhost:5400/api/v6/agreements`, modifiedTpa.value)
+      
+      // If "Project ID" or "Course ID" modified, replace in the TPA and redirect to URL with new IDs
+      const areIdsModified = originalTpa.value.context.definitions.scopes.development.project.default !== modifiedTpa.value.context.definitions.scopes.development.project.default
+        || originalTpa.value.context.definitions.scopes.development.class.default !== modifiedTpa.value.context.definitions.scopes.development.class.default
+      
+      if (areIdsModified) {
+        modifiedTpa.value.id = "tpa-" + modifiedTpa.value.context.definitions.scopes.development.project.default
+        modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value).replace(new RegExp('\"' + originalTpa.value.context.definitions.scopes.development.project.default + '\"', "g"), '\"' + modifiedTpa.value.context.definitions.scopes.development.project.default + '\"'))
+        modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value).replace(new RegExp('\"' + originalTpa.value.context.definitions.scopes.development.class.default + '\"', "g"), '\"' + modifiedTpa.value.context.definitions.scopes.development.class.default + '\"'))
+        this.router.push({ name: 'edition', params: { courseId: modifiedTpa.value.context.definitions.scopes.development.class.default, projectId: modifiedTpa.value.context.definitions.scopes.development.project.default } })
+      }
+        
+      await axios.delete(`http://localhost:5400/api/v6/agreements/${originalTpa.value.id}`).catch(error => console.log("Error deleting agreement: ", error))
+      await axios.post(`http://localhost:5400/api/v6/agreements`, modifiedTpa.value).catch(error => console.log("Error creating agreement: ", error))
+      
     } catch (error) {
-      console.log("Error: ", error)
+      console.log("Error when saving TPA changes: ", error)
     }
   }
 
