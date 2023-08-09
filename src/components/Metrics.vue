@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
@@ -26,7 +26,7 @@ const router = useRouter();
 const appThemeStore = useAppThemeStore();
 const tpaEditionStore = useTpaEditionStore();
 
-const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
+const isEditionMode = computed(() => router.currentRoute.value.name === 'edition');
 const metrics = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const collapsed = ref(new Array(Object.keys(metrics.value).length).fill(true));
 const currentlyEditingDetails = ref(new Array(Object.keys(metrics.value).length).fill(false));

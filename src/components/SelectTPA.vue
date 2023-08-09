@@ -327,9 +327,9 @@ function updateLocalStorageEnvironment() {
         <Dropdown class="overflow-hidden" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid')].join(' ')" v-model="selectedProject" :options="mode !== 'creation' ? projectsWithTpas : projectsWithoutTpas" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
         <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
         
-        <div v-if="mode === 'creation'" class="flex align-items-center gap-2">
+        <div v-if="mode === 'creation'" class="flex align-items-center gap-2 pb-1">
           <Checkbox v-model="switchToEditionAfterCreation" :binary="true" inputId="switchToEditionAfterCreation" />
-          <label for="switchToEditionAfterCreation">Switch to edition mode after creation</label> 
+          <label for="switchToEditionAfterCreation">Switch to edition mode after creation?</label> 
         </div>
       </div>
     </template>

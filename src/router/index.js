@@ -10,13 +10,12 @@ const routes = [
     {
         path: "/visualization/:courseId?/:projectId?",
         name: "visualization",
-        component: () => import("../views/Visualization.vue"),
+        component: () => import("../views/TpaDetails.vue"),
     },
     {
         path: "/edition/:courseId?/:projectId?",
         name: "edition",
-        component: () => import("../views/Edition.vue"),
-        props: true,
+        component: () => import("../views/TpaDetails.vue"),
     },
     {
         path: "/catalogue",

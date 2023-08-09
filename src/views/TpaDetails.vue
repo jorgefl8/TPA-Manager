@@ -1,5 +1,8 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import Scope from '../components/Scope.vue';
 import Dashboard from '../components/Dashboard.vue';
@@ -11,6 +14,10 @@ import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import ToggleButton from 'primevue/togglebutton';
 
+const router = useRouter();
+const tpaEditionStore = useTpaEditionStore();
+const { originalTpa, modifiedTpa, discardButtonClicked} = storeToRefs(tpaEditionStore);
+
 const selectTpa = ref();
 const dashboardBlocks = ref();
 const guarantees = ref();
@@ -20,10 +27,36 @@ const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);
 const transitionInProgress = ref(false);
 
+const currentMode = computed(() => router.currentRoute.value.name);
+
 const agreement = computed(() => {
   if (selectTpa.value) return selectTpa.value.agreement;
   return null;
 });
+
+// Attach the event listener when the component is mounted
+window.addEventListener('beforeunload', handlePageReload);
+
+onBeforeUnmount(() => {
+  handlePageLeave();
+  window.removeEventListener('beforeunload', handlePageReload);
+});
+
+function handlePageReload(event) {
+  if (!discardButtonClicked && originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    event.preventDefault();
+    event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
+  }
+};
+
+function handlePageLeave() {
+  if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    if (confirm("There are unsaved changes. Do you want to save them before you leave?")) {
+      // Web apps cannot prevent the user from leaving the page, so all we can do is save the changes if the user wants to
+      console.log("TODO: save changes")
+    }
+  }
+};
 
 function toggleExpandedDashboardBlocks() {
   expandedDashboardBlocks.value ? dashboardBlocks.value.expandAll() : dashboardBlocks.value.collapseAll();
@@ -65,7 +98,7 @@ function handleCardTransition() {
 
 <template>
   <div class="grid">
-    <SelectTPA ref="selectTpa" :isDialog="false" mode="visualization" @collapseAllClick="collapseAll" @expandAllClick="expandAll" @tpaChange="handleCardTransition" />
+    <SelectTPA ref="selectTpa" :isDialog="false" :mode="currentMode" @collapseAllClick="collapseAll" @expandAllClick="expandAll" @tpaChange="handleCardTransition" />
 
     <Transition name="slide-fade">
       <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement && !transitionInProgress">
@@ -85,7 +118,7 @@ function handleCardTransition() {
                 </div>
                 <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
               </div>
-
+  
               <div>
                 <div class="flex align-items-baseline gap-2">
                   <h2>Guarantees</h2>
@@ -93,7 +126,7 @@ function handleCardTransition() {
                 </div>
                 <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
               </div>
-
+  
               <div>
                 <div class="flex align-items-baseline gap-2">
                   <h2>Metrics</h2>
@@ -109,7 +142,7 @@ function handleCardTransition() {
         </div>
       </div>
     </Transition>
-
+  
   </div>
 </template>
 
@@ -119,3 +152,5 @@ function handleCardTransition() {
   gap: 1rem !important;
 }
 </style>
+
+<!-- Cambiar todo de localhost a variable de entorno para permitir subir la app a producción -->

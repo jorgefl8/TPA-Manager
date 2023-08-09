@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
@@ -32,7 +32,7 @@ const WINDOW_PERIOD_OPTIONS = [
   { label: 'Annually', value: 'annually'}
 ]
 
-const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
+const isEditionMode = computed(() => router.currentRoute.value.name === 'edition');
 const guarantees = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const isGuaranteeByMember = ref(guarantees.value.map((value) => value.scope?.member));
 const collapsed = ref(new Array(guarantees.value.length).fill(true));

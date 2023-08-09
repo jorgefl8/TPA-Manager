@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
@@ -17,7 +17,7 @@ const props = defineProps({
 const router = useRouter();
 const tpaEditionStore = useTpaEditionStore()
 
-const isVisualizationMode = ref(router.currentRoute.value.name.includes('visualization'));
+const isVisualizationMode = computed(() => router.currentRoute.value.name === 'visualization');
 const isMemberNeeded = ref(tpaEditionStore.getTpaField(props.fieldName)?.member?.default);
 const validityInitial = ref(new Date(tpaEditionStore.getTpaField('context.validity.initial')));
 

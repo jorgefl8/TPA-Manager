@@ -1,6 +1,6 @@
 <script setup>
 import _ from 'lodash';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { deepFindKeyword, parseJsonEditorContent } from '../utils/utils';
 import { useAppThemeStore } from '@/stores/appTheme';
@@ -32,7 +32,7 @@ const BLOCKS_WITH_TIME_INTERVAL_CONFIG = ["time-graph2-member-groupby", "time-gr
 const BLOCKS_WITH_AGGREGATION_CONFIG = ["time-graph2-member-groupby"]
 
 const projectId = tpaEditionStore.getTpaField('context.definitions.scopes.development.project.default');
-const isEditionMode = ref(router.currentRoute.value.name.includes('edition'));
+const isEditionMode = computed(() => router.currentRoute.value.name === 'edition');
 const dashboardBlocks = ref(Object.values(tpaEditionStore.getTpaField(props.fieldName)?.blocks ?? {}));
 const useDefaultDashboard = ref(dashboardBlocks.value.length === 0);
 const dashboardBlocksCache = ref(JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}")?.[projectId] || dashboardBlocks.value);
