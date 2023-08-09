@@ -10,11 +10,24 @@ import ProgressSpinner from 'primevue/progressspinner';
 const router = useRouter();
 const appThemeStore = useAppThemeStore();
 
-const catalogueData = ref({})
+const catalogueData = ref({metrics: [], guarantees: []})
 const loading = ref(true)
 
 onMounted(async () => {
-  catalogueData.value = await getCatalogueData();
+  const data = await getCatalogueData();
+
+  // Add a delay between each metric/guarantee to make the transition look better
+  for (let i = 0; i < data.metrics.length; i++) {
+    setTimeout(() => {
+      catalogueData.value.metrics.push(data.metrics[i]);
+    }, i * 50);
+  }
+
+  for (let i = 0; i < data.guarantees.length; i++) {
+    setTimeout(() => {
+      catalogueData.value.guarantees.push(data.guarantees[i]);
+    }, 1000 + i * 50);
+  }
 });
 
 async function getCatalogueData() {
@@ -24,16 +37,13 @@ async function getCatalogueData() {
 
     for (let metric of parsedResponse.metrics) {
       for (let key in metric.dsl) {
-        const { scope, ...data } = metric.dsl[key].metric;
+        const { scope, computing, ...data } = metric.dsl[key].metric;
         metric.dsl = data ;
       }
     }
 
     for (let guarantee of parsedResponse.guarantees) {
-      guarantee.of = [{
-        objective: guarantee.of[0].objective,
-        with: guarantee.of[0].with
-      }]
+      guarantee.objective = guarantee.of[0].objective
     }
 
     loading.value = false
@@ -46,10 +56,13 @@ async function getCatalogueData() {
 </script>
 
 <template>
+  <Button class="absolute ml-3 mt-2 left-0 top-0" icon="pi pi-home" severity="secondary" @click="router.push({ name: 'home' })" />
+  <Button class="absolute ml-3 mt-2 left-0 top-0" style="margin-left: 4.55rem !important;" 
+  icon="pi pi-arrow-left" severity="secondary" @click="router.go(-1)" />
   <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" />
   
   <div class="card">
-    <h1 class="text-center">TPs Catalogue View</h1>
+    <h1 class="text-center font-bold"><u>📖 TPs Catalogue</u></h1>
     
     <div v-if="loading" class="flex flex-column m-5">
       <ProgressSpinner class="text-center" strokeWidth="4" />
@@ -59,21 +72,25 @@ async function getCatalogueData() {
     <div v-else>
       <h2>Metrics</h2>
       <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));">
-        <div v-for="metric in catalogueData.metrics" :key="metric.name" class="card flex flex-column align-items-center">
-          <h4 style="word-break: break-all; font-weight: bold;">{{ metric.name }}</h4>
-          <p>{{ metric.description }}</p>
-          <pre class="preOverflow">{{metric.dsl}}</pre>
-        </div> 
+        <TransitionGroup name="list">
+          <div v-for="metric in catalogueData.metrics" :key="metric.name" class="card flex flex-column align-items-center">
+            <h4 style="word-break: break-all; font-weight: bold;">{{ metric.name }}</h4>
+            <p>{{ metric.description }}</p>
+            <pre class="preOverflow">{{metric.dsl}}</pre>
+          </div>
+        </TransitionGroup> 
       </div>
   
       <h2>Guarantees</h2>
       <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));">
-        <div v-for="guarantee in catalogueData.guarantees" :key="guarantee.id" class="card flex flex-column align-items-center">
-          <h4 style="word-break: break-all; font-weight: bold;">{{ guarantee.id }}</h4>
-          <p>{{ guarantee.notes }}</p>
-          <p>{{ guarantee.description }}</p>
-          <pre class="preOverflow">{{ guarantee.of[0] }}</pre>
-        </div> 
+        <TransitionGroup name="list">
+          <div v-for="guarantee in catalogueData.guarantees" :key="guarantee.id" class="card flex flex-column align-items-center">
+            <h4 style="word-break: break-all; font-weight: bold;">{{ guarantee.id }}</h4>
+            <p>{{ guarantee.notes }}</p>
+            <p>{{ guarantee.description }}</p>
+            <pre class="preOverflow" severity="info">{{ guarantee.objective }}</pre>
+          </div> 
+        </TransitionGroup>
       </div>
     </div>
 
@@ -84,3 +101,24 @@ async function getCatalogueData() {
 
   </div>
 </template>
+
+<style scoped>
+.list-enter-active {
+  animation: enterAnimation 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+@keyframes enterAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.5);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translateY(15px) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+</style>

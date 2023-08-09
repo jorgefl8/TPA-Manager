@@ -18,6 +18,7 @@ const metrics = ref();
 const expandedDashboardBlocks = ref(false);
 const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);
+const transitionInProgress = ref(false);
 
 const agreement = computed(() => {
   if (selectTpa.value) return selectTpa.value.agreement;
@@ -53,52 +54,62 @@ function collapseAll() {
   guarantees.value.collapseAll();
   metrics.value.collapseAll();
 }
+
+function handleCardTransition() {
+  transitionInProgress.value = true;
+  setTimeout(() => {
+    transitionInProgress.value = false;
+  }, 300);
+}
 </script>
 
 <template>
   <div class="grid">
-    <SelectTPA ref="selectTpa" :isDialog="false" :isVisualizationMode="true" @collapseAllClick="collapseAll" @expandAllClick="expandAll" />
+    <SelectTPA ref="selectTpa" :isDialog="false" mode="visualization" @collapseAllClick="collapseAll" @expandAllClick="expandAll" @tpaChange="handleCardTransition" />
 
-    <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement">
-      <div class="flex flex-column align-items-center w-full">
-        <div class="card w-full">
-          <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">
-  
-            <div>
-              <h2>Scope</h2>
-              <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
-            </div>
-        
-            <div>
-              <div class="flex align-items-center gap-2">
-                <h2>Dashboard blocks</h2>
-                <ToggleButton class="expandButton" v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
-              </div>
-              <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
-            </div>
-
-            <div>
-              <div class="flex align-items-baseline gap-2">
-                <h2>Guarantees</h2>
-                <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
-              </div>
-              <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
-            </div>
-
-            <div>
-              <div class="flex align-items-baseline gap-2">
-                <h2>Metrics</h2>
-                <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
-              </div>
-              <Metrics ref="metrics" fieldName="terms.metrics" :key="agreement.terms.metrics" />
-            </div>
+    <Transition name="slide-fade">
+      <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement && !transitionInProgress">
+        <div class="flex flex-column align-items-center w-full">
+          <div class="card w-full">
+            <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">
     
-            <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
-  
-          </ScrollPanel>
+              <div>
+                <h2>Scope</h2>
+                <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
+              </div>
+          
+              <div>
+                <div class="flex align-items-center gap-2">
+                  <h2>Dashboard blocks</h2>
+                  <ToggleButton class="expandButton" v-model="expandedDashboardBlocks" @click="toggleExpandedDashboardBlocks" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+                </div>
+                <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config" :key="agreement.context.definitions.dashboards.main.config" />
+              </div>
+
+              <div>
+                <div class="flex align-items-baseline gap-2">
+                  <h2>Guarantees</h2>
+                  <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+                </div>
+                <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
+              </div>
+
+              <div>
+                <div class="flex align-items-baseline gap-2">
+                  <h2>Metrics</h2>
+                  <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+                </div>
+                <Metrics ref="metrics" fieldName="terms.metrics" :key="agreement.terms.metrics" />
+              </div>
+      
+              <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />
+    
+            </ScrollPanel>
+          </div>
         </div>
       </div>
-    </div>
+    </Transition>
+
   </div>
 </template>
 

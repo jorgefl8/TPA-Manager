@@ -1,4 +1,5 @@
 <script setup>
+import _ from 'lodash'
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
@@ -12,6 +13,7 @@ import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
+import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import ConfirmPopup from 'primevue/confirmpopup';
 import ToggleButton from 'primevue/togglebutton';
@@ -20,8 +22,8 @@ const props = defineProps({
   isDialog: {
     type: Boolean
   },
-  isVisualizationMode: {
-    type: Boolean,
+  mode: {
+    type: String,
     required: true
   }
 });
@@ -34,7 +36,6 @@ const appThemeStore = useAppThemeStore();
 const tpaEditionStore = useTpaEditionStore();
 const { isProductionEnvironment } = storeToRefs(tpaEditionStore);
 
-
 const MODES = {
   HOME: "🏠 Home",
   VISUALIZATION: "🔍 Visualization",
@@ -43,6 +44,8 @@ const MODES = {
 };
 
 const courses = ref([]);
+const projectsWithTpas = ref([]);
+const projectsWithoutTpas = ref([]);
 const selectedCourse = ref();
 const selectedProject = ref();
 const courseId = ref(route.params.courseId);
@@ -52,11 +55,12 @@ const isCourseInvalid = ref(false);
 const isProjectInvalid = ref(false);
 const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
+const switchToEditionAfterCreation = ref(false)
 const modes = ref([
-  { label: '🏠 Home', value: MODES.HOME},
-  { label: '🔍 Visualization', value: MODES.VISUALIZATION },
-  { label: '✏️ Edition', value: MODES.EDITION },
-  { label: '📖 Catalogue', value: MODES.CATALOGUE }
+{ label: '🏠 Home', value: MODES.HOME},
+{ label: '🔍 Visualization', value: MODES.VISUALIZATION },
+{ label: '✏️ Edition', value: MODES.EDITION },
+{ label: '📖 Catalogue', value: MODES.CATALOGUE }
 ]);
 
 defineExpose({
@@ -67,7 +71,7 @@ defineExpose({
   agreement
 });
 
-const emits = defineEmits(['collapseAllClick', 'expandAllClick']);
+const emits = defineEmits(['collapseAllClick', 'expandAllClick', 'tpaChange']);
 
 onMounted(() => {
   getCourses();
@@ -79,13 +83,13 @@ watch([selectedProject], () => {
     routeParams.courseId = selectedCourse.value.classId;
     routeParams.projectId = selectedProject.value?.projectId;
     
-    router.push({ name: (props.isVisualizationMode ? 'visualization' : 'edition'), params: routeParams });
+    router.push({ name: props.mode, params: routeParams });
   } 
 });
 
 function getSelectedModeFromUrl() {
   const routeName = route.name;
-  switch(routeName) {
+  switch (routeName) {
     case "home":
       return MODES.HOME;
     case "visualization":
@@ -99,21 +103,26 @@ function getSelectedModeFromUrl() {
 
 function getCourses() {
   axios.get("http://localhost:5700/api/v1/scopes/development/courses")
-    .then(response => {
-      courses.value = response.data.scope;
-      if (courseId.value) selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
-      if (projectId.value) selectedProject.value = selectedCourse.value.projects.find(project => project.projectId === projectId.value);
+    .then(async (response) => {
+      
+      courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
+
+      if (courseId.value) {
+        selectedCourse.value = courses.value.find(course => course.classId === courseId.value);
+        await getProjectsWithTpas();
+      }
+
+      if (projectId.value) {
+        selectedProject.value = projectsWithTpas.value.find(project => project.projectId === projectId.value);
+      }
+
       if (selectedCourse.value && selectedProject.value) getAgreement();
+      
       if (!props.isDialog) {
         if (!selectedCourse.value) isCourseInvalid.value = true;
         if (!selectedProject.value) isProjectInvalid.value = true;
       }
-      
-      for (const course of courses.value) {
-        course.projects.sort((a, b) => {
-          return a.projectId.localeCompare(b.projectId);
-        });
-      }
+
     })
     .catch(error => {
       console.log("Error: ", error);
@@ -131,20 +140,43 @@ function getAgreement() {
     })
     .catch(error => {
       console.log("Error: ", error);
+      if (error.response.status === 404) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'This project does not have an existing TPA.', life: 3000 });
+      }
     });
   } 
 }
 
+async function getProjectsWithTpas() {
+  await axios.get("http://localhost:5400/api/v6/agreements")
+    .then(response => {
+
+      // Projects from the selected course that have a TPA
+      projectsWithTpas.value = response.data
+        .filter(agreement => agreement.context.definitions.scopes.development.class.default === selectedCourse.value.classId)
+        .map(agreement => {
+          return { projectId: agreement.id.substring(4) }
+        })
+        .sort((a, b) => a.projectId.localeCompare(b.projectId));
+      
+      // Projects from the selected course that are not in the projectsWithTpas array
+      projectsWithoutTpas.value = selectedCourse.value.projects.filter(project => !projectsWithTpas.value.some(projectWithTpa => projectWithTpa.projectId === project.projectId)).sort((a, b) => a.projectId.localeCompare(b.projectId));
+    })
+    .catch(error => {
+      console.log("Error: ", error);
+    });
+}
+
 function changeViewByMode() {
-  switch(selectedMode.value) {
+  switch (selectedMode.value) {
     case MODES.HOME:
       router.push({ name: 'home' });
       break;
     case MODES.VISUALIZATION:
-      router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: selectedProject.value.projectId } });
+      router.push({ name: 'visualization', params: { courseId: courseId.value, projectId: selectedProject.value?.projectId } });
       break;
     case MODES.EDITION:
-      router.push({ name: 'edition', params: { courseId: courseId.value, projectId: selectedProject.value.projectId } });
+      router.push({ name: 'edition', params: { courseId: courseId.value, projectId: selectedProject.value?.projectId } });
       break;
     case MODES.CATALOGUE:
       router.push({ name: 'catalogue' });
@@ -152,18 +184,83 @@ function changeViewByMode() {
   }
 }
 
-function submit() {
+function isSelectionInvalid() {
+  let isInvalid = false;
+  
   if (!selectedCourse.value) {
     isCourseInvalid.value = true;
+    isInvalid = true;
   } else if (selectedCourse.value && !selectedProject.value) {
     isProjectInvalid.value = true;
-  } else {
-    const routeParams = {
-        courseId: selectedCourse.value.classId,
-        projectId: selectedProject.value.projectId
-    };
+    isInvalid = true;
+  }
+  
+  return isInvalid;
+}
 
-    router.push({ name: props.isVisualizationMode ? 'visualization' : 'edition', params: routeParams });
+async function deleteSelectedTpa() {
+  if (isSelectionInvalid()) return;
+  
+  try {
+    await axios.delete(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
+    toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA deleted!', life: 3000 });
+    projectsWithTpas.value = projectsWithTpas.value.filter(project => project.projectId !== selectedProject.value.projectId);
+    projectsWithoutTpas.value.push({ projectId: selectedProject.value.projectId })
+    projectsWithoutTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
+    selectedProject.value = null;
+    agreement.value = null;
+  } catch (error) {
+    console.log("Error: ", error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be deleted.', life: 3000 });
+  }
+  
+}
+
+function navigateToTpaView() {
+  if (isSelectionInvalid()) return;
+
+  emits("tpaChange")
+  
+  const routeParams = {
+    courseId: selectedCourse.value.classId,
+    projectId: selectedProject.value.projectId
+  };
+
+  router.push({ name: props.mode, params: routeParams });
+  // If already in the URL, reload the page to update the view
+  getAgreement();
+}
+
+async function createTpa() {
+  if (isSelectionInvalid()) return;
+
+  let tpaTemplate = null;
+
+  try {
+    tpaTemplate = await axios.get(`http://localhost:5200/api/v1/public/renders/tpa/${selectedCourse.value.classId}.json`)
+  } catch (error) {
+    if (error.response.status === 404) {
+      console.log(`There is no "public/renders/tpa/${selectedCourse.value.classId}.json" file in the assets manager. Using the default template instead...`)
+      tpaTemplate = await axios.get(`http://localhost:5200/api/v1/public/renders/tpa/template.json`).catch(error => {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be created.', life: 3000 });
+      });
+    } else {
+      toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be created.', life: 3000 });
+    }
+  }
+
+  const tpa = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/1010101010/g, selectedProject.value.projectId).replace(/2020202020/g, selectedCourse.value.classId));
+
+  await axios.post("http://localhost:5400/api/v6/agreements", tpa)
+
+  if (switchToEditionAfterCreation.value) {
+    router.push({ name: 'edition', params: { courseId: selectedCourse.value.classId, projectId: selectedProject.value.projectId } });
+  } else {
+    projectsWithTpas.value.push({ projectId: selectedProject.value.projectId });
+    projectsWithTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
+    projectsWithoutTpas.value = projectsWithoutTpas.value.filter(project => project.projectId !== selectedProject.value.projectId);
+    projectsWithoutTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
+    toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA created!', life: 3000 });
   }
 }
 
@@ -210,34 +307,44 @@ function confirmDiscardTpaChanges(event) {
 function updateLocalStorageEnvironment() {
   localStorage.setItem('isProductionEnvironment', isProductionEnvironment.value);
 }
-
+  
 </script>
 
 <template>
-
+  
   <Toast position="bottom-right" />
   <ConfirmPopup></ConfirmPopup>
-
+  
   <Dialog v-if="isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
-        <h2 class="mb-0 font-bold">Select a TPA</h2>
+      <h2 class="mb-0 font-bold">Select a {{ !selectedCourse || isCourseInvalid ? 'course' : 'project' }}</h2>
+    </template>
+
+    <template #default>
+      <div style="display: grid; gap: 0.5rem;">
+        <Dropdown class="overflow-hidden" :class="isCourseInvalid && 'p-invalid'" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearErrors(); getProjectsWithTpas();" />
+        <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
+        <Dropdown class="overflow-hidden" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid')].join(' ')" v-model="selectedProject" :options="mode !== 'creation' ? projectsWithTpas : projectsWithoutTpas" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
+        <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
+        
+        <div v-if="mode === 'creation'" class="flex align-items-center gap-2">
+          <Checkbox v-model="switchToEditionAfterCreation" :binary="true" inputId="switchToEditionAfterCreation" />
+          <label for="switchToEditionAfterCreation">Switch to edition mode after creation</label> 
+        </div>
+      </div>
     </template>
     
-      <div style="display: grid; gap: 0.5rem;">
-          <Dropdown class="overflow-hidden" :class="isCourseInvalid && 'p-invalid'" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearErrors" />
-          <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
-          <Dropdown class="overflow-hidden" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid')].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
-          <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
-      </div>
-      
-      <template #footer>
-        <div class="flex justify-content-end">
-        <Button :icon="'pi pi-' + (isVisualizationMode ? 'search' : 'pencil')" :label="(isVisualizationMode ? 'Display' : 'Edit') + ' agreement'" :severity="isVisualizationMode ? 'primary' : 'warning'" @click="submit" />
-        <Button icon="pi pi-times" label="Cancel" severity="danger" @click="displayDialog = false" />
+    <template #footer>
+      <div class="flex justify-content-end">
+        <Button v-if="mode === 'creation'" icon="pi pi-wrench" label="Create agreement" severity="success" @click="createTpa" />
+        <Button v-else-if="mode === 'deletion'" icon="pi pi-trash" label="Delete agreement" severity="danger" @click="deleteSelectedTpa" />
+        <Button v-else-if="mode === 'visualization'" icon="pi pi-search" label="Display agreement" severity="primary" @click="navigateToTpaView" />
+        <Button v-else-if="mode === 'edition'" icon="pi pi-pencil" label="Edit agreement" severity="warning" @click="navigateToTpaView" />
+        <Button icon="pi pi-times" label="Cancel" severity="secondary" @click="displayDialog = false" />
       </div>
     </template>
   </Dialog>
-
+  
   <div class="col-12 flex pt-2 p-0" v-if="!isDialog">
     <div class="card p-3 mb-2" style="width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: auto auto 1fr auto auto; align-items: end; overflow: auto;">
       
@@ -249,31 +356,37 @@ function updateLocalStorageEnvironment() {
             </h3>
           </template>
         </Dropdown>
-
-        <ToggleButton v-if="!isVisualizationMode" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" />
+        
+        <ToggleButton v-if="!mode === 'edition'" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" />
       </div>
-
+      
       <Divider layout="vertical"/>
-
+      
       <div class="flex" style="align-items: inherit;">
         <div style="display: grid; gap: 0.25rem; flex: 1 1 auto;">
           <label for="dd-classId">Course</label>
-          <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearSelectedProject" />
+          <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearSelectedProject(); getProjectsWithTpas()" />
           <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
         </div>
+        
         <div style="display: grid; gap: 0.25rem; flex: 1 1 auto;">
           <label for="dd-projectId">Project</label>
-          <Dropdown inputId="dd-projectId" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid'), 'mr-2'].join(' ')" v-model="selectedProject" :options="selectedCourse?.projects" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
+          <Dropdown inputId="dd-projectId" :class="[(!selectedCourse && 'p-disabled '), (isProjectInvalid && 'p-invalid'), 'mr-2'].join(' ')" v-model="selectedProject" :options="projectsWithTpas" optionLabel="projectId" placeholder="Select a project" scrollHeight="300px" filter :autoFilterFocus="true" @change="clearErrors" />
           <small class="p-error" v-if="isProjectInvalid">You must select a project.</small>
         </div>
-        <Button :icon="'pi pi-' + (isVisualizationMode ? 'search' : 'pencil')" :severity="isVisualizationMode ? 'primary' : 'warning'" @click="getAgreement" />
+        
+        <Button v-if="mode === 'visualization'" icon="pi pi-search" label="Display agreement" severity="primary" @click="navigateToTpaView" />
+        <Button v-if="mode === 'edition'" icon="pi pi-pencil" label="Edit agreement" severity="warning" @click="navigateToTpaView" />
       </div>
-
+      
       <Divider layout="vertical"/>
-
+      
       <div style="display: grid; gap: 0.5rem; grid-template-areas: 'saveChanges collapseAll viewTpaJson' 'discardChanges expandAll toggleTheme'; align-items: center;">
-        <Button v-if="!isVisualizationMode" title="Save changes" icon="pi pi-save" severity="success" @click="confirmSaveTpaChanges($event)" style="grid-area: saveChanges;" />
-        <Button v-if="!isVisualizationMode" title="Discard changes" icon="pi pi-times" severity="danger" @click="confirmDiscardTpaChanges" style="grid-area: discardChanges;" />
+        <template v-if="mode === 'edition'">
+          <Button title="Save changes" icon="pi pi-save" severity="success" @click="confirmSaveTpaChanges($event)" style="grid-area: saveChanges;" />
+          <Button title="Discard changes" icon="pi pi-times" severity="danger" @click="confirmDiscardTpaChanges" style="grid-area: discardChanges;" />
+        </template>
+
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
         <a :href="'http://localhost:5400/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
@@ -284,5 +397,5 @@ function updateLocalStorageEnvironment() {
       
     </div>
   </div>
-
+  
 </template>
