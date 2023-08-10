@@ -45,7 +45,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   async function saveTpaChanges() {
 
     // Remove "member" from scope if checkbox is not checked
-    if (modifiedTpa.value.context.definitions.scopes.development.member.default !== "*") {
+    if (modifiedTpa.value.context.definitions.scopes.development?.member?.default !== "*") {
       deleteTpaField('context.definitions.scopes.development.member')
     }
 

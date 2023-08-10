@@ -1,5 +1,4 @@
 <script setup>
-import _ from 'lodash'
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAppThemeStore } from '@/stores/appTheme';
@@ -198,39 +197,6 @@ function isSelectionInvalid() {
   return isInvalid;
 }
 
-async function deleteSelectedTpa() {
-  if (isSelectionInvalid()) return;
-  
-  try {
-    await axios.delete(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
-    toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA deleted!', life: 3000 });
-    projectsWithTpas.value = projectsWithTpas.value.filter(project => project.projectId !== selectedProject.value.projectId);
-    projectsWithoutTpas.value.push({ projectId: selectedProject.value.projectId })
-    projectsWithoutTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
-    selectedProject.value = null;
-    agreement.value = null;
-  } catch (error) {
-    console.log("Error: ", error)
-    toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be deleted.', life: 3000 });
-  }
-  
-}
-
-function navigateToTpaView() {
-  if (isSelectionInvalid()) return;
-
-  emits("tpaChange")
-  
-  const routeParams = {
-    courseId: selectedCourse.value.classId,
-    projectId: selectedProject.value.projectId
-  };
-
-  router.push({ name: props.mode, params: routeParams });
-  // If already in the URL, reload the page to update the view
-  getAgreement();
-}
-
 async function createTpa() {
   if (isSelectionInvalid()) return;
 
@@ -262,6 +228,39 @@ async function createTpa() {
     projectsWithoutTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
     toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA created!', life: 3000 });
   }
+}
+
+async function deleteSelectedTpa() {
+  if (isSelectionInvalid()) return;
+  
+  try {
+    await axios.delete(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
+    toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA deleted!', life: 3000 });
+    projectsWithTpas.value = projectsWithTpas.value.filter(project => project.projectId !== selectedProject.value.projectId);
+    projectsWithoutTpas.value.push({ projectId: selectedProject.value.projectId })
+    projectsWithoutTpas.value.sort((a, b) => a.projectId.localeCompare(b.projectId));
+    selectedProject.value = null;
+    agreement.value = null;
+  } catch (error) {
+    console.log("Error: ", error)
+    toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be deleted.', life: 3000 });
+  }
+  
+}
+
+function navigateToTpaView() {
+  if (isSelectionInvalid()) return;
+
+  emits("tpaChange")
+  
+  const routeParams = {
+    courseId: selectedCourse.value.classId,
+    projectId: selectedProject.value.projectId
+  };
+
+  router.push({ name: props.mode, params: routeParams });
+  // If already in the URL, reload the page to update the view
+  getAgreement();
 }
 
 function clearErrors() {

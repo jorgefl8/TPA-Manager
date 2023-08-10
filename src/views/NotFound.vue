@@ -1,15 +1,9 @@
 <script setup>
-import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Button from 'primevue/button';
 
 const router = useRouter();
 
-onMounted(() => {
-  const dangerButton = document.getElementsByClassName('p-button-danger')[0];
-  const buttonColor = getComputedStyle(dangerButton).getPropertyValue('background-color');
-  document.getElementById('title').style.color = buttonColor;
-});
 </script>
 
 <template>

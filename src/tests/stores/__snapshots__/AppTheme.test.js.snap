@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AppTheme store > matches snapshot in dark mode 1`] = `
+"<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute ml-3 mt-2 left-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" data-pd-ripple=\\"true\\"><span class=\\"p-button-icon pi pi-home\\" data-pc-section=\\"icon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute ml-3 mt-2 left-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" style=\\"margin-left: 4.55rem !important;\\" data-pd-ripple=\\"true\\"><span class=\\"p-button-icon pi pi-arrow-left\\" data-pc-section=\\"icon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute mr-3 mt-2 right-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" data-pd-ripple=\\"true\\"><span data-pc-section=\\"icon\\" class=\\"p-button-icon pi pi-moon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<div data-v-cbf9ab53=\\"\\" class=\\"card\\">
+  <h1 data-v-cbf9ab53=\\"\\" class=\\"text-center font-bold\\"><u data-v-cbf9ab53=\\"\\">📖 TPs Catalogue</u></h1>
+  <div data-v-cbf9ab53=\\"\\" class=\\"flex flex-column m-5\\">
+    <div data-v-cbf9ab53=\\"\\" class=\\"p-progress-spinner text-center\\" role=\\"progressbar\\" data-pc-name=\\"progressspinner\\" data-pc-section=\\"root\\"><svg class=\\"p-progress-spinner-svg\\" viewBox=\\"25 25 50 50\\" style=\\"animation-duration: 2s;\\" data-pc-section=\\"spinner\\">
+        <circle class=\\"p-progress-spinner-circle\\" cx=\\"50\\" cy=\\"50\\" r=\\"20\\" fill=\\"none\\" stroke-width=\\"4\\" strokeMiterlimit=\\"10\\" data-pc-section=\\"circle\\"></circle>
+      </svg></div>
+    <h3 data-v-cbf9ab53=\\"\\" class=\\"text-center\\">Loading...</h3>
+  </div>
+  <div data-v-cbf9ab53=\\"\\" style=\\"display: grid; grid-auto-flow: column; gap: 1rem;\\"><button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component\\" type=\\"button\\" aria-label=\\"🏠 Home\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pd-ripple=\\"true\\">
+      <!----><span class=\\"p-button-label\\" data-pc-section=\\"label\\">🏠 Home</span>
+      <!---->
+    </button><button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component\\" type=\\"button\\" aria-label=\\"🔙 Back\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pd-ripple=\\"true\\">
+      <!----><span class=\\"p-button-label\\" data-pc-section=\\"label\\">🔙 Back</span>
+      <!---->
+    </button></div>
+</div>"
+`;
+
+exports[`AppTheme store > matches snapshot in light mode 1`] = `
+"<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute ml-3 mt-2 left-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" data-pd-ripple=\\"true\\"><span class=\\"p-button-icon pi pi-home\\" data-pc-section=\\"icon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute ml-3 mt-2 left-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" style=\\"margin-left: 4.55rem !important;\\" data-pd-ripple=\\"true\\"><span class=\\"p-button-icon pi pi-arrow-left\\" data-pc-section=\\"icon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component p-button-icon-only p-button-secondary absolute mr-3 mt-2 right-0 top-0\\" type=\\"button\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pc-severity=\\"secondary\\" data-pd-ripple=\\"true\\"><span class=\\"p-button-icon pi pi-sun\\" data-pc-section=\\"icon\\"></span><span class=\\"p-button-label\\" data-pc-section=\\"label\\"> </span>
+  <!---->
+</button>
+<div data-v-cbf9ab53=\\"\\" class=\\"card\\">
+  <h1 data-v-cbf9ab53=\\"\\" class=\\"text-center font-bold\\"><u data-v-cbf9ab53=\\"\\">📖 TPs Catalogue</u></h1>
+  <div data-v-cbf9ab53=\\"\\" class=\\"flex flex-column m-5\\">
+    <div data-v-cbf9ab53=\\"\\" class=\\"p-progress-spinner text-center\\" role=\\"progressbar\\" data-pc-name=\\"progressspinner\\" data-pc-section=\\"root\\"><svg class=\\"p-progress-spinner-svg\\" viewBox=\\"25 25 50 50\\" style=\\"animation-duration: 2s;\\" data-pc-section=\\"spinner\\">
+        <circle class=\\"p-progress-spinner-circle\\" cx=\\"50\\" cy=\\"50\\" r=\\"20\\" fill=\\"none\\" stroke-width=\\"4\\" strokeMiterlimit=\\"10\\" data-pc-section=\\"circle\\"></circle>
+      </svg></div>
+    <h3 data-v-cbf9ab53=\\"\\" class=\\"text-center\\">Loading...</h3>
+  </div>
+  <div data-v-cbf9ab53=\\"\\" style=\\"display: grid; grid-auto-flow: column; gap: 1rem;\\"><button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component\\" type=\\"button\\" aria-label=\\"🏠 Home\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pd-ripple=\\"true\\">
+      <!----><span class=\\"p-button-label\\" data-pc-section=\\"label\\">🏠 Home</span>
+      <!---->
+    </button><button data-v-cbf9ab53=\\"\\" class=\\"p-button p-component\\" type=\\"button\\" aria-label=\\"🔙 Back\\" data-pc-name=\\"button\\" data-pc-section=\\"root\\" data-pd-ripple=\\"true\\">
+      <!----><span class=\\"p-button-label\\" data-pc-section=\\"label\\">🔙 Back</span>
+      <!---->
+    </button></div>
+</div>"
+`;

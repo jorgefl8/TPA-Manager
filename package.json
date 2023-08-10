@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
+    "test": "vitest --dom",
+    "updateSnapshots": "vitest -u",
+    "cypress:open": "cypress open",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -20,7 +23,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.1.2",
+    "@vue/test-utils": "^2.4.1",
+    "cypress": "^12.17.3",
+    "happy-dom": "^10.9.0",
     "sass": "^1.62.1",
-    "vite": "^3.1.8"
+    "vite": "^3.1.8",
+    "vitest": "^0.34.1"
   }
 }

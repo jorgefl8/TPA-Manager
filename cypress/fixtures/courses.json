@@ -1,0 +1,41 @@
+{
+  "code": 200,
+  "message": "Scope returned",
+  "scope": [
+      {
+          "classId": "test-course",
+          "identities": [],
+          "credentials": [],
+          "projects": [
+              {
+                  "name": "Test project without TPA",
+                  "owner": "TPA Manager",
+                  "teamId": "Test team",
+                  "projectId": "test-project-without-tpa",
+                  "notifications": {},
+                  "credentials": [],
+                  "identities": [
+                      {
+                        "source": "github"
+                      }
+                  ],
+                  "members": []
+              },
+              {
+                "name": "Test project with TPA",
+                "owner": "TPA Manager",
+                "teamId": "Test team",
+                "projectId": "test-project-with-tpa",
+                "notifications": {},
+                "credentials": [],
+                "identities": [
+                    {
+                      "source": "github"
+                    }
+                ],
+                "members": []
+            }
+          ]
+      }
+  ]
+}

@@ -152,5 +152,3 @@ function handleCardTransition() {
   gap: 1rem !important;
 }
 </style>
-
-<!-- Cambiar todo de localhost a variable de entorno para permitir subir la app a producción -->
