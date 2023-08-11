@@ -101,7 +101,7 @@ function getSelectedModeFromUrl() {
 }
 
 function getCourses() {
-  axios.get("http://localhost:5700/api/v1/scopes/development/courses")
+  axios.get(process.env.SCOPE_MANAGER_URL + "/api/v1/scopes/development/courses")
     .then(async (response) => {
       
       courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
@@ -132,7 +132,7 @@ function getAgreement() {
   if (!selectedCourse.value && !props.isDialog) isCourseInvalid.value = true;
   else if (!selectedProject.value && !props.isDialog) isProjectInvalid.value = true;
   else {
-    axios.get(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
+    axios.get(`${process.env.REGISTRY_URL}/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
     .then(response => {
       agreement.value = response.data;
       tpaEditionStore.setInitialTpaData(agreement.value);
@@ -147,7 +147,7 @@ function getAgreement() {
 }
 
 async function getProjectsWithTpas() {
-  await axios.get("http://localhost:5400/api/v6/agreements")
+  await axios.get(process.env.REGISTRY_URL + "/api/v6/agreements")
     .then(response => {
 
       // Projects from the selected course that have a TPA
@@ -203,11 +203,11 @@ async function createTpa() {
   let tpaTemplate = null;
 
   try {
-    tpaTemplate = await axios.get(`http://localhost:5200/api/v1/public/renders/tpa/${selectedCourse.value.classId}.json`)
+    tpaTemplate = await axios.get(`${process.env.ASSETS_MANAGER_URL}/api/v1/public/renders/tpa/${selectedCourse.value.classId}.json`)
   } catch (error) {
     if (error.response.status === 404) {
       console.log(`There is no "public/renders/tpa/${selectedCourse.value.classId}.json" file in the assets manager. Using the default template instead...`)
-      tpaTemplate = await axios.get(`http://localhost:5200/api/v1/public/renders/tpa/template.json`).catch(error => {
+      tpaTemplate = await axios.get(`${process.env.ASSETS_MANAGER_URL}/api/v1/public/renders/tpa/template.json`).catch(error => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'TPA could not be created.', life: 3000 });
       });
     } else {
@@ -217,7 +217,7 @@ async function createTpa() {
 
   const tpa = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/1010101010/g, selectedProject.value.projectId).replace(/2020202020/g, selectedCourse.value.classId));
 
-  await axios.post("http://localhost:5400/api/v6/agreements", tpa)
+  await axios.post(process.env.REGISTRY_URL + "/api/v6/agreements", tpa)
 
   if (switchToEditionAfterCreation.value) {
     router.push({ name: 'edition', params: { courseId: selectedCourse.value.classId, projectId: selectedProject.value.projectId } });
@@ -234,7 +234,7 @@ async function deleteSelectedTpa() {
   if (isSelectionInvalid()) return;
   
   try {
-    await axios.delete(`http://localhost:5400/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
+    await axios.delete(`${process.env.REGISTRY_URL}/api/v6/agreements/tpa-${selectedProject.value.projectId}`)
     toast.add({ severity: 'success', summary: 'Confirmed', detail: 'TPA deleted!', life: 3000 });
     projectsWithTpas.value = projectsWithTpas.value.filter(project => project.projectId !== selectedProject.value.projectId);
     projectsWithoutTpas.value.push({ projectId: selectedProject.value.projectId })
@@ -259,7 +259,7 @@ function navigateToTpaView() {
   };
 
   router.push({ name: props.mode, params: routeParams });
-  // If already in the URL, reload the page to update the view
+  // If already in the URL, update the agreement info
   getAgreement();
 }
 
@@ -356,7 +356,7 @@ function updateLocalStorageEnvironment() {
           </template>
         </Dropdown>
         
-        <ToggleButton v-if="!mode === 'edition'" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" />
+        <ToggleButton v-if="mode === 'edition'" id="selectEnvironmentButton" v-model="tpaEditionStore.isProductionEnvironment" onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud" offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" />
       </div>
       
       <Divider layout="vertical"/>
@@ -388,7 +388,7 @@ function updateLocalStorageEnvironment() {
 
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
-        <a :href="'http://localhost:5400/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
+        <a :href="'process.env.REGISTRY_URL' + '/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
           <Button title="View TPA in JSON" icon="pi pi-eye" severity="secondary" />
         </a>
         <Button title="Toggle theme" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" style="grid-area: toggleTheme;" />

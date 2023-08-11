@@ -6,6 +6,7 @@ const PrimeVue = usePrimeVue();
 
 onMounted(() => {
   const appTheme = localStorage.getItem("appTheme");
+  
   if (appTheme === 'Dark') {
     PrimeVue.changeTheme('lara-light-blue', 'arya-blue', 'theme-link', () => {});
   } else {
@@ -17,7 +18,8 @@ onMounted(() => {
 <template>
   <main>
     <div class="wrapper">
-      <RouterView />
+      <!-- This key prevents the TpaDetails component from re-rendering when the user switches the mode for the same course and project -->
+      <RouterView :key="`${$route.params.courseId} ${$route.params.projectId}`" />
     </div>
   </main>
 </template>
@@ -29,14 +31,9 @@ onMounted(() => {
 main {
   margin: 0;
   padding: 0;
-  /* height: 100vh; */
-  /* display:flex; */
-  /* align-items:center; */
-  /* justify-content:center; */
 }
 
 .wrapper {
   padding: 1rem 2rem 0rem 2rem;
 }
-
 </style>

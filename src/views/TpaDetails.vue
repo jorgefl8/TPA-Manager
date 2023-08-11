@@ -8,7 +8,7 @@ import Scope from '../components/Scope.vue';
 import Dashboard from '../components/Dashboard.vue';
 import Guarantees from '../components/Guarantees.vue';
 import Metrics from '../components/Metrics.vue';
-import SelectTPA from '../components/SelectTPA.vue';
+import SelectTpa from '../components/SelectTpa.vue';
 
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
@@ -34,29 +34,21 @@ const agreement = computed(() => {
   return null;
 });
 
+function handlePageUnload(event) {
+  if (!discardButtonClicked.value && originalTpa.value && modifiedTpa.value && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
+    // Web apps cannot prevent the user from leaving the page.
+    // All we can do is warn them to save their work if they want to.
+    // Also, the browser will show a generic message, so we can't customize it.
+  }
+};
+
 // Attach the event listener when the component is mounted
-window.addEventListener('beforeunload', handlePageReload);
+window.addEventListener('beforeunload', handlePageUnload);
 
 onBeforeUnmount(() => {
-  handlePageLeave();
-  window.removeEventListener('beforeunload', handlePageReload);
+  window.removeEventListener('beforeunload', handlePageUnload);
 });
-
-function handlePageReload(event) {
-  if (!discardButtonClicked && originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
-    event.preventDefault();
-    event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
-  }
-};
-
-function handlePageLeave() {
-  if (originalTpa && modifiedTpa && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
-    if (confirm("There are unsaved changes. Do you want to save them before you leave?")) {
-      // Web apps cannot prevent the user from leaving the page, so all we can do is save the changes if the user wants to
-      console.log("TODO: save changes")
-    }
-  }
-};
 
 function toggleExpandedDashboardBlocks() {
   expandedDashboardBlocks.value ? dashboardBlocks.value.expandAll() : dashboardBlocks.value.collapseAll();
@@ -98,7 +90,7 @@ function handleCardTransition() {
 
 <template>
   <div class="grid">
-    <SelectTPA ref="selectTpa" :isDialog="false" :mode="currentMode" @collapseAllClick="collapseAll" @expandAllClick="expandAll" @tpaChange="handleCardTransition" />
+    <SelectTpa ref="selectTpa" :isDialog="false" :mode="currentMode" @collapseAllClick="collapseAll" @expandAllClick="expandAll" @tpaChange="handleCardTransition" />
 
     <Transition name="slide-fade">
       <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement && !transitionInProgress">

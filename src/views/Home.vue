@@ -5,7 +5,7 @@ import { useAppThemeStore } from '@/stores/appTheme';
 import Button from 'primevue/button'
 import Divider from 'primevue/divider';
 
-import SelectTPA from '../components/SelectTPA.vue';
+import SelectTpa from '../components/SelectTpa.vue';
 
 const appThemeStore = useAppThemeStore();
 
@@ -82,7 +82,7 @@ onDeactivated(() => {
                     </div>
                 </div>
 
-                <SelectTPA ref="selectTpaDialog" :isDialog="true" :mode="selectTpaMode" />
+                <SelectTpa ref="selectTpaDialog" :isDialog="true" :mode="selectTpaMode" />
                 
                 <p><a href="https://github.com/governify" target="_blank">Governify</a> also provides a <a href="https://github.com/governify/governify-examples/tree/master/metrics" target="_blank">catalogue of TPs</a>
                     and <a href="https://github.com/governify/governify-examples/tree/master/TPAs" target="_blank">TPAs</a> that can be used for reference as a starting point.

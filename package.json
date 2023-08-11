@@ -1,11 +1,12 @@
 {
-  "name": "primevue-quickstart-create-vue",
+  "name": "tpa-manager",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "test": "vitest --dom",
     "updateSnapshots": "vitest -u",
     "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
     "build": "vite build",
     "preview": "vite preview"
   },

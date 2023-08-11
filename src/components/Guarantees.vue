@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
 import EditContent from './EditContent.vue';
@@ -19,7 +18,6 @@ const props = defineProps({
   }
 });
 
-const router = useRouter();
 const tpaEditionStore = useTpaEditionStore();
 
 const WINDOW_PERIOD_OPTIONS = [
@@ -32,7 +30,6 @@ const WINDOW_PERIOD_OPTIONS = [
   { label: 'Annually', value: 'annually'}
 ]
 
-const isEditionMode = computed(() => router.currentRoute.value.name === 'edition');
 const guarantees = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const isGuaranteeByMember = ref(guarantees.value.map((value) => value.scope?.member));
 const collapsed = ref(new Array(guarantees.value.length).fill(true));
@@ -113,7 +110,7 @@ function updateGuaranteeMember(index) {
       <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
         
         <div class="flex flex-column align-items-start gap-3">
-          <span v-if="isEditionMode" class="flex align-items-center gap-2">
+          <span v-if="tpaEditionStore.isEditionMode" class="flex align-items-center gap-2">
             <i class="pi pi-file-edit"></i>
             <span class="font-semibold">Id:</span>
             <EditContent :fieldName="fieldName + '[' + slotProps.index + ']' + '.id'" />
@@ -122,45 +119,45 @@ function updateGuaranteeMember(index) {
           <span class="flex align-items-center gap-2">
             <i class="pi pi-file-edit"></i>
             <span class="font-semibold">Notes:</span>
-            <EditContent v-if="isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.notes'" />
+            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.notes'" />
             <span v-else>{{ slotProps.data.notes }}</span>
           </span>
 
           <span class="flex align-items-center gap-2">
             <i class="pi pi-align-left"></i>
             <span class="font-semibold">Description:</span>
-            <EditContent v-if="isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.description'" />
+            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.description'" />
             <span v-else>{{ slotProps.data.description }}</span>
           </span>
 
           <span class="flex align-items-center gap-2">
             <i class="pi pi-users"></i>
             <span class="font-semibold">Is guarantee by member?</span>
-            <Checkbox v-model="isGuaranteeByMember[slotProps.index]" :disabled="!isEditionMode" :readonly="!isEditionMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
+            <Checkbox v-model="isGuaranteeByMember[slotProps.index]" :disabled="!tpaEditionStore.isEditionMode" :readonly="!tpaEditionStore.isEditionMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
           </span>
 
           <span class="flex align-items-center gap-2">
             <i class="pi pi-clock"></i>
             <span class="font-semibold">Calculation period:</span>
-            <Dropdown v-if="isEditionMode" class="editDropdown" :options="WINDOW_PERIOD_OPTIONS" v-model="slotProps.data.of[0].window.period" optionLabel="label" optionValue="value" placeholder="Select a window period" />
+            <Dropdown v-if="tpaEditionStore.isEditionMode" class="editDropdown" :options="WINDOW_PERIOD_OPTIONS" v-model="slotProps.data.of[0].window.period" optionLabel="label" optionValue="value" placeholder="Select a window period" />
             <Tag v-else :value="slotProps.data.of[0].window.period"></Tag>
           </span>
 
           <span class="flex align-items-center gap-2">
             <i class="pi pi-check-circle"></i>
             <span class="font-semibold">Objective:</span>
-            <EditContent v-if="isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.of[0].objective'" />
+            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.of[0].objective'" />
             <Tag v-else :value="slotProps.data.of[0].objective"></Tag>
           </span>
 
         </div>
         
-        <Button v-if="isEditionMode" class="mt-2" icon="pi pi-trash" severity="danger" @click="deleteGuarantee(slotProps.index)" />
+        <Button v-if="tpaEditionStore.isEditionMode" class="mt-2" icon="pi pi-trash" severity="danger" @click="deleteGuarantee(slotProps.index)" />
         
       </Fieldset>
     </template>
     
-    <template #footer v-if="isEditionMode">
+    <template #footer v-if="tpaEditionStore.isEditionMode">
       <Button label="Add new guarantee" icon="pi pi-plus" @click="addNewGuarantee" />
     </template>
   </DataView>

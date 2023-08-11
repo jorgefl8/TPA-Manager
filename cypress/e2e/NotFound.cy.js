@@ -1,7 +1,7 @@
 describe('Not Found Component', () => {
 
     it('should input a non-existent URL and see the Not Found component', () => {
-        cy.visit('http://localhost:5173/non-existent-url');
+        cy.visit(Cypress.env('BASE_URL') + '/non-existent-url');
 
         const notFoundComponent = cy.get('body');
         notFoundComponent.should('exist');
@@ -14,7 +14,7 @@ describe('Not Found Component', () => {
     });
 
     it('should click on the Home button and see the Home component', () => {
-        cy.visit('http://localhost:5173/non-existent-url');
+        cy.visit(Cypress.env('BASE_URL') + '/non-existent-url');
 
         const notFoundComponent = cy.get('body');
 
@@ -22,15 +22,15 @@ describe('Not Found Component', () => {
         notFoundButton.should('have.text', 'Home');
 
         notFoundButton.click();
-        cy.url().should('eq', 'http://localhost:5173/');
+        cy.url().should('eq', Cypress.env('BASE_URL') + '/');
 
         const homePageTitle = cy.get('h1');
         homePageTitle.should('have.text', 'Welcome to the TPA Manager! ');
     });
 
     it('should click on the Back button and see the previous page', () => {
-        cy.visit('http://localhost:5173/catalogue');
-        cy.visit('http://localhost:5173/non-existent-url');
+        cy.visit(Cypress.env('BASE_URL') + '/catalogue');
+        cy.visit(Cypress.env('BASE_URL') + '/non-existent-url');
 
         const notFoundComponent = cy.get('body');
 
@@ -38,7 +38,7 @@ describe('Not Found Component', () => {
         notFoundButton.should('have.text', 'Back');
 
         notFoundButton.click();
-        cy.url().should('eq', 'http://localhost:5173/catalogue');
+        cy.url().should('eq', Cypress.env('BASE_URL') + '/catalogue');
 
         const homePageTitle = cy.get('h1');
         homePageTitle.should('have.text', '📖 TPs Catalogue');
