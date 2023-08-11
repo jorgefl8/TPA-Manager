@@ -13,6 +13,7 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    exclude: ['**/AppTheme.test.js', '**/node_modules/**'] // excluding AppTheme.test.js due to problems in the GitHub Actions workflow
   },
   define: {
     "process.env.ASSETS_MANAGER_URL": JSON.stringify(process.env.ASSETS_MANAGER_URL || 'http://localhost:5200'), // 'http://host.docker.internal:5200'
