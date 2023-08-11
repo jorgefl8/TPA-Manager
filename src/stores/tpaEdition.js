@@ -8,6 +8,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
   const modifiedTpa = ref(null)
   const discardButtonClicked = ref(false)
+  const REGISTRY_URL = process.env.REGISTRY_URL || 'http://localhost:5400'
   const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true' ?? false)
 
   const ASSETS_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200"
@@ -77,8 +78,8 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
       }
       
       // Delete and create the TPA to update it
-      await axios.delete(`${process.env.REGISTRY_URL}/api/v6/agreements/${originalTpa.value.id}`).catch(error => console.log("Error deleting agreement: ", error))
-      await axios.post(`${process.env.REGISTRY_URL}/api/v6/agreements`, modifiedTpa.value).catch(error => console.log("Error creating agreement: ", error))
+      await axios.delete(`${REGISTRY_URL}/api/v6/agreements/${originalTpa.value.id}`).catch(error => console.log("Error deleting agreement: ", error))
+      await axios.post(`${REGISTRY_URL}/api/v6/agreements`, modifiedTpa.value).catch(error => console.log("Error creating agreement: ", error))
       
       if (areIdsModified) {
         this.router.push({ name: 'edition', params: { courseId: modifiedTpa.value.context.definitions.scopes.development.class.default, projectId: modifiedTpa.value.context.definitions.scopes.development.project.default } })

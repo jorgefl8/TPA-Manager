@@ -1,6 +1,9 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { useTpaEditionStore } from "@/stores/tpaEdition";
 import { useRoute } from 'vue-router'
+import axios from 'axios'
+
+vi.mock('axios')
 
 describe("TpaEdition store", () => {
     let store;
@@ -24,6 +27,8 @@ describe("TpaEdition store", () => {
     test("should save TPA changes", async () => {
         store.modifiedTpa.context.definitions.scopes.development.project.default = "new-project-id";
         store.modifiedTpa.context.definitions.scopes.development.class.default = "new-course-id";
+        axios.delete.mockResolvedValue();
+        axios.post.mockResolvedValue();
         await store.saveTpaChanges();
         expect(store.modifiedTpa.context.definitions.scopes.development.project.default).toBe("new-project-id");
         expect(store.modifiedTpa.context.definitions.scopes.development.class.default).toBe("new-course-id");
