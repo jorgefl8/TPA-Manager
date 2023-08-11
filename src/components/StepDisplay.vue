@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { deepFindKeyword } from '../utils/utils';
+import { deepFindKeyword } from '@/utils/utils';
 
 import Tag from 'primevue/tag';
 import Fieldset from 'primevue/fieldset';

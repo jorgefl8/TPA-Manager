@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
-import { parseJsonEditorContent } from '../utils/utils';
+import { parseJsonEditorContent } from '@/utils/utils';
 
 import StepDisplay from './StepDisplay.vue';
 

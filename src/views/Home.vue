@@ -5,7 +5,7 @@ import { useAppThemeStore } from '@/stores/appTheme';
 import Button from 'primevue/button'
 import Divider from 'primevue/divider';
 
-import SelectTpa from '../components/SelectTpa.vue';
+import SelectTpa from '@/components/SelectTpa.vue';
 
 const appThemeStore = useAppThemeStore();
 

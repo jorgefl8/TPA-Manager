@@ -1,7 +1,7 @@
 <script setup>
 import _ from 'lodash';
 import { ref, watch } from 'vue';
-import { deepFindKeyword, parseJsonEditorContent } from '../utils/utils';
+import { deepFindKeyword, parseJsonEditorContent } from '@/utils/utils';
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 

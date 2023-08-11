@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router"
-import Home from "../views/Home.vue"
+import Home from "@/views/Home.vue"
 
 const routes = [
     {
@@ -10,22 +10,22 @@ const routes = [
     {
         path: "/visualization/:courseId?/:projectId?",
         name: "visualization",
-        component: () => import("../views/TpaDetails.vue"),
+        component: () => import("@/views/TpaDetails.vue"),
     },
     {
         path: "/edition/:courseId?/:projectId?",
         name: "edition",
-        component: () => import("../views/TpaDetails.vue"),
+        component: () => import("@/views/TpaDetails.vue"),
     },
     {
         path: "/catalogue",
         name: "catalogue",
-        component: () => import("../views/Catalogue.vue"),
+        component: () => import("@/views/Catalogue.vue"),
     },
     {
         path: "/:catchAll(.*)",
         name: "notFound",
-        component: () => import("../views/NotFound.vue"),
+        component: () => import("@/views/NotFound.vue"),
     },
 ]
 

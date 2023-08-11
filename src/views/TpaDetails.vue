@@ -4,11 +4,11 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 
-import Scope from '../components/Scope.vue';
-import Dashboard from '../components/Dashboard.vue';
-import Guarantees from '../components/Guarantees.vue';
-import Metrics from '../components/Metrics.vue';
-import SelectTpa from '../components/SelectTpa.vue';
+import Scope from '@/components/Scope.vue';
+import Dashboard from '@/components/Dashboard.vue';
+import Guarantees from '@/components/Guarantees.vue';
+import Metrics from '@/components/Metrics.vue';
+import SelectTpa from '@/components/SelectTpa.vue';
 
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
