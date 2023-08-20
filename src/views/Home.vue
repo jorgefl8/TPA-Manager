@@ -91,8 +91,8 @@ onDeactivated(() => {
                     <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" severity="secondary" @click="$router.push({ name: 'catalogue' })" />
                 </div>
                 <p>
-                    This tool has been developed following the guidelines of the <a href="https://www.governify.io/reference-guides/iAgree-5_2" target="_blank">iAgree Syntax (version 5.2)</a>.
-                    Also, you can check out the <a href="https://www.governify.io/customization/agreement_modeling" target="_blank">documentation</a> for more info on how TPAs are modeled.
+                    This tool has been developed following the guidelines of the <a href="https://docs.governify.io/about/iAgree" target="_blank">iAgree Syntax (version 5.2)</a>.
+                    Also, you can check out the <a href="https://docs.governify.io/about/iAgree#examples" target="_blank">documentation</a> for more info on how TPAs are modeled.
                 </p>
             </div>
     
