@@ -54,7 +54,8 @@ const isCourseInvalid = ref(false);
 const isProjectInvalid = ref(false);
 const displayDialog = ref(false);
 const selectedMode = ref(getSelectedModeFromUrl());
-const switchToEditionAfterCreation = ref(false)
+const switchToEditionAfterCreation = ref(false);
+const REGISTRY_URL = process.env.REGISTRY_URL || 'http://localhost:5400';
 const modes = ref([
 { label: '🏠 Home', value: MODES.HOME},
 { label: '🔍 Visualization', value: MODES.VISUALIZATION },
@@ -388,7 +389,7 @@ function updateLocalStorageEnvironment() {
 
         <Button title="Collapse all" icon="pi pi-angle-double-up" severity="secondary" @click="$emit('collapseAllClick')" style="grid-area: collapseAll;" />
         <Button title="Expand all" icon="pi pi-angle-double-down" severity="secondary" @click="$emit('expandAllClick')" style="grid-area: expandAll;" />
-        <a :href="'process.env.REGISTRY_URL' + '/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
+        <a :href="REGISTRY_URL + '/api/v6/agreements/tpa-' + selectedProject?.projectId" target="_blank" style="grid-area: viewTpaJson;">
           <Button title="View TPA in JSON" icon="pi pi-eye" severity="secondary" />
         </a>
         <Button title="Toggle theme" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" style="grid-area: toggleTheme;" />
