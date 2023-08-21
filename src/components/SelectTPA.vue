@@ -78,7 +78,7 @@ onMounted(() => {
 });
 
 watch([selectedProject], () => {
-  if (selectedCourse && selectedProject && !props.isDialog) {
+  if (selectedCourse.value && selectedProject.value && !props.isDialog) {
     const routeParams = {};
     routeParams.courseId = selectedCourse.value.classId;
     routeParams.projectId = selectedProject.value?.projectId;
@@ -269,13 +269,6 @@ function clearErrors() {
   isProjectInvalid.value = false;
 }
 
-function clearSelectedProject() {
-  if (selectedCourse) {
-    selectedProject.value = null;
-    agreement.value = null;
-  }
-};
-
 function confirmSaveTpaChanges(event) {
   confirm.require({
     target: event.currentTarget,
@@ -365,7 +358,7 @@ function updateLocalStorageEnvironment() {
       <div class="flex" style="align-items: inherit;">
         <div style="display: grid; gap: 0.25rem; flex: 1 1 auto;">
           <label for="dd-classId">Course</label>
-          <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="clearSelectedProject(); getProjectsWithTpas()" />
+          <Dropdown inputId="dd-classId" :class="[isCourseInvalid && 'p-invalid', 'mr-2'].join(' ')" v-model="selectedCourse" :options="courses" optionLabel="classId" placeholder="Select a course" filter @change="getProjectsWithTpas()" />
           <small class="p-error" v-if="isCourseInvalid">You must select a course.</small>
         </div>
         

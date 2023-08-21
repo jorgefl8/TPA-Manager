@@ -9,7 +9,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const modifiedTpa = ref(null)
   const discardButtonClicked = ref(false)
   const REGISTRY_URL = process.env.REGISTRY_URL || 'http://localhost:5400'
-  const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true' ?? false)
+  const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true')
 
   const ASSETS_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200"
   const SCOPE_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-scope-manager" : "http://host.docker.internal:5700"

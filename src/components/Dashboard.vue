@@ -65,11 +65,10 @@ function refreshLocalStorageInfo() {
     localStorage.setItem("dashboardBlocks", JSON.stringify(currentCache));
     tpaEditionStore.updateTpaField(props.fieldName, {});
   } else {
-    localStorage.getItem("dashboardBlocks") ?? {};
     dashboardBlocksCache.value = JSON.parse(localStorage.getItem("dashboardBlocks") ?? "{}")?.[projectId] || dashboardBlocks.value;
     
     const blocks = dashboardBlocks.value.reduce((acc, value, index) => ({ ...acc, [index]: value }), {});
-    tpaEditionStore.updateTpaField(props.fieldName, {configDashboard: true, blocks});
+    tpaEditionStore.updateTpaField(props.fieldName, { configDashboard: true, blocks });
   }
 }
 
