@@ -25,9 +25,6 @@ onMounted(() => {
 </template>
 
 <style>
-/* @import url('https://fonts.googleapis.com/css?family=Abel'); */
-@import url('https://fonts.googleapis.com/css?family=Didact Gothic');
-
 main {
   margin: 0;
   padding: 0;

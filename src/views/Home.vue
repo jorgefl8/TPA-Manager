@@ -34,7 +34,7 @@ onDeactivated(() => {
 
 <template>
     <div style="display: grid; justify-items: center;">
-        <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" />
+        <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" aria-label="Switch app theme" />
         <div class="card flex flex-column align-items-center md:px-5 lg:px-7 py-5 mb-0">
             <h1 class="flex gap-3 mb-3 align-items-end">Welcome to the TPA Manager!
                 <img v-if="!isMobile" src="/app-logo-250-filled.png" alt="App Logo" width="80" />
