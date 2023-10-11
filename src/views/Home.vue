@@ -36,12 +36,12 @@ onDeactivated(() => {
     <div style="display: grid; justify-items: center;">
         <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" aria-label="Switch app theme" />
         <div class="card flex flex-column align-items-center md:px-5 lg:px-7 py-5 mb-0">
-            <h1 class="flex gap-3 mb-3 align-items-end">Welcome to the TPA Manager!
+            <h1 class="flex gap-3 mb-3 align-items-end">Welcome to the TPA Designer!
                 <img v-if="!isMobile" src="/app-logo-250-filled.png" alt="App Logo" width="80" />
             </h1>
 
             <div>
-                <p style="text-align-last: justify;">This is the TPA Manager, a tool designed to help you manage your Team Practices Agreements!</p>
+                <p style="text-align-last: justify;">This is the TPA Designer, a tool designed to help you manage your Team Practices Agreements!</p>
                 <p>A TPA is a document that describes the practices a team should follow during the development of a project and it is comprised of several elements such as the following:</p>
                 <ul>
                     <li><b>Guarantees:</b> The guarantees that the team will provide to the client.</li>
@@ -50,7 +50,7 @@ onDeactivated(() => {
                     <li><b>Extra information:</b> The extra information that will be used to complement the TPA (context, scopes, infrastructure settings...).</li>
                 </ul>
                 
-                <p>The TPA Manager allows you to create and edit TPAs in a visual way, and then export them to a JSON file that can be used by the <a href="https://www.governify.io/" target="_blank">Governify platform</a>.</p>
+                <p>The TPA Designer allows you to create and edit TPAs in a visual way, and then export them to a JSON file that can be used by the <a href="https://www.governify.io/" target="_blank">Governify platform</a>.</p>
                 <p>To get started, you can opt for one of the following options:</p>
     
                 <div v-if="isMobile" class="mb-3" style="display: grid; grid-template-rows: auto auto auto; grid-template-columns: auto auto; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -86,7 +86,7 @@ onDeactivated(() => {
                 
                 <p><a href="https://github.com/governify" target="_blank">Governify</a> also provides a <a href="https://github.com/governify/governify-examples/tree/master/metrics" target="_blank">catalogue of TPs</a>
                     and <a href="https://github.com/governify/governify-examples/tree/master/TPAs" target="_blank">TPAs</a> that can be used for reference as a starting point.
-                    This catalogue can also be consulted inside the TPA Manager by clicking the button below.</p>
+                    This catalogue can also be consulted inside the TPA Designer by clicking the button below.</p>
                 <div class="flex justify-content-center">
                     <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" severity="secondary" @click="$router.push({ name: 'catalogue' })" />
                 </div>

@@ -96,7 +96,7 @@ function handleCardTransition() {
       <div class="col-12 flex flex-column align-items-center p-0" v-if="agreement && !transitionInProgress">
         <div class="flex flex-column align-items-center w-full">
           <div class="card w-full">
-            <ScrollPanel class="px-2" style="width: 100%; height: 70svh;">
+            <ScrollPanel class="px-2" style="width: 100%; height: 75svh;">
     
               <div>
                 <h2>Scope</h2>
@@ -113,18 +113,18 @@ function handleCardTransition() {
   
               <div>
                 <div class="flex align-items-baseline gap-2">
-                  <h2>Guarantees</h2>
-                  <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
-                </div>
-                <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
-              </div>
-  
-              <div>
-                <div class="flex align-items-baseline gap-2">
                   <h2>Metrics</h2>
                   <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
                 </div>
                 <Metrics ref="metrics" fieldName="terms.metrics" :key="agreement.terms.metrics" />
+              </div>
+
+              <div>
+                <div class="flex align-items-baseline gap-2">
+                  <h2>Guarantees</h2>
+                  <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
+                </div>
+                <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
               </div>
       
               <ScrollTop target="parent" :threshold="600" class="custom-scrolltop" icon="pi pi-angle-up" />

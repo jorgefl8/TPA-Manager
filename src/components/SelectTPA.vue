@@ -305,7 +305,7 @@ function updateLocalStorageEnvironment() {
 
 <template>
   
-  <Toast position="bottom-right" />
+  <Toast position="bottom-right" :baseZIndex="10000" />
   <ConfirmPopup></ConfirmPopup>
   
   <Dialog v-if="isDialog" v-model:visible="displayDialog" header="Select a TPA" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">

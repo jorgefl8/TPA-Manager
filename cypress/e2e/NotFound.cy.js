@@ -25,7 +25,7 @@ describe('Not Found Component', () => {
         cy.url().should('eq', Cypress.env('BASE_URL') + '/');
 
         const homePageTitle = cy.get('h1');
-        homePageTitle.should('have.text', 'Welcome to the TPA Manager! ');
+        homePageTitle.should('have.text', 'Welcome to the TPA Designer! ');
     });
 
     it('should click on the Back button and see the previous page', () => {

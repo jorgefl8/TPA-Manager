@@ -48,6 +48,39 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     'time-graph2-member-notZero',
     'time-graph2-notZero'
   ];
+  
+  const COLLECTOR_EVENT_SOURCES = ["github", "githubCI", "githubGQL", "gitlab", "ghwrapper", "pivotal", "heroku", "travis", "codeclimate", "redmine", "jira"]
+
+  const COLLECTOR_EVENT_ENDPOINTS = {
+    github: ["events", "mergedPR", "closedPR", "openPR", "allPR", "closedPRFiles"],
+    githubCI: ["builds"],
+    githubGQL: ["custom"],
+    gitlab: ["events", "mergedMR", "closedMR", "allMR", "newBranches", "newBranchesAllRepos", "updatedBranches", "branchesUpdateRatioAllRepos", "closedBranches", "closedBranchesAllRepos", "commits", "releases"],
+    ghwrapper: ["events"],
+    pivotal: ["activity", "stories"],
+    heroku: ["releases", "builds"],
+    travis: ["builds_public", "builds_private"],
+    codeclimate: ["coverage"],
+    redmine: ["newIssues", "inProgressIssues30Days", "updatedIssues", "inProgressIssuesByMember", "issuesMovedToInProgress", "inProgressIssuesClosed", "closedIssues", "closedIssues30Days", "closedIssuesOnePoint5Days"],
+    jira: ["newIssues", "updatedIssues"]
+  }
+
+  const STEP_TYPES = [
+    { label: "GraphQL query", value: "queryGetObject" },
+    { label: "Select data by path", value: "objectGetSubObjects" },
+    { label: "Filter data", value: "objectsFilterObjects" },
+    { label: "Execute custom function", value: "runScript" },
+  ]
+
+  const WINDOW_PERIOD_OPTIONS = [
+    { label: 'Hourly', value: 'hourly' },
+    { label: 'Daily', value: 'daily' },
+    { label: 'Weekly', value: 'weekly' },
+    { label: 'Biweekly', value: 'biweekly' },
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Bimonthly', value: 'bimonthly' },
+    { label: 'Annually', value: 'annually'}
+  ]
 
   function setInitialTpaData(tpa) {
     originalTpa.value = _.cloneDeep(tpa)
@@ -107,8 +140,23 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     _.unset(modifiedTpa.value, fieldPath)
   }
 
+  function updateGuaranteeWithNewObjective(withPath, newObjective) {
+    const newWith = {};
+    const tpaMetricsIds = Object.keys(modifiedTpa.value.terms.metrics)
+
+    for (const metric of tpaMetricsIds) {
+
+      // If the metric is in the new objective, add it to the new "with" object
+      if (newObjective.match(new RegExp(`\\b${metric}\\b`, 'g'))) {
+        newWith[metric] = {};
+      }
+    }
+
+    _.set(modifiedTpa.value, withPath, newWith)
+  }
+
   return { 
-    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES,
-    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField
+    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS,
+    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective
   }
 })

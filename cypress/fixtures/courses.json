@@ -9,7 +9,7 @@
           "projects": [
               {
                   "name": "Test project without TPA",
-                  "owner": "TPA Manager",
+                  "owner": "TPA Designer",
                   "teamId": "Test team",
                   "projectId": "test-project-without-tpa",
                   "notifications": {},
@@ -23,7 +23,7 @@
               },
               {
                 "name": "Test project with TPA",
-                "owner": "TPA Manager",
+                "owner": "TPA Designer",
                 "teamId": "Test team",
                 "projectId": "test-project-with-tpa",
                 "notifications": {},

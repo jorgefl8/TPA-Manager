@@ -5,6 +5,7 @@ import { useTpaEditionStore } from '@/stores/tpaEdition';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
+import Textarea from 'primevue/textarea';
 
 const props = defineProps({
   fieldName: {
@@ -27,6 +28,10 @@ function confirmEdit() {
   if (valueAfterEdit.value != valueBeforeEdit.value) {
     tpaEditionStore.updateTpaField(props.fieldName, valueAfterEdit.value);
     valueBeforeEdit.value = valueAfterEdit.value;
+
+    if (props.fieldName.endsWith('objective')) {
+      tpaEditionStore.updateGuaranteeWithNewObjective(props.fieldName.replace("objective", "with"), valueAfterEdit.value);
+    }
   }
     
   displayDialog.value = false;
@@ -36,7 +41,7 @@ function confirmEdit() {
 <template>
   <Button class="editableText" @click="showEditContent()">{{ valueBeforeEdit }}</Button>
   
-  <Dialog v-model:visible="displayDialog" header="Edit value" modal :draggable="false" :closable="false" :dismissable-mask="true" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
+  <Dialog v-model:visible="displayDialog" header="Edit value" modal :draggable="false" :closable="false" :breakpoints="{ '960px': '75svw'}" style="width: 30svw">
     <template #header>
       <h2 class="mb-0 font-bold">Edit value</h2>
     </template>
@@ -48,7 +53,8 @@ function confirmEdit() {
       </div>
       <div>
         <p class="mb-1"><b>New value</b></p>
-        <InputText v-model="valueAfterEdit" class="w-full" autofocus="true" @keyup.enter="confirmEdit"/>
+        <Textarea v-if="props.fieldName.endsWith('notes')" v-model="valueAfterEdit" class="w-full" autofocus="true" />
+        <InputText v-else v-model="valueAfterEdit" class="w-full" autofocus="true" @keyup.enter="confirmEdit"/>
       </div>
     </div>
     

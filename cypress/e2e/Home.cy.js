@@ -9,7 +9,7 @@ beforeEach(() => {
 describe('Basic Home logic', () => {
     it('should see the Home component', () => {
         const homePageTitle = cy.get('h1');
-        homePageTitle.should('have.text', 'Welcome to the TPA Manager! ');
+        homePageTitle.should('have.text', 'Welcome to the TPA Designer! ');
     });
 });
 

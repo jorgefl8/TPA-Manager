@@ -10,6 +10,8 @@ import DataView from 'primevue/dataview';
 import Fieldset from 'primevue/fieldset';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
+import Markdown from 'vue3-markdown-it';
+import Divider from 'primevue/divider';
 
 const props = defineProps({
   fieldName: {
@@ -19,16 +21,6 @@ const props = defineProps({
 });
 
 const tpaEditionStore = useTpaEditionStore();
-
-const WINDOW_PERIOD_OPTIONS = [
-  { label: 'Hourly', value: 'hourly' },
-  { label: 'Daily', value: 'daily' },
-  { label: 'Weekly', value: 'weekly' },
-  { label: 'Biweekly', value: 'biweekly' },
-  { label: 'Monthly', value: 'monthly' },
-  { label: 'Bimonthly', value: 'bimonthly' },
-  { label: 'Annually', value: 'annually'}
-]
 
 const guarantees = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const isGuaranteeByMember = ref(guarantees.value.map((value) => value.scope?.member));
@@ -74,7 +66,7 @@ function addNewGuarantee() {
         // member: "*" // To indicate whether the guarantee is by member or not
       },
       objective: "METRIC_1 / METRIC_2 * 100 >= 75",
-      with: {},
+      with: { METRIC_1: {}, METRIC_2: {} },
       window: {
         type: "static",
         period: null,
@@ -101,6 +93,26 @@ function updateGuaranteeMember(index) {
     tpaEditionStore.deleteTpaField(props.fieldName + "[" + index + "].of[0].scope.member");
   }
 }
+
+// Look for all the metrics in the objective and check if they exist in the terms.metrics section of the agreement
+function objectiveContainsNonExistentMetric(index) {
+  const objective = guarantees.value[index].of[0].objective;
+  const metrics = Object.keys(tpaEditionStore.getTpaField('context.definitions.terms.metrics'));
+  
+  if (objective) {
+    const objectiveMetrics = objective.match(/(?<=\b)[A-Z_]+(?=\b)/g);
+    
+    if (objectiveMetrics) {
+      for (const objectiveMetric of objectiveMetrics) {
+        if (!metrics[objectiveMetric]) {
+          return true;
+        }
+      }
+    }
+  }
+  
+  return false;
+}
 </script>
 
 <template>
@@ -109,47 +121,69 @@ function updateGuaranteeMember(index) {
     <template #list="slotProps">
       <Fieldset :legend="slotProps.data.id" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
         
-        <div class="flex flex-column align-items-start gap-3">
-          <span v-if="tpaEditionStore.isEditionMode" class="flex align-items-center gap-2">
-            <i class="pi pi-file-edit"></i>
-            <span class="font-semibold">Id:</span>
-            <EditContent :fieldName="fieldName + '[' + slotProps.index + ']' + '.id'" />
-          </span>
+        <div style="display: grid; grid-auto-flow: column; grid-template-columns: 1fr auto 1fr;">
+          <div class="flex flex-column align-items-start gap-3">
+            <span v-if="tpaEditionStore.isEditionMode" class="flex align-items-center gap-2">
+              <i class="pi pi-file-edit"></i>
+              <span class="font-semibold">Id:</span>
+              <EditContent :fieldName="fieldName + '[' + slotProps.index + ']' + '.id'" />
+            </span>
+  
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-file-edit"></i>
+              <span class="font-semibold">Notes:</span>
+              <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.notes'" />
+              <span v-else>{{ slotProps.data.notes }}</span>
+            </span>
+  
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-align-left"></i>
+              <span class="font-semibold">Description:</span>
+              <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.description'" />
+              <span v-else>{{ slotProps.data.description }}</span>
+            </span>
+  
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-users"></i>
+              <span class="font-semibold">Is guarantee by member?</span>
+              <Checkbox v-model="isGuaranteeByMember[slotProps.index]" :disabled="!tpaEditionStore.isEditionMode" :readonly="!tpaEditionStore.isEditionMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
+            </span>
+  
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-clock"></i>
+              <span class="font-semibold">Calculation period:</span>
+              <Dropdown v-if="tpaEditionStore.isEditionMode" class="editDropdown" :options="tpaEditionStore.WINDOW_PERIOD_OPTIONS" v-model="slotProps.data.of[0].window.period" optionLabel="label" optionValue="value" placeholder="Select a window period" />
+              <Tag v-else :value="slotProps.data.of[0].window.period"></Tag>
+            </span>
+  
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-check-circle"></i>
+              <span class="font-semibold">Objective:</span>
+              <template v-if="tpaEditionStore.isEditionMode">
+                <EditContent :fieldName="fieldName + '[' + slotProps.index + ']' + '.of[0].objective'" />
+                <i class="pi pi-info-circle" title="The objective must be a mathematical expression using the metrics defined in the 'with' section."></i>
+              </template>
+              <Tag v-else :value="slotProps.data.of[0].objective"></Tag>
+            </span>
 
-          <span class="flex align-items-center gap-2">
-            <i class="pi pi-file-edit"></i>
-            <span class="font-semibold">Notes:</span>
-            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.notes'" />
-            <span v-else>{{ slotProps.data.notes }}</span>
-          </span>
+            <span class="flex align-items-center gap-2">
+              <i class="pi pi-tag"></i>
+              <span class="font-semibold">Metrics being used:</span>
+              <template v-if="Object.keys(slotProps.data.of[0].with).length == 0">
+                <Tag severity="warning" value="There are no metrics being used!" />
+              </template>
+              <template v-else>
+                <Tag v-for="metric in Object.keys(slotProps.data.of[0].with)" :value="metric" />
+              </template>
+            </span>
+          </div>
+          
+          <Divider layout="vertical" />
 
-          <span class="flex align-items-center gap-2">
-            <i class="pi pi-align-left"></i>
-            <span class="font-semibold">Description:</span>
-            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.description'" />
-            <span v-else>{{ slotProps.data.description }}</span>
-          </span>
-
-          <span class="flex align-items-center gap-2">
-            <i class="pi pi-users"></i>
-            <span class="font-semibold">Is guarantee by member?</span>
-            <Checkbox v-model="isGuaranteeByMember[slotProps.index]" :disabled="!tpaEditionStore.isEditionMode" :readonly="!tpaEditionStore.isEditionMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
-          </span>
-
-          <span class="flex align-items-center gap-2">
-            <i class="pi pi-clock"></i>
-            <span class="font-semibold">Calculation period:</span>
-            <Dropdown v-if="tpaEditionStore.isEditionMode" class="editDropdown" :options="WINDOW_PERIOD_OPTIONS" v-model="slotProps.data.of[0].window.period" optionLabel="label" optionValue="value" placeholder="Select a window period" />
-            <Tag v-else :value="slotProps.data.of[0].window.period"></Tag>
-          </span>
-
-          <span class="flex align-items-center gap-2">
-            <i class="pi pi-check-circle"></i>
-            <span class="font-semibold">Objective:</span>
-            <EditContent v-if="tpaEditionStore.isEditionMode" :fieldName="fieldName + '[' + slotProps.index + ']' + '.of[0].objective'" />
-            <Tag v-else :value="slotProps.data.of[0].objective"></Tag>
-          </span>
-
+          <div class="pl-3">
+            <h4 class="mb-2 text-center"><u>Markdown content of the "notes" section</u></h4>
+            <Markdown :source="slotProps.data.notes" />
+          </div>
         </div>
         
         <Button v-if="tpaEditionStore.isEditionMode" class="mt-2" icon="pi pi-trash" severity="danger" @click="deleteGuarantee(slotProps.index)" />

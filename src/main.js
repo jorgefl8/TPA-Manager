@@ -5,6 +5,7 @@ import PrimeVue from 'primevue/config';
 import { createPinia } from 'pinia'
 import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
+import Markdown from 'vue3-markdown-it';
 
 import '@/assets/main.css'
 import '@/assets/styles/layout.scss';
@@ -21,4 +22,5 @@ createApp(App)
     .use(PrimeVue)
     .use(ToastService)
     .use(ConfirmationService)
+    .use(Markdown)
     .mount('#app');
