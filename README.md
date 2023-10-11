@@ -12,6 +12,11 @@ TPA Designer is a web application that allows the user to create and edit Team P
     - [Vite](#vite)
     - [PrimeVue](#primevue)
     - [SimpleCodeEditor](#simplecodeeditor)
+  - [Governify specific configuration](#governify-specific-configuration)
+  - [Contributing](#contributing)
+  - [Authors](#authors)
+  - [License](#license)
+  - [Badges](#badges)
 
 
 ## Project setup
