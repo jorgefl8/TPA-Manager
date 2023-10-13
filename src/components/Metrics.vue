@@ -92,6 +92,8 @@ function addNewMetric() {
     collapsed.value.push(false);
     metrics.value[newMetricLabel] = newMetric;
     metricEntries.value.push([newMetricLabel, newMetric]);
+    metricElements.value.push(JSON.stringify(newMetric.measure.element));
+    metricDetails.value.push("{}");
 }
 
 function updateMetricsFromEntries() {
@@ -126,15 +128,22 @@ function openEditEventDialog(event, metricId) {
     currentEditingMetricId.value = metricId;
     try {
         currentEditingSource.value = Object.keys(event)?.[0];
-        currentEditingEndpoint.value = Object.keys(Object.values(event)?.[0])?.[0];
-        currentEditingFilter.value = Object.values(Object.values(event)?.[0])?.[0];
+
+        if (event && Object.keys(event).length > 0) {
+            currentEditingEndpoint.value = Object.keys(Object.values(event)[0])[0];
+            currentEditingFilter.value = Object.values(Object.values(event)[0])[0];
+        } else {
+            currentEditingEndpoint.value = 'undefined';
+            currentEditingFilter.value = {};
+        }
+
     } catch (error) {
         // Ignoring hence the event is empty
     }
 }
 
 function confirmEventEdit() {
-    // Join the source, endpoint and filter into a single object
+    // Merge the source, endpoint and filter into a single object
     let newEvent = {
         [currentEditingSource.value]: {
             [currentEditingEndpoint.value]: currentEditingFilter.value
@@ -144,19 +153,6 @@ function confirmEventEdit() {
     showEditEventDialog.value = false;
     tpaEditionStore.updateTpaField(props.fieldName + "[" + currentEditingMetricId.value + "].measure.event", newEvent);
 }
-
-// function updateDetails(metric, index) {
-//     const metricName = metric[0];
-//     const eventName = Object.keys(metric[1].measure.event)[0];
-//     const eventProperty = Object.keys(Object.values(metric[1].measure.event)[0])[0];
-
-//     const pathToUpdate = `${props.fieldName}[${metricName}].measure.event[${eventName}][${eventProperty}]`;
-//     const updatedValue = parseJsonEditorContent(metricDetails.value[index]);
-
-//     console.log("Value before update: ", tpaEditionStore.getTpaField(pathToUpdate));
-//     tpaEditionStore.updateTpaField(pathToUpdate, updatedValue);
-//     console.log("Value after update: ", tpaEditionStore.getTpaField(pathToUpdate));
-// }
 
 function updateEditedDataOnDetailsModes(metricIndex) {
     if (detailsMode.value === true) {

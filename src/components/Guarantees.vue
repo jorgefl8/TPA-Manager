@@ -65,8 +65,8 @@ function addNewGuarantee() {
         project: tpaEditionStore.getTpaField('context.definitions.scopes.development.project.default')
         // member: "*" // To indicate whether the guarantee is by member or not
       },
-      objective: "METRIC_1 / METRIC_2 * 100 >= 75",
-      with: { METRIC_1: {}, METRIC_2: {} },
+      objective: "EXAMPLE_METRIC_1 / EXAMPLE_METRIC_2 * 100 >= 75",
+      with: { },
       window: {
         type: "static",
         period: null,
@@ -92,26 +92,6 @@ function updateGuaranteeMember(index) {
     tpaEditionStore.deleteTpaField(props.fieldName + "[" + index + "].scope.member");
     tpaEditionStore.deleteTpaField(props.fieldName + "[" + index + "].of[0].scope.member");
   }
-}
-
-// Look for all the metrics in the objective and check if they exist in the terms.metrics section of the agreement
-function objectiveContainsNonExistentMetric(index) {
-  const objective = guarantees.value[index].of[0].objective;
-  const metrics = Object.keys(tpaEditionStore.getTpaField('context.definitions.terms.metrics'));
-  
-  if (objective) {
-    const objectiveMetrics = objective.match(/(?<=\b)[A-Z_]+(?=\b)/g);
-    
-    if (objectiveMetrics) {
-      for (const objectiveMetric of objectiveMetrics) {
-        if (!metrics[objectiveMetric]) {
-          return true;
-        }
-      }
-    }
-  }
-  
-  return false;
 }
 </script>
 
@@ -173,7 +153,7 @@ function objectiveContainsNonExistentMetric(index) {
                 <Tag severity="warning" value="There are no metrics being used!" />
               </template>
               <template v-else>
-                <Tag v-for="metric in Object.keys(slotProps.data.of[0].with)" :value="metric" />
+                <Tag v-for="metric in Object.keys(slotProps.data.of[0].with)" :value="metric" :key="slotProps.index" />
               </template>
             </span>
           </div>

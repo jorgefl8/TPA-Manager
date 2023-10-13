@@ -137,7 +137,6 @@ function deleteStep(event, stepNumber) {
 function moveStep(event, stepNumber, direction) {
   event.stopPropagation();
   if (direction === 'up' && stepNumber != 0 || direction === 'down' && stepNumber != Object.keys(props.data.steps).length - 1) {
-    console.log("Moving step " + stepNumber + " " + direction)
     const newStepNumber = direction === 'up' ? parseInt(stepNumber, 10) - 1 : parseInt(stepNumber, 10) + 1;
     const newStep = props.data.steps[newStepNumber];
   
@@ -150,15 +149,13 @@ function moveStep(event, stepNumber, direction) {
     for (let step in variables.value) {
       if (step === stepNumber) {
         newVariables[newStepNumber] = variables.value[step];
-      } else if (step === newStepNumber) {
+      } else if (step == newStepNumber) {
         newVariables[stepNumber] = variables.value[step];
       } else {
         newVariables[step] = variables.value[step];
       }
     }
     variables.value = newVariables;
-
-
   }
 }
 
