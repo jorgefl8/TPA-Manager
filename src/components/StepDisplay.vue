@@ -107,7 +107,8 @@ function checkFilterFormat(e, stepNumber) {
 }
 
 function addNewStep(stepNumber) {
-  props.data.steps[stepNumber] = {
+  const newStepNumber = Object.keys(props.data.steps).length;
+  props.data.steps[newStepNumber] = {
     type: 'queryGetObject',
     query: "query {\n" + "  repository(owner: \"%PROJECT.github.repository%\", name: \"%PROJECT.github.repoOwner%\") {\n" + "    name\n" + "  }\n" + "}",
     cache: false
@@ -299,7 +300,7 @@ function moveStep(event, stepNumber, direction) {
         </li>
       </ul>
     </Fieldset>
-    <Button v-if="tpaEditionStore.isEditionMode" icon="pi pi-plus" class="p-button-rounded p-button-primary" @click="addNewStep(Object.keys(props.data.steps).length)" label="Add new step" />
+    <Button v-if="tpaEditionStore.isEditionMode" icon="pi pi-plus" class="p-button-rounded p-button-primary" @click="addNewStep" label="Add new step" />
   </Fieldset>
 
   <Toast ref="toast" position="bottom-right" :baseZIndex="10000" />

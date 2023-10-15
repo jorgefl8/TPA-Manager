@@ -34,14 +34,17 @@ const metrics = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const collapsed = ref(new Array(Object.keys(metrics.value).length).fill(true));
 const metricEntries = ref(Object.entries(metrics.value));
 const metricElements = ref(metricEntries.value.map(metric => JSON.stringify(metric[1].measure.element, null, 2)));
-const metricDetails = ref(metricEntries.value.map(metric => JSON.stringify(Object.values(Object.values(metric[1].measure.event)[0])[0], null, 2)));
+const metricDetailsObject = ref(metricEntries.value.map(metric => Object.values(Object.values(metric?.[1]?.measure?.event)[0])[0], null, 2));
+const metricDetailsString = ref(metricDetailsObject.value.map(metric => JSON.stringify(metric, null, 2)));
+
 const showSwitchDetailsModeErrorDialog = ref(false);
 const showEditEventDialog = ref(false);
 const currentEditingMetricId = ref();
 const currentEditingSource = ref();
 const currentEditingEndpoint = ref();
 const currentEditingFilter = ref({});
-const detailsMode = ref(false); // true = Interactive; false = Json
+const isInteractiveMode = ref(false);
+const detailsMode = ref(new Array(Object.keys(metrics.value).length).fill(false)); // true = Interactive; false = Json
 
 defineExpose({
     collapseAll,
@@ -71,7 +74,11 @@ function addNewMetric() {
         measure: {
             computing: "actual",
             element: "number",
-            event: {},
+            event: {
+                github: {
+                    events: {}
+                }
+            },
             scope: {
                 project: {
                     name: "Project",
@@ -93,7 +100,9 @@ function addNewMetric() {
     metrics.value[newMetricLabel] = newMetric;
     metricEntries.value.push([newMetricLabel, newMetric]);
     metricElements.value.push(JSON.stringify(newMetric.measure.element));
-    metricDetails.value.push("{}");
+    metricDetailsObject.value.push({});
+    metricDetailsString.value.push("{}");
+    detailsMode.value.push(false);
 }
 
 function updateMetricsFromEntries() {
@@ -126,21 +135,29 @@ function deleteMetric(index) {
 function openEditEventDialog(event, metricId) {
     showEditEventDialog.value = true;
     currentEditingMetricId.value = metricId;
-    try {
-        currentEditingSource.value = Object.keys(event)?.[0];
-
-        if (event && Object.keys(event).length > 0) {
-            currentEditingEndpoint.value = Object.keys(Object.values(event)[0])[0];
-            currentEditingFilter.value = Object.values(Object.values(event)[0])[0];
-        } else {
-            currentEditingEndpoint.value = 'undefined';
-            currentEditingFilter.value = {};
+    
+    if (event && Object.keys(event).length > 0) {
+        try {
+            currentEditingSource.value = Object.keys(event)[0];
+            const firstPropertyValue = Object.values(event)[0];
+            
+            if (firstPropertyValue) {
+                currentEditingEndpoint.value = Object.keys(firstPropertyValue)[0];
+                currentEditingFilter.value = Object.values(firstPropertyValue)[0];
+            } else {
+                currentEditingEndpoint.value = 'undefined';
+                currentEditingFilter.value = {};
+            }
+        } catch (error) {
+            // Handle the error appropriately if there's an issue with accessing properties
         }
-
-    } catch (error) {
-        // Ignoring hence the event is empty
+    } else {
+        // Handle the case where event is null or has no properties
+        currentEditingEndpoint.value = 'undefined';
+        currentEditingFilter.value = {};
     }
 }
+
 
 function confirmEventEdit() {
     // Merge the source, endpoint and filter into a single object
@@ -155,15 +172,18 @@ function confirmEventEdit() {
 }
 
 function updateEditedDataOnDetailsModes(metricIndex) {
-    if (detailsMode.value === true) {
+    if (detailsMode.value[metricIndex] === true) {
         try {
-            metricDetails.value[metricIndex] = JSON.parse(metricDetails.value[metricIndex]);
+            metricDetailsObject.value[metricIndex] = JSON.parse(metricDetailsString.value[metricIndex]);
+            isInteractiveMode.value = true;
         } catch (error) {
             showSwitchDetailsModeErrorDialog.value = true;
-            detailsMode.value = false; // Switch back to Json mode
+            isInteractiveMode.value = false;
+            detailsMode.value[metricIndex] = false; // Switch back to Json mode
         }
     } else {
-        metricDetails.value[metricIndex] = JSON.stringify(metricDetails.value[metricIndex], null, 2);
+        metricDetailsString.value[metricIndex] = JSON.stringify(metricDetailsObject.value[metricIndex], null, 2);
+        isInteractiveMode.value = false;
     }
 }
 
@@ -173,7 +193,7 @@ function updateMetricDetails(metricName, metricEvent, metricIndex) {
     const pathToUpdate = `${props.fieldName}[${metricName}].measure.event[${metricEventName}][${metricEventEndpoint}]`;
 
     try {
-        const updatedValue = JSON.parse(metricDetails.value[metricIndex]);
+        const updatedValue = JSON.parse(metricDetailsString.value[metricIndex]);
         tpaEditionStore.updateTpaField(pathToUpdate, updatedValue);
     } catch (error) {
         toast.add({
@@ -184,7 +204,7 @@ function updateMetricDetails(metricName, metricEvent, metricIndex) {
         });
 
         // Reset the value to the previous one
-        metricDetails.value[metricIndex] = JSON.stringify(tpaEditionStore.getTpaField(pathToUpdate), null, 2);
+        metricDetailsString.value[metricIndex] = JSON.stringify(tpaEditionStore.getTpaField(pathToUpdate), null, 2);
     }
 }
 
@@ -194,7 +214,7 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
     const pathToUpdate = `${props.fieldName}[${metricName}].measure.event[${metricEventName}][${metricEventEndpoint}]`;
 
     try {
-        const updatedValue = JSON.parse(metricDetails.value[metricIndex]);
+        const updatedValue = JSON.parse(metricDetailsString.value[metricIndex]);
         tpaEditionStore.updateTpaField(pathToUpdate, updatedValue);
     } catch (error) {
         toast.add({
@@ -205,7 +225,7 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
         });
 
         // Reset the value to the previous one
-        metricDetails.value[metricIndex] = JSON.stringify(tpaEditionStore.getTpaField(pathToUpdate), null, 2);
+        metricDetailsString.value[metricIndex] = JSON.stringify(tpaEditionStore.getTpaField(pathToUpdate), null, 2);
     }
 }
 
@@ -214,12 +234,13 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
 <template>
     <DataView :value="metricEntries" dataKey="id">
         <template #list="slotProps">
-            
+
             <Fieldset :legend="slotProps.data[0]" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
                 
                 <template #legend>
                     <div class="flex align-items-center gap-2 metric-legend">
                         {{  slotProps.data[0] }}
+                        <Tag v-if="metricEntries.filter(metric => metric[0] === slotProps.data[0]).length > 1" severity="warning" class="pi pi-exclamation-triangle" title="This metric ID is duplicated and only the last one will be persisted!" />
                         <Button v-if="tpaEditionStore.isEditionMode" class="p-button-text" icon="pi pi-trash" severity="danger" @click="deleteMetric(slotProps.index)" />
                     </div>
                 </template>
@@ -272,7 +293,7 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
                             <i class="pi pi-align-left"></i>
                             <template v-if="slotProps.data[1].measure.event.githubGQL">
                                 <b>Details mode:</b>
-                                <ToggleButton v-model="detailsMode" onLabel="Interactive" offLabel="Json" onIcon="pi pi-desktop" offIcon="pi pi-file-edit" @change="updateEditedDataOnDetailsModes(slotProps.index)" />
+                                <ToggleButton v-model="detailsMode[slotProps.index]" onLabel="Interactive" offLabel="Json" onIcon="pi pi-desktop" offIcon="pi pi-file-edit" @change="updateEditedDataOnDetailsModes(slotProps.index)" />
                             </template>
                             <template v-else>
                                 <b>Filters:</b>
@@ -282,19 +303,18 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
                         <div>
                             <template v-if="tpaEditionStore.isEditionMode">
                                 <template v-if="slotProps.data[1].measure.event.githubGQL">
-                                    <StepDisplay v-if="detailsMode" :data="metricDetails[slotProps.index]" :fieldName="props.fieldName + '[' + slotProps.data[0] + ']' + '.measure.event'" />
+                                    <StepDisplay v-if="isInteractiveMode" :data="metricDetailsObject[slotProps.index]" :fieldName="props.fieldName + '[' + slotProps.data[0] + ']' + '.measure.event'" />
                                     <div v-else @focusout="updateMetricDetails(slotProps.data[0], slotProps.data[1].measure.event, slotProps.index)" >
-                                        <CodeEditor width="100%" :wrap="true" v-model="metricDetails[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
+                                        <CodeEditor width="100%" :wrap="true" v-model="metricDetailsString[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
                                     </div>
                                 </template>
                                 <div v-else @focusout="updateMetricFilters(slotProps.data[0], slotProps.data[1].measure.event, slotProps.index)" >
-                                    <CodeEditor width="100%" :wrap="true" v-model="metricDetails[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
+                                    <CodeEditor width="100%" :wrap="true" v-model="metricDetailsString[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
                                 </div>
                             </template>
                             <template v-else>
-                                <StepDisplay v-if="detailsMode" :data="metricDetails[slotProps.index]" />
-                                <CodeEditor v-else width="100%" :wrap="true" v-model="metricDetails[slotProps.index]" :readOnly="true" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
-                                <!-- <pre v-else>{{ slotProps.data[1].measure.event }}</pre> -->
+                                <StepDisplay v-if="isInteractiveMode" :data="metricDetailsObject[slotProps.index]" />
+                                <CodeEditor v-else width="100%" :wrap="true" v-model="metricDetailsString[slotProps.index]" :readOnly="true" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
                             </template>
                         </div>
                     </span>
