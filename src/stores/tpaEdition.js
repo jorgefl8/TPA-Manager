@@ -9,6 +9,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const modifiedTpa = ref(null)
   const discardButtonClicked = ref(false)
   const REGISTRY_URL = process.env.REGISTRY_URL || 'http://localhost:5400'
+  const COLLECTOR_EVENTS_URL = process.env.COLLECTOR_EVENTS_URL || 'http://localhost:5500'
   const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true')
 
   const ASSETS_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200"
@@ -155,8 +156,28 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     _.set(modifiedTpa.value, withPath, newWith)
   }
 
+  function testMetric(metricData, window) {
+    const requestBody = {
+      config: metricData.collector.config,
+      metric: {
+        computing: metricData.measure.computing,
+        element: metricData.measure.element,
+        event: metricData.measure.event,
+        scope: {
+          project: metricData.measure.scope.project.default,
+          class: metricData.measure.scope.class.default
+        },
+        window
+      }
+    }
+
+    return axios.post(`${COLLECTOR_EVENTS_URL}/api/v2/computations`, requestBody)
+  }
+
   return { 
     originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS,
-    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective
+    // COLLECTOR_ELEMENT_TYPES,
+    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective, testMetric,
+    // formatQueryGraphQL, unformatQueryGraphQL
   }
 })

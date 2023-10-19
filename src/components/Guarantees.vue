@@ -93,6 +93,21 @@ function updateGuaranteeMember(index) {
     tpaEditionStore.deleteTpaField(props.fieldName + "[" + index + "].of[0].scope.member");
   }
 }
+
+function scrollToMetric(metric) {
+  const metricElement = document.getElementById(metric);
+  metricElement.scrollIntoView({ behavior: 'smooth' });
+
+  // Aplicar una clase que activa la transición
+  metricElement.classList.add('shadow-effect');
+
+  // Quitar la clase después de que termine la animación
+  setTimeout(() => {
+    metricElement.classList.remove('shadow-effect');
+  }, 2000); // Tiempo total = tiempo de entrada (1s) + tiempo de permanencia (2s) + tiempo de salida (1s)
+}
+
+
 </script>
 
 <template>
@@ -153,7 +168,9 @@ function updateGuaranteeMember(index) {
                 <Tag severity="warning" value="There are no metrics being used!" />
               </template>
               <template v-else>
-                <Tag v-for="metric in Object.keys(slotProps.data.of[0].with)" :value="metric" :key="slotProps.index" />
+                <div v-for="metric in Object.keys(slotProps.data.of[0].with)" @click="scrollToMetric(metric)" class="cursor-pointer">
+                  <Tag :value="metric" :key="slotProps.index" />
+                </div>
               </template>
             </span>
           </div>
@@ -177,3 +194,22 @@ function updateGuaranteeMember(index) {
   </DataView>
   
 </template>
+
+<style>
+@keyframes shadow-animation {
+  0% {
+    box-shadow: 0px 0px 0px 10px rgba(255, 223, 186, 0);
+  }
+  50% {
+    box-shadow: 0px 0px 15px 15px rgba(255, 223, 186, 0.7);
+  }
+  100% {
+    box-shadow: 0px 0px 0px 10px rgba(255, 223, 186, 0);
+  }
+}
+
+.shadow-effect {
+  animation: shadow-animation 2s ease-in-out; /* Duración y efecto de la animación */
+}
+
+</style>

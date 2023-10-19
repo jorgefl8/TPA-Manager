@@ -4,19 +4,17 @@ TPA Designer is a web application that allows the user to create and edit Team P
 
 ## Table of contents
 
-- [TPA Designer](#tpa-designer)
-  - [Table of contents](#table-of-contents)
-  - [Project setup](#project-setup)
-  - [Documentation](#documentation)
-    - [Vue.js 3](#vuejs-3)
-    - [Vite](#vite)
-    - [PrimeVue](#primevue)
-    - [SimpleCodeEditor](#simplecodeeditor)
-  - [Governify specific configuration](#governify-specific-configuration)
-  - [Contributing](#contributing)
-  - [Authors](#authors)
-  - [License](#license)
-  - [Badges](#badges)
+- [Project setup](#project-setup)
+- [Documentation](#documentation)
+  - [Vue.js 3](#vuejs-3)
+  - [Vite](#vite)
+  - [PrimeVue](#primevue)
+  - [SimpleCodeEditor](#simplecodeeditor)
+- [Governify specific configuration](#governify-specific-configuration)
+- [Contributing](#contributing)
+- [Authors](#authors)
+- [License](#license)
+- [Badges](#badges)
 
 
 ## Project setup
@@ -64,15 +62,17 @@ The following table shows the tools that must be deployed and the corresponding 
 | ASSETS_MANAGER_URL | process.env.ASSETS_MANAGER_URL | http://localhost:5200 | https://assets.bluejay.governify.io/ |
 | REGISTRY_URL | process.env.REGISTRY_URL | http://localhost:5400 | https://registry.bluejay.governify.io/ |
 | SCOPE_MANAGER_URL | process.env.SCOPE_MANAGER_URL | http://localhost:5700 | https://scopes.bluejay.governify.io |
+| COLLECTOR_EVENTS_URL | process.env.COLLECTOR_EVENTS_URL | http://localhost:5500 | https://event-collector.bluejay.governify.io/ |
 
 There are two ways to set the environment variables:
 
-1. Create a `.env` file in the root directory of the project and set the variables there. The file should look like this:
+1. Create a `.env` file in the root directory of the project and set the variables there. The file should look like this (the values are just examples):
 
 ```
 ASSETS_MANAGER_URL=https://assets.bluejay.governify.io/
 REGISTRY_URL=https://registry.bluejay.governify.io/
 SCOPE_MANAGER_URL=https://scopes.bluejay.governify.io
+COLLECTOR_EVENTS_URL=https://event-collector.bluejay.governify.io/
 ```
 
 2. Set the environment variables in the server where the TPA Designer is deployed.

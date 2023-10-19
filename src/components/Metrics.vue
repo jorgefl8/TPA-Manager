@@ -8,8 +8,10 @@ import StepDisplay from './StepDisplay.vue';
 
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 import ToggleButton from 'primevue/togglebutton';
+import OverlayPanel from 'primevue/overlaypanel';
 // import JsonEditorVue from 'json-editor-vue'
 import CodeEditor from 'simple-code-editor';
+import Calendar from 'primevue/calendar';
 import InputText from 'primevue/inputtext';
 import DataView from 'primevue/dataview';
 import Fieldset from 'primevue/fieldset';
@@ -38,6 +40,7 @@ const metricDetailsObject = ref(metricEntries.value.map(metric => Object.values(
 const metricDetailsString = ref(metricDetailsObject.value.map(metric => JSON.stringify(metric, null, 2)));
 
 const showSwitchDetailsModeErrorDialog = ref(false);
+const selectWindowOverlayPanel = ref();
 const showEditEventDialog = ref(false);
 const currentEditingMetricId = ref();
 const currentEditingSource = ref();
@@ -45,6 +48,12 @@ const currentEditingEndpoint = ref();
 const currentEditingFilter = ref({});
 const isInteractiveMode = ref(false);
 const detailsMode = ref(new Array(Object.keys(metrics.value).length).fill(false)); // true = Interactive; false = Json
+const windowComputation = ref({
+    period: "weekly",
+    initial: new Date(new Date().getFullYear(), 0, 1),
+    end: new Date(),
+    timeZone: "America/Los_Angeles"
+});
 
 defineExpose({
     collapseAll,
@@ -175,7 +184,7 @@ function updateEditedDataOnDetailsModes(metricIndex) {
     if (detailsMode.value[metricIndex] === true) {
         try {
             metricDetailsObject.value[metricIndex] = JSON.parse(metricDetailsString.value[metricIndex]);
-            isInteractiveMode.value = true;
+            isInteractiveMode.value = true; // Switch to Interactive mode
         } catch (error) {
             showSwitchDetailsModeErrorDialog.value = true;
             isInteractiveMode.value = false;
@@ -229,18 +238,66 @@ function updateMetricFilters(metricName, metricEvent, metricIndex) {
     }
 }
 
+function showSelectWindowPanel(event) {
+    event.stopPropagation();
+    selectWindowOverlayPanel.value.toggle(event);
+}
+
+function computeMetric(metricData) {
+    let windowComputationCopy = Object.assign({}, windowComputation.value);
+    try {
+        windowComputationCopy.initial = new Date(windowComputation.value.initial).toISOString();
+        windowComputationCopy.end = new Date(windowComputation.value.end).toISOString();
+        
+        tpaEditionStore.testMetric(metricData, windowComputationCopy).then((response) => {
+            window.open("http://localhost:5500" + response.data.computation, '_blank');
+        }).catch((error) => {
+            console.log("Error computing the metric: ", error);
+        });
+    } catch (error) {
+        console.log("Error requesting the metric computation: ", error)
+        toast.add({
+            severity: 'error',
+            summary: 'Invalid window computation format',
+            detail: `The "window computation" format is invalid. Please correct it and retry again.`,
+            life: 10000
+        });
+    }
+}
+
 </script>
 
 <template>
     <DataView :value="metricEntries" dataKey="id">
         <template #list="slotProps">
 
-            <Fieldset :legend="slotProps.data[0]" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]">
+            <Fieldset :legend="slotProps.data[0]" :toggleable="true" :collapsed="collapsed[slotProps.index]" class="col-12" @toggle="collapsed[slotProps.index] = !collapsed[slotProps.index]" :id="slotProps.data[0]">
                 
                 <template #legend>
                     <div class="flex align-items-center gap-2 metric-legend">
                         {{  slotProps.data[0] }}
                         <Tag v-if="metricEntries.filter(metric => metric[0] === slotProps.data[0]).length > 1" severity="warning" class="pi pi-exclamation-triangle" title="This metric ID is duplicated and only the last one will be persisted!" />
+                        <Button class="p-button-text" icon="pi pi-play" severity="success" @click="showSelectWindowPanel($event)" />
+
+                        <OverlayPanel ref="selectWindowOverlayPanel">
+                            <div class="flex flex-column gap-4">
+                                <div class="flex gap-3">
+                                    <div class="flex flex-column gap-2">
+                                        <label for="windowPeriod">Period</label>
+                                        <Dropdown class="editDropdown" :options="tpaEditionStore.WINDOW_PERIOD_OPTIONS" v-model="windowComputation.period" optionLabel="label" optionValue="value" placeholder="Select a period" inputId="windowPeriod" />
+                                    </div>
+                                    <div class="flex flex-column gap-2">
+                                        <label for="windowInitial">Initial</label>
+                                        <Calendar v-model="windowComputation.initial" inputId="windowInitial" placeholder="Select an initial date" />
+                                    </div>
+                                    <div class="flex flex-column gap-2">
+                                        <label for="windowEnd">End</label>
+                                        <Calendar v-model="windowComputation.end" inputId="windowEnd" placeholder="Select an end date" />
+                                    </div>
+                                </div>
+                                <Button label="Compute metric" @click="computeMetric(slotProps.data[1])" />
+                            </div>
+                        </OverlayPanel>
                         <Button v-if="tpaEditionStore.isEditionMode" class="p-button-text" icon="pi pi-trash" severity="danger" @click="deleteMetric(slotProps.index)" />
                     </div>
                 </template>
