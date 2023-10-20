@@ -59,7 +59,7 @@ const windowComputation = ref({
 
 onMounted(() => {
     for (let metricEntry of metricEntries.value) {
-        const metricElement = JSON.stringify(metricEntry[1].measure.element, null, 2);
+        const metricElement = JSON.stringify(metricEntry?.[1]?.measure?.element, null, 2);
         
         metricDetailsObject.value.push(Object.values(Object.values(metricEntry?.[1]?.measure?.event)[0])[0]);
         metricDetailsString.value.push(JSON.stringify(Object.values(Object.values(metricEntry?.[1]?.measure?.event)[0])[0], null, 2));
