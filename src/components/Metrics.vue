@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useToast } from "primevue/usetoast";
 import { useAppThemeStore } from '@/stores/appTheme';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
@@ -35,24 +35,50 @@ const tpaEditionStore = useTpaEditionStore();
 const metrics = ref(tpaEditionStore.getTpaField(props.fieldName) ?? {});
 const collapsed = ref(new Array(Object.keys(metrics.value).length).fill(true));
 const metricEntries = ref(Object.entries(metrics.value));
-const metricElements = ref(metricEntries.value.map(metric => JSON.stringify(metric[1].measure.element, null, 2)));
-const metricDetailsObject = ref(metricEntries.value.map(metric => Object.values(Object.values(metric?.[1]?.measure?.event)[0])[0], null, 2));
-const metricDetailsString = ref(metricDetailsObject.value.map(metric => JSON.stringify(metric, null, 2)));
+const metricElements = ref([]);
+const metricDetailsObject = ref([]);
+const metricDetailsString = ref([]);
+const metricElementTypes = ref([]);
+// const metricElements = ref(metricEntries.value.map(metric => JSON.stringify(metric[1].measure.element, null, 2)));
+// const metricDetailsObject = ref(metricEntries.value.map(metric => Object.values(Object.values(metric?.[1]?.measure?.event)[0])[0], null, 2));
+// const metricDetailsString = ref(metricDetailsObject.value.map(metric => JSON.stringify(metric, null, 2)));
 
 const showSwitchDetailsModeErrorDialog = ref(false);
 const selectWindowOverlayPanel = ref();
 const showEditEventDialog = ref(false);
 const currentEditingMetricId = ref();
+const currentEditingMetricIndex = ref();
 const currentEditingSource = ref();
 const currentEditingEndpoint = ref();
 const currentEditingFilter = ref({});
 const isInteractiveMode = ref(false);
+const changingElementType = ref(false);
 const detailsMode = ref(new Array(Object.keys(metrics.value).length).fill(false)); // true = Interactive; false = Json
 const windowComputation = ref({
     period: "weekly",
     initial: new Date(new Date().getFullYear(), 0, 1),
     end: new Date(),
     timeZone: "America/Los_Angeles"
+});
+
+onMounted(() => {
+    for (let metricEntry of metricEntries.value) {
+        const metricElement = JSON.stringify(metricEntry[1].measure.element, null, 2);
+        
+        metricDetailsObject.value.push(Object.values(Object.values(metricEntry?.[1]?.measure?.event)[0])[0]);
+        metricDetailsString.value.push(JSON.stringify(Object.values(Object.values(metricEntry?.[1]?.measure?.event)[0])[0], null, 2));
+        
+        if (metricElement === '"number"') {
+            metricElements.value.push(metricElement);
+            metricElementTypes.value.push('number');
+        } else if (metricElement.includes('githubGQL')) {
+            metricElements.value.push(metricEntry[1].measure.element)
+            metricElementTypes.value.push('githubGQL');
+        } else {
+            metricElements.value.push(metricElement);
+            metricElementTypes.value.push('json');
+        }
+    }
 });
 
 defineExpose({
@@ -69,9 +95,9 @@ function expandAll() {
 }
 
 function addNewMetric() {
-    
-    let newMetricLabel = "DEFAULT_METRIC_NAME_" + (Object.keys(metrics.value).length + 1);
-    let newMetric = {
+    const isNewMetricIdDuplicated = metricEntries.value.find(metricEntry => metricEntry[0] === "DEFAULT_METRIC_NAME_" + (Object.keys(metrics.value).length + 1));
+    const newMetricLabel = isNewMetricIdDuplicated ? "DEFAULT_METRIC_NAME_" + (Object.keys(metrics.value).length + 1) + "_DUPLICATED" : "DEFAULT_METRIC_NAME_" + (Object.keys(metrics.value).length + 1);
+    const newMetric = {
         collector: {
             infrastructurePath: "internal.collector.events",
             endpoint: "/api/v2/computations",
@@ -109,9 +135,11 @@ function addNewMetric() {
     metrics.value[newMetricLabel] = newMetric;
     metricEntries.value.push([newMetricLabel, newMetric]);
     metricElements.value.push(JSON.stringify(newMetric.measure.element));
+    metricElementTypes.value.push('number');
     metricDetailsObject.value.push({});
     metricDetailsString.value.push("{}");
     detailsMode.value.push(false);
+    updateMetricsFromEntries();
 }
 
 function updateMetricsFromEntries() {
@@ -120,7 +148,8 @@ function updateMetricsFromEntries() {
 
 function updateMetricsFromElement(elementIndex) {
     try {
-        metricEntries.value[elementIndex][1].measure.element = JSON.parse(metricElements.value[elementIndex]);
+        const metricElement = metricElements.value[elementIndex];
+        metricEntries.value[elementIndex][1].measure.element = typeof metricElement === "object" ? metricElement : JSON.parse(metricElement);
         updateMetricsFromEntries();
     } catch (error) {
         toast.add({
@@ -135,15 +164,23 @@ function updateMetricsFromElement(elementIndex) {
     }
 }
 
-function deleteMetric(index) {
+function deleteMetric(event, index) {
+    event.stopPropagation();
     delete metrics.value[Object.keys(metrics.value)[index]];
     metricEntries.value.splice(index, 1);
     collapsed.value.splice(index, 1);
+    metricElements.value.splice(index, 1);
+    metricElementTypes.value.splice(index, 1);
+    metricDetailsObject.value.splice(index, 1);
+    metricDetailsString.value.splice(index, 1);
+    detailsMode.value.splice(index, 1);
+    updateMetricsFromEntries();
 }
 
-function openEditEventDialog(event, metricId) {
+function openEditEventDialog(event, metricId, metricIndex) {
     showEditEventDialog.value = true;
     currentEditingMetricId.value = metricId;
+    currentEditingMetricIndex.value = metricIndex;
     
     if (event && Object.keys(event).length > 0) {
         try {
@@ -169,15 +206,32 @@ function openEditEventDialog(event, metricId) {
 
 
 function confirmEventEdit() {
+    if (currentEditingSource.value === 'githubGQL') {
+        const defaultQuery = "query { repository(owner: \"%PROJECT.github.repository%\", name: \"%PROJECT.github.repoOwner%\") { name } }";
+        currentEditingFilter.value = {
+            type: "GraphQL",
+            title: "Custom GraphQL query",
+            steps: {
+                0: {
+                    type: "queryGetObject",
+                    query: tpaEditionStore.unformatQueryGraphQL(defaultQuery),
+                    cache: false
+                }
+            }
+        };
+    }
     // Merge the source, endpoint and filter into a single object
     let newEvent = {
         [currentEditingSource.value]: {
             [currentEditingEndpoint.value]: currentEditingFilter.value
         }
     };
-    
+
     showEditEventDialog.value = false;
-    tpaEditionStore.updateTpaField(props.fieldName + "[" + currentEditingMetricId.value + "].measure.event", newEvent);
+    metricEntries.value[currentEditingMetricIndex.value][1].measure.event = newEvent;
+    metricDetailsObject.value[currentEditingMetricIndex.value] = currentEditingFilter.value;
+    metricDetailsString.value[currentEditingMetricIndex.value] = JSON.stringify(currentEditingFilter.value, null, 2);
+    updateMetricsFromEntries();
 }
 
 function updateEditedDataOnDetailsModes(metricIndex) {
@@ -191,8 +245,15 @@ function updateEditedDataOnDetailsModes(metricIndex) {
             detailsMode.value[metricIndex] = false; // Switch back to Json mode
         }
     } else {
+        
+        for (let step of Object.values(metricDetailsObject.value[metricIndex].steps)) {
+            if (step.type.includes('query')) {
+                step.query = tpaEditionStore.unformatQueryGraphQL(step.query);
+            }
+        }
+        
         metricDetailsString.value[metricIndex] = JSON.stringify(metricDetailsObject.value[metricIndex], null, 2);
-        isInteractiveMode.value = false;
+        isInteractiveMode.value = false; // Switch to Json mode
     }
 }
 
@@ -265,6 +326,56 @@ function computeMetric(metricData) {
     }
 }
 
+async function changeElementType(metricIndex) {
+    changingElementType.value = true;
+    const currentElementType = metricElementTypes.value[metricIndex];
+    let newElementValue = '"number"';
+
+    if (currentElementType === 'number') {
+        // Do nothing because the default value is already set
+    } else if (currentElementType === 'githubGQL') {
+        try {
+            const defaultQuery = "query { repository(owner: \"%PROJECT.github.repository%\", name: \"%PROJECT.github.repoOwner%\") { name } }";
+            const formattedQuery = await tpaEditionStore.formatQueryGraphQL(defaultQuery);
+        
+            newElementValue = {
+                count: {
+                    related: {
+                        githubGQL: {
+                            custom: {
+                                type: "GraphQL",
+                                title: "Custom GraphQL query",
+                                steps: {
+                                    0: {
+                                        type: "queryGetObject",
+                                        query: formattedQuery,
+                                        cache: false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+        } catch (error) {
+            console.log("Error formatting the default query: ", error);
+        }
+    } else {
+        newElementValue = JSON.stringify({
+            count: {
+                related: {
+                    github: {
+                        events: {}
+                    }
+                }
+            }
+        }, null, 2);
+    }
+
+    metricElements.value[metricIndex] = newElementValue;
+    updateMetricsFromElement(metricIndex);
+    changingElementType.value = false;
+}
 </script>
 
 <template>
@@ -298,7 +409,7 @@ function computeMetric(metricData) {
                                 <Button label="Compute metric" @click="computeMetric(slotProps.data[1])" />
                             </div>
                         </OverlayPanel>
-                        <Button v-if="tpaEditionStore.isEditionMode" class="p-button-text" icon="pi pi-trash" severity="danger" @click="deleteMetric(slotProps.index)" />
+                        <Button v-if="tpaEditionStore.isEditionMode" class="p-button-text" icon="pi pi-trash" severity="danger" @click="deleteMetric($event, slotProps.index)" />
                     </div>
                 </template>
 
@@ -314,21 +425,29 @@ function computeMetric(metricData) {
                         <span class="flex align-items-center gap-2">
                             <i class="pi pi-file"></i>
                             <b>Element:</b>
+                            <Dropdown class="editDropdown w-full" :options="tpaEditionStore.COLLECTOR_ELEMENT_TYPES" v-model="metricElementTypes[slotProps.index]" placeholder="Select an element type" optionLabel="label" optionValue="value"  @change="changeElementType(slotProps.index)" :disabled="!tpaEditionStore.isEditionMode" />
                         </span>
                         <div>
-                            <div v-if="tpaEditionStore.isEditionMode" @focusout="updateMetricsFromElement(slotProps.index)">
-                                <CodeEditor width="100%" :wrap="true" v-model="metricElements[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0]" />
+                            <div v-if="metricElementTypes[slotProps.index] === 'githubGQL' && !changingElementType" @focusout="updateMetricsFromElement(slotProps.index)">
+                                <StepDisplay :data="metricElements[slotProps.index].count.related.githubGQL.custom" :fieldName="props.fieldName + '[' + slotProps.data[0] + ']' + '.measure.element.count.related'" />
                             </div>
-                            <template v-else>
-                                <CodeEditor width="100%" :wrap="true" v-model="metricElements[slotProps.index]" :readOnly="true" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
-                            </template>
+                            <div v-if="tpaEditionStore.isEditionMode" @focusout="updateMetricsFromElement(slotProps.index)">
+                                <template v-if="metricElementTypes[slotProps.index] === 'json' && !changingElementType">
+                                    <CodeEditor width="100%" :wrap="true" v-model="metricElements[slotProps.index]" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0]" />
+                                </template>
+                            </div>
+                            <div v-else>
+                                <template v-if="metricElementTypes[slotProps.index] === 'json' && !changingElementType">
+                                    <CodeEditor width="100%" :wrap="true" v-model="metricElements[slotProps.index]" :readOnly="true" :languages="[['json', 'JSON']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="slotProps.data[0] + slotProps.index" />
+                                </template>
+                            </div>
                         </div>
                     </span>
 
                     <span class="flex flex-wrap align-items-center gap-2">
                         <i class="pi pi-megaphone"></i>
                         <b>Event:</b>
-                        <div @click="openEditEventDialog(slotProps.data[1].measure.event, slotProps.data[0])" class="flex align-items-center gap-2">
+                        <div @click="openEditEventDialog(slotProps.data[1].measure.event, slotProps.data[0], slotProps.index)" class="flex align-items-center gap-2">
                             <Tag v-if="Object.keys(slotProps.data[1].measure.event)?.length === 0" severity="warning">No details</Tag>
                             <div v-else style="cursor: pointer;">
                                 <Tag :class="tpaEditionStore.isEditionMode && 'cursor-pointer'"

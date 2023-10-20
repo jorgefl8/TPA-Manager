@@ -3,6 +3,8 @@ import axios from 'axios'
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { defineStore } from 'pinia'
+import * as prettier from "prettier";
+import prettierPluginGraphql from "https://unpkg.com/prettier@3.0.3/plugins/graphql.mjs";
 
 export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
@@ -49,6 +51,12 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     'time-graph2-member-notZero',
     'time-graph2-notZero'
   ];
+
+  const COLLECTOR_ELEMENT_TYPES = [
+    { label: "Number", value: "number" },
+    { label: "Github GraphQL", value: "githubGQL" },
+    { label: "JSON", value: "json" }
+  ]
   
   const COLLECTOR_EVENT_SOURCES = ["github", "githubCI", "githubGQL", "gitlab", "ghwrapper", "pivotal", "heroku", "travis", "codeclimate", "redmine", "jira"]
 
@@ -156,6 +164,28 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     _.set(modifiedTpa.value, withPath, newWith)
   }
 
+  async function formatQueryGraphQL(query) {
+    try {
+      return await prettier.format(query, {
+        parser: "graphql",
+        plugins: [prettierPluginGraphql],
+      });
+    } catch (error) {
+      console.error('Error formatting the GraphQL query:', error);
+      throw error;
+      // return query; // Return the original query in case of an error
+    }
+  }
+  
+  function unformatQueryGraphQL(query) {
+    try {
+      return query.replace(/\s+/g, ' ').trim();;
+    } catch (error) {
+      console.error('Error unformatting GraphQL query:', error);
+      return query; // Return the original query in case of an error
+    }
+  }
+
   function testMetric(metricData, window) {
     const requestBody = {
       config: metricData.collector.config,
@@ -175,9 +205,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   }
 
   return { 
-    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS,
-    // COLLECTOR_ELEMENT_TYPES,
-    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective, testMetric,
-    // formatQueryGraphQL, unformatQueryGraphQL
+    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS, COLLECTOR_ELEMENT_TYPES,
+    setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective, testMetric, formatQueryGraphQL, unformatQueryGraphQL
   }
 })

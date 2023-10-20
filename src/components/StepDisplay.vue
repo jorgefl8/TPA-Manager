@@ -34,9 +34,24 @@ const toast = useToast();
 const variables = ref({});
 
 onMounted(() => {
-  for (let step in props.data.steps) {
-    if (props.data.steps[step].type === 'runScript') {
-      variables.value[step] = JSON.stringify(props.data.steps[step].variables, null, 2);
+  console.log("Props.data: ", props.data)
+  for (let stepNumber in props.data.steps) {
+    const stepData = props.data.steps[stepNumber];
+
+    if (stepData.type.includes('query')) {
+      tpaEditionStore.formatQueryGraphQL(stepData.query).then(formattedQuery => {
+        props.data.steps[stepNumber].query = formattedQuery;
+      }).catch(error => {
+        toast.add({
+          severity: 'error',
+          summary: 'Invalid query format',
+          detail: `The "query" format at Step ${parseInt(stepNumber, 10) + 1} of the metric "${props.fieldName.split('[')[1].split(']')[0]}" is invalid.
+          Please use a valid GraphQL format.`,
+          life: 10000
+        });
+      });
+    } else if (stepData.type === 'runScript') {
+      variables.value[stepNumber] = JSON.stringify(stepData.variables, null, 2);
     }
   }
 })
@@ -88,6 +103,22 @@ function updateStepVariables(stepNumber) {
   }
 }
 
+async function updateStepQuery(stepNumber, stepQuery) {
+  try {
+    const formattedQuery = await tpaEditionStore.formatQueryGraphQL(stepQuery);
+    props.data.steps[stepNumber].query = formattedQuery;
+    tpaEditionStore.updateTpaField(props.fieldName + '.githubGQL.custom.steps.[' + stepNumber + '].query', formattedQuery);
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Invalid query format',
+      detail: `The "query" format at Step ${parseInt(stepNumber, 10) + 1} of the metric "${props.fieldName.split('[')[1].split(']')[0]}" is invalid.
+      Please use a valid GraphQL format.`,
+      life: 10000
+    });
+  }
+}
+
 function updateStepData(stepNumber, stepKey, stepData) {
   tpaEditionStore.updateTpaField(props.fieldName + '.githubGQL.custom.steps.[' + stepNumber + '][' + stepKey + ']', stepData);
 }
@@ -106,14 +137,15 @@ function checkFilterFormat(e, stepNumber) {
   }
 }
 
-function addNewStep(stepNumber) {
+function addNewStep() {
+  console.log("Props.data: ", props.data)
   const newStepNumber = Object.keys(props.data.steps).length;
   props.data.steps[newStepNumber] = {
     type: 'queryGetObject',
     query: "query {\n" + "  repository(owner: \"%PROJECT.github.repository%\", name: \"%PROJECT.github.repoOwner%\") {\n" + "    name\n" + "  }\n" + "}",
     cache: false
   };
-  tpaEditionStore.updateTpaField(props.fieldName + '.githubGQL.custom.steps[' +  stepNumber + ']', props.data.steps[stepNumber]);
+  tpaEditionStore.updateTpaField(props.fieldName + '.githubGQL.custom.steps[' +  newStepNumber + ']', props.data.steps[newStepNumber]);
 }
 
 function deleteStep(event, stepNumber) {
@@ -159,7 +191,6 @@ function moveStep(event, stepNumber, direction) {
     variables.value = newVariables;
   }
 }
-
 </script>
 
 <template>
@@ -174,7 +205,7 @@ function moveStep(event, stepNumber, direction) {
       <template #legend>
         <div class="flex align-items-center gap-2">
           <span class="p-fieldset-legend-text">
-            Step {{ parseInt(stepNumber, 10) + 1 }} - {{ tpaEditionStore.STEP_TYPES.find(stepType => stepType.value === stepData.type)?.label }}
+            Step {{ parseInt(stepNumber, 10) + 1 }} - {{ tpaEditionStore.STEP_TYPES.find(stepType => stepType.value === stepData?.type)?.label }}
           </span>
   
           <Button v-if="tpaEditionStore.isEditionMode" icon="pi pi-arrow-up" class="p-button-rounded p-button-text" @click="moveStep($event, stepNumber, 'up')" />
@@ -195,7 +226,7 @@ function moveStep(event, stepNumber, direction) {
             <template v-if="props.data.steps[stepNumber].type === 'queryGetObject' || props.data.steps[stepNumber].type === 'queryGetObjects'">
               <div v-if="stepKey === 'query'" class="flex flex-column gap-2">
                 <strong>Query:</strong>
-                <div @focusout="updateStepData(stepNumber, stepKey, stepValue)">
+                <div @focusout="updateStepQuery(stepNumber, stepValue)">
                   <CodeEditor width="100%" :wrap="true" v-model="props.data.steps[stepNumber].query" :languages="[['graphql', 'GraphQL']]" :theme="appThemeStore.isDarkModeOn ? 'github-dark' : 'github'" :key="stepNumber + 'query'"></CodeEditor>
                 </div>
               </div>
