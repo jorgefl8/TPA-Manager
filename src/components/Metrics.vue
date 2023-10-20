@@ -9,7 +9,6 @@ import StepDisplay from './StepDisplay.vue';
 import 'vanilla-jsoneditor/themes/jse-theme-dark.css'
 import ToggleButton from 'primevue/togglebutton';
 import OverlayPanel from 'primevue/overlaypanel';
-// import JsonEditorVue from 'json-editor-vue'
 import CodeEditor from 'simple-code-editor';
 import Calendar from 'primevue/calendar';
 import InputText from 'primevue/inputtext';
@@ -39,9 +38,6 @@ const metricElements = ref([]);
 const metricDetailsObject = ref([]);
 const metricDetailsString = ref([]);
 const metricElementTypes = ref([]);
-// const metricElements = ref(metricEntries.value.map(metric => JSON.stringify(metric[1].measure.element, null, 2)));
-// const metricDetailsObject = ref(metricEntries.value.map(metric => Object.values(Object.values(metric?.[1]?.measure?.event)[0])[0], null, 2));
-// const metricDetailsString = ref(metricDetailsObject.value.map(metric => JSON.stringify(metric, null, 2)));
 
 const showSwitchDetailsModeErrorDialog = ref(false);
 const selectWindowOverlayPanel = ref();
@@ -195,7 +191,6 @@ function openEditEventDialog(event, metricId, metricIndex) {
                 currentEditingFilter.value = {};
             }
         } catch (error) {
-            // Handle the error appropriately if there's an issue with accessing properties
         }
     } else {
         // Handle the case where event is null or has no properties
@@ -220,6 +215,7 @@ function confirmEventEdit() {
             }
         };
     }
+    
     // Merge the source, endpoint and filter into a single object
     let newEvent = {
         [currentEditingSource.value]: {

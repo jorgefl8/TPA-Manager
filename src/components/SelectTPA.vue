@@ -204,10 +204,7 @@ async function createTpa() {
   let tpaTemplate = null;
 
   try {
-    tpaTemplate = await axios.get(`${process.env.ASSETS_MANAGER_URL}/api/v1/public/renders/tpa/${selectedCourse.value.classId}.json`) 
-    // habría que llamar al scopes-manager (http://localhost:5700/api/v1/scopes/development/courses): scope.(objeto tal que objeto.classId = [classId]).templateURL
-    // A esa URL (del Registry) se le haría un GET para obtener el template y eso ya sería tpaTemplate
-
+    tpaTemplate = await axios.get(`${process.env.ASSETS_MANAGER_URL}/api/v1/public/renders/tpa/${selectedCourse.value.classId}.json`)
   } catch (error) {
     if (error.response.status === 404) {
       console.log(`There is no "public/renders/tpa/${selectedCourse.value.classId}.json" file in the assets manager. Using the default template instead...`)
@@ -219,9 +216,6 @@ async function createTpa() {
     }
   }
 
-  // tpa.id = "tpa-" + selectedProject.value.projectId + "1.0.0" si se crea o "vX.Y.Z" incrementando la X si se modifica
-  // tpa.type = "template";
-  // Obligatorios: id, type, context y terms
   const tpa = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/1010101010/g, selectedProject.value.projectId).replace(/2020202020/g, selectedCourse.value.classId));
 
   await axios.post(process.env.REGISTRY_URL + "/api/v6/agreements", tpa)

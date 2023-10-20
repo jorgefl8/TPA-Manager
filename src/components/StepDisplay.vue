@@ -34,7 +34,6 @@ const toast = useToast();
 const variables = ref({});
 
 onMounted(() => {
-  console.log("Props.data: ", props.data)
   for (let stepNumber in props.data.steps) {
     const stepData = props.data.steps[stepNumber];
 
@@ -138,7 +137,6 @@ function checkFilterFormat(e, stepNumber) {
 }
 
 function addNewStep() {
-  console.log("Props.data: ", props.data)
   const newStepNumber = Object.keys(props.data.steps).length;
   props.data.steps[newStepNumber] = {
     type: 'queryGetObject',
