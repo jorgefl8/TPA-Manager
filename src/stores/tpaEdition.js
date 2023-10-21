@@ -4,7 +4,13 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { defineStore } from 'pinia'
 import * as prettier from "prettier";
-import prettierPluginGraphql from "https://unpkg.com/prettier@3.0.3/plugins/graphql.mjs";
+let prettierPluginGraphql;
+
+if (process.env.NODE_ENV !== 'test') {
+  import('https://unpkg.com/prettier@3.0.3/plugins/graphql.mjs').then((module) => {
+    prettierPluginGraphql = module.default;
+  });
+}
 
 export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
