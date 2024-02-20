@@ -31,6 +31,6 @@ main {
 }
 
 .wrapper {
-  padding: 1rem 2rem 0rem 2rem;
+  padding: 0;
 }
 </style>

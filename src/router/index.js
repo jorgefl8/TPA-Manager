@@ -27,6 +27,21 @@ const routes = [
         name: "notFound",
         component: () => import("@/views/NotFound.vue"),
     },
+    {
+        path: "/about",
+        name: "about",
+        component: () => import("@/views/About.vue"),
+    },
+    {
+        path: "/templates-management",
+        name: "templates-management",
+        component: () => import("@/views/TemplatesManagement.vue"),
+    },
+    {
+        path: "/new-class",
+        name: "new-class",
+        component: () => import("@/views/NewClass.vue"),
+    }
 ]
 
 const router = createRouter({

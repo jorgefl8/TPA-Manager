@@ -56,13 +56,12 @@ async function getCatalogueData() {
 </script>
 
 <template>
-  <Button class="absolute ml-3 mt-2 left-0 top-0" icon="pi pi-home" severity="secondary" @click="router.push({ name: 'home' })" aria-label="Home" />
-  <Button class="absolute ml-3 mt-2 left-0 top-0" style="margin-left: 4.55rem !important;" icon="pi pi-arrow-left" severity="secondary" @click="router.go(-1)" aria-label="Back" />
-  <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" severity="secondary" @click="appThemeStore.toggleTheme()" aria-label="Toggle theme" />
+  <Button class="absolute ml-3 mt-2 left-0 top-0" icon="pi pi-home"  @click="router.push({ name: 'home' })" aria-label="Home" outlined/>
+  <Button class="absolute ml-3 mt-2 left-0 top-0" style="margin-left: 4.55rem !important;" icon="pi pi-arrow-left"  @click="router.go(-1)" aria-label="Back" outlined/>
+  <Button class="absolute mr-3 mt-2 right-0 top-0" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')"  @click="appThemeStore.toggleTheme()" aria-label="Toggle theme" outlined/>
   
   <div class="card">
-    <h1 class="text-center font-bold"><u>📖 TPs Catalogue</u></h1>
-    
+    <h1 class="text-center ">📖 TPs Catalogue</h1>
     <div v-if="loading" class="flex flex-column m-5">
       <ProgressSpinner class="text-center" strokeWidth="4" />
         <h3 class="text-center">Loading...</h3>
@@ -93,10 +92,7 @@ async function getCatalogueData() {
       </div>
     </div>
 
-    <div style="display: grid; grid-auto-flow: column; gap: 1rem;">
-        <Button label="🏠 Home" @click="router.push({ name: 'home' })" aria-label="Home" />
-        <Button label="🔙 Back" @click="router.go(-1)" aria-label="Back" />
-    </div>
+    
 
   </div>
 </template>

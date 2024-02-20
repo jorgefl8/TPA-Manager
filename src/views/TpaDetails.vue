@@ -97,7 +97,6 @@ function handleCardTransition() {
         <div class="flex flex-column align-items-center w-full">
           <div class="card w-full">
             <ScrollPanel class="px-2" style="width: 100%; height: 75svh;">
-    
               <div>
                 <h2>Scope</h2>
                 <Scope fieldName="context.definitions.scopes.development" :key="agreement.context.definitions.scopes.development" />
