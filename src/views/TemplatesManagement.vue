@@ -1,185 +1,347 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useAppThemeStore } from '@/stores/appTheme';
-
-import Button from 'primevue/button'
+import { ref, watch, onMounted, onUnmounted } from 'vue';
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+import NavMenu from '@/components/NavMenu.vue';
 import Divider from 'primevue/divider';
-import axios from 'axios'
+import axios from 'axios';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
+import Button from 'primevue/button';
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useConfirm } from 'primevue/useconfirm';
+import { bluejayInfraStore } from '@/stores/bluejayInfra';
+import { useTPAMode } from '@/utils/tpaMode.js';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import { useRouter } from 'vue-router';
 
-const appThemeStore = useAppThemeStore();
-
+const { tpaEditMode } = useTPAMode();
+const router = useRouter();
+const bluejayInfra = bluejayInfraStore();
+const toast = useToast();
+const confirm = useConfirm();
 const templates = ref([]);
-
+const courses = ref([]);
+const authorization = ref();
+const templatesURL = bluejayInfra.REGISTRY_URL + '/api/v6/templates';
+const coursesURL = bluejayInfra.SCOPE_MANAGER_URL + '/api/v1/scopes/development/courses';
 const isMobile = ref(window.innerWidth <= 768);
+const showNoTemplatesMessage = ref(false);
+const templatesConfig = ref([]);
+const sampleTemplate = ref();
+const displayCreateFromSample = ref(false);
+const newTemplateId = ref('');
+
 
 const updateIsMobile = () => {
     isMobile.value = window.innerWidth <= 768;
 };
-
 async function getTemplates() {
-    await axios.get(process.env.REGISTRY_URL + "/api/v6/agreements")
+    await axios.get(templatesURL)
         .then(async (response) => {
             templates.value = response.data.sort((a, b) => a.id.localeCompare(b.id));
+            try {
+                const response = await axios.get('/templates.config.json');
+                templatesConfig.value = response.data;
+                showNoTemplatesMessage.value = templatesConfig.value.length === 0;
+            } catch (error) {
+                toast.add({ severity: 'error', summary: 'Error', detail: 'Error fetching templates config', life: 3000 });
+            }
         })
         .catch(error => {
-            console.log("Error: ", error);
+            toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
         });
-    templates.value = [
-        {
-            "templateId": "template_1",
-            "coursesInUse": ["Curso de Matemáticas", "Curso de Física"]
-        },
-        {
-            "templateId": "template_2",
-            "coursesInUse": ["Curso de Literatura", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "cardio", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "cardio", "Curso de Historia", "Curso de Arte", "Curso de Historia", "Curso de Arte", "cardio"]
-        },
-        {
-            "templateId": "template_3",
-            "coursesInUse": []
-        },
-        {
-            "templateId": "template_4",
-            "coursesInUse": ["Curso de Programación", "Curso de Diseño Gráfico"]
-        },
-        {
-            "templateId": "template_5",
-            "coursesInUse": ["Curso de Biología", "Curso de Medicina"]
-        }
-    ]
-
 }
+async function getCourses() {
+    await axios.get(coursesURL, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async (response) => {
+        courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
+    })
+        .catch(error => {
+            console.log('Error: ', error);
+        });
+}
+const deletePopup = (event, templateId) => {
+    confirm.require({
+        target: event.currentTarget,
+        message: 'Are you sure you want to delete?',
+        icon: 'pi pi-exclamation-triangle',
+        rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
+        acceptClass: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600',
+        rejectLabel: 'Cancel',
+        acceptLabel: 'Save',
+        accept: () => {
+            axios.delete(`${templatesURL}/${templateId}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authorization.value
+                }
+            }).then(async (response) => {
+                toast.add({ severity: 'success', summary: 'Success', detail: 'Template deleted successfully.', life: 3000 });
+                await getTemplates();
+            }).catch(error => {
+                console.log('Error: ', error.response);
+                toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
+            });
 
+        },
+        reject: () => { }
+    });
+};
+const coursesForTemplate = (templateId) => {
+    return courses.value.filter(course => course.templateId === templateId);
+};
 onMounted(() => {
+    getCourses();
     getTemplates();
+    if (localStorage.getItem('auth')) {
+        authorization.value = localStorage.getItem('auth');
+    }
     window.addEventListener('resize', updateIsMobile);
 });
-
 onUnmounted(() => {
     window.removeEventListener('resize', updateIsMobile);
 });
 
+watch(templates, (newTemplates) => {
+    if (newTemplates.length === 0) {
+        setTimeout(() => {
+            showNoTemplatesMessage.value = true;
+        }, 500);
+    } else {
+        showNoTemplatesMessage.value = false;
+    }
+});
 
+async function cloneTemplate(template) {
+    if (templates.value.some(existingTemplate => existingTemplate.id.endsWith('-clone'))) {
+        toast.add({ severity: 'warn', summary: 'Warning', detail: 'Rename or delete the clone to create a new one.', life: 4000 });
+    } else {
+
+        const new_template = JSON.parse(JSON.stringify(template));
+        new_template.id = template.id + '-clone';
+        delete new_template._id;
+        await axios.post(templatesURL, new_template, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authorization.value
+            }
+        }).then(async (response) => {
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Template cloned successfully.', life: 3000 });
+            await getTemplates();
+        }).catch(error => {
+            console.error('Error: ', error.response);
+            toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
+        });
+    }
+
+}
+
+const openSampleUrl = (url) => {
+    window.open(url, '_blank');
+};
+async function createTemplateFromSample() {
+    if (!newTemplateId.value) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill the field.', life: 3000 });
+        return;
+    }
+    const apiGitHubUrl = sampleTemplate.value.replace('github.com', 'api.github.com/repos')
+        .replace('/blob/', '/')
+        .replace('/main/', '/contents/');
+    try {
+        const response = await axios.get(apiGitHubUrl);
+        const tpaTemplate = JSON.parse(atob(response.data.content));
+        tpaTemplate.id = `template-${newTemplateId.value}`;
+        tpaTemplate.type = "template";
+
+        await axios.post(templatesURL, tpaTemplate, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        displayCreateFromSample.value = false;
+        newTemplateId.value = '';
+        getTemplates();
+        toast.add({ severity: 'success', summary: 'Success', detail: 'Template added successfully.', life: 3000 });
+    } catch (error) {
+        console.error("Error: ", error);
+        let detailMessage = 'Unknown error occurred.';
+        if (error.response) {
+            if (error.response.data && error.response.data.code === 11000) {
+                detailMessage = 'Template already exists.';
+            } else if (error.response.data && error.response.data.error) {
+                detailMessage = error.response.data.error;
+            } else {
+                detailMessage = error.response.statusText || JSON.stringify(error.response.data);
+            }
+        }
+        toast.add({ severity: 'error', summary: 'Error', detail: detailMessage, life: 3000 });
+    }
+}
+const visualizeTemplate = (templateId) => {
+    tpaEditMode.value = false;
+    router.push({ name: 'tpa-template', params: { templateId } });
+};
+const editTemplate = (templateId) => {
+    tpaEditMode.value = true;
+    router.push({ name: 'tpa-template', params: { templateId } });
+};
 </script>
 
 <template>
     <div style="display: grid; justify-items: center;">
-        <Button v-if="!isMobile" class="absolute ml-3 mt-2 left-0 top-0" icon="pi pi-home"
-            @click="$router.push({ name: 'home' })" outlined />
-        <Button v-if="!isMobile" class="absolute mr-3 mt-2 right-0 top-0"
-            :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')" @click="appThemeStore.toggleTheme()"
-            aria-label="Switch app theme" outlined />
-        <div class="card">
-            <div class="header">
-                <Button v-if="isMobile" icon="pi pi-home" @click="$router.push({ name: 'home' })" outlined />
-                Templates Management
-                <Button v-if="isMobile" :icon="'pi pi-' + (appThemeStore.isDarkModeOn ? 'moon' : 'sun')"
-                    @click="appThemeStore.toggleTheme()" aria-label="Switch app theme" outlined />
-                <img v-if="!isMobile" src="/templates-logo.png" width="60" />
-            </div>
-            <div class="buttons">
-                <Button label="New Template" icon="pi pi-plus" outlined />
-                <Button class="mr-3 ml-3" label="Scope Management" icon="pi pi-wrench" outlined />
-            </div>
+        <div class="card ">
+            <NavMenu @templates-updated="getTemplates" />
             <Divider layout="horizontal" />
             <div class="content">
-                <div v-for="template in templates" :key="template.templateId" class="template-card">
-                    <div class="card-header">
-                        {{ template.templateId }}
-                    </div>
-                    <div v-if="template.coursesInUse.length > 0">
-                        <span style="margin-left: 15px;">In use in these classes:</span>
-                        <ScrollPanel style="width: 100%; height: 150px"
-                            :pt="{ bary: 'hover:bg-green-400 bg-green-400 opacity-70' }">
+                <TransitionGroup name="list">
+                    <template v-if="templates.length === 0 && showNoTemplatesMessage">
+                        <div class="card-checkout">
+                            <h2 class="checkout-title text-center">Check out some samples from our GitHub</h2>
                             <ul>
-                                <li v-for="course in template.coursesInUse" :key="course">
-                                    <span @click="$router.push({ name: 'home' })">{{ course }}</span>
+                                <li v-for="(template, index) in templatesConfig" :key="index">
+                                    <div @click="openSampleUrl(template.sample_url)">
+                                        <span>{{ template.description }}</span>
+                                    </div>
                                 </li>
                             </ul>
-                            <ScrollTop target="parent" :threshold="200" class="no-hover" style="margin-right: 15px;"
-                                icon="pi pi-angle-up" />
-                        </ScrollPanel>
-                    </div>
-                    <div v-else style="display: grid; justify-items: center; align-items: center;">
-                        <span>Not in use</span>
-                        <div class="buttons">
-                            <Button class="no-hover" label="Edit" @click="editTemplate(template)" icon="pi pi-pencil"
-                                severity="warning" />
-                            <Button class="no-hover" label="Delete" @click="deleteTemplate(template)" icon="pi pi-trash"
-                                severity="danger" />
+                            <Button label="Create new template from sample" @click="displayCreateFromSample = true"
+                                :pt="{ root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600', style: 'width: 280px; padding: 0 10px; margin-top: 10px' } }" />
+                            <Dialog v-model:visible="displayCreateFromSample" header="Add new template from sample"
+                                modal>
+                                <div class="flex flex-column  gap-3 mb-3" style="width: 300px;">
+                                    <label for="newTemplateId">Template ID</label>
+                                    <InputText id="newTemplateId" v-model="newTemplateId" />
+
+                                    <label for="sampleTemplate">Select Template Sample</label>
+                                    <Dropdown id="sampleTemplate" v-model="sampleTemplate" :options="templatesConfig"
+                                        optionLabel="description" optionValue="sample_url" filter showClear>
+                                    </Dropdown>
+                                </div>
+                                <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
+                                    <Button label="Create" @click="createTemplateFromSample"
+                                        :pt="{ root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' } }" />
+                                    <Button label="Cancel" @click="displayCreateFromSample = false"
+                                        :pt="{ root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' } }" />
+                                </div>
+                            </Dialog>
+
                         </div>
-                    </div>
-                </div>
+                    </template>
+                    <template v-else>
+                        <div v-for="template in templates" :key="template.id" class="template-card">
+                            <div class="card-header">
+                                <span class="text-header" v-tooltip.bottom="'Visualize'" @click="visualizeTemplate(template.id)">{{ template.id }}</span>
+                                <Button v-if="!template.id.endsWith('-clone')" label="Clone"
+                                    @click="cloneTemplate(template)" icon="pi pi-clone" :pt="{
+                root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600', style: 'height: 27px; width: 105px ;padding: 0 10px; margin-left: 10px' },
+            }" />
+                            </div>
+                            <div v-if="courses.some(course => course.templateId === template.id)">
+                                <span style="margin-left: 15px; font-size: min(max(15px, 4vw), 18px) !important;">In use in these classes:</span>
+                                <ScrollPanel style="width: 100%; height: 125px"
+                                    :pt="{ bary: 'hover:bg-green-400 bg-green-400 opacity-70' }">
+                                    <ul>
+                                        <li v-for="course in coursesForTemplate(template.id)" :key="course">
+                                            <span style="font-size: min(max(15px, 4vw), 18px) !important;"
+                                                @click="$router.push({ name: 'tpa-list', params: { classId: course.classId } })">{{
+                course.classId }}</span>
+                                        </li>
+                                    </ul>
+                                    <ScrollTop target="parent" :threshold="200" class="no-hover"
+                                        style="margin-right: 15px;" icon="pi pi-angle-up" />
+                                </ScrollPanel>
+                            </div>
+                            <div v-else style="display: grid; justify-items: center; align-items: center;">
+                                <span>Not in use</span>
+                                <div class="buttons">
+                                    <Button label="Edit" @click="editTemplate(template.id)" icon="pi pi-pencil" :pt="{
+                root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-400 hover:border-yellow-400', style: 'min-width: 93px' }
+            }" />
+
+                                    <ConfirmPopup></ConfirmPopup>
+                                    <Button label="Delete" @click="deletePopup($event, template.id)" icon="pi pi-trash"
+                                        :pt="{
+                root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600', style: 'min-width: 93px' }
+            }" />
+
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </TransitionGroup>
             </div>
+            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
         </div>
     </div>
 </template>
 
+
 <style scoped>
-Button:not(.no-hover):hover {
-    background-color: #43A5F4 !important;
-    color: white !important;
-    border: 1px solid #43A5F4 !important;
-}
-
-.card {
-    margin: 2% 10%;
-    min-width: 75vw;
-    max-width: calc(100vw - 20%);
-    min-height: 75vh;
-    max-height: auto;
-}
-
-ul {
-    margin: 0 !important;
-    padding: 5px 40px;
-}
-
-li {
-    padding: 2px 0;
-}
-
-li span {
-    cursor: pointer;
-    color: #10B981;
-    text-decoration: underline;
-}
-
-.content {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-.card-header {
-    font-size: min(max(20px, 4vw), 25px) !important;
-}
-
-.template-card {
-    flex: 0 1 calc(50% - 20px);
-    border: 1px solid #10B981;
+.card-checkout {
+    border: 1px solid #ccc;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-
-}
-
-.template-card span {
-    font-size: min(max(15px, 4vw), 18px) !important;
-}
-
-
-.header {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center;
-    font-size: min(max(30px, 4vw), 40px) !important;
-    gap: 10px;
+    width: 80%;
 }
+
+.checkout-title {
+    font-size: min(max(20px, 4vw), 30px) !important;
+    margin-bottom: 10px;
+}
+
+.list-enter-active {
+    animation: enterAnimation 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+@keyframes enterAnimation {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.5);
+    }
+
+    50% {
+        opacity: 0.75;
+        transform: translateY(15px) scale(1.1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.list-leave-active {
+    animation: leaveAnimation 0.5s cubic-bezier(0.55, 0, 0.1, 1) forwards;
+}
+
+@keyframes leaveAnimation {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: translateY(-15px) scale(1.1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.5);
+    }
+}
+
 
 .buttons {
     display: flex;
@@ -190,17 +352,62 @@ li span {
     margin-top: 7px;
 }
 
+ul {
+    margin: 0 !important;
+}
+
+li {
+    padding: 2px 0;
+}
+
+li span {
+    cursor: pointer;
+    color: #10B981;
+}
+
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+}
+.text-header {
+    cursor: pointer;
+    font-size: min(max(20px, 4vw), 22px) !important;
+    transition: 0.4s;
+}
+.text-header:hover {
+    color: #10B981;
+    transform: scale(1.1);
+}
+
+
+.template-card {
+    flex: 0 1 calc(50% - 10px);
+    border: 1px solid #10B981;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
 
 @media screen and (max-width: 768px) {
     .template-card {
         flex: 0 1 100%;
     }
 
-    .card {
-        margin: 5% 5%;
-        min-width: 80vw;
-        max-width: calc(100vw - 10%);
-        min-height: 95vh;
+    .card-checkout {
+        width: 100%;
+    }
+
+    .card-header {
+        flex-direction: column;
+        justify-content: center;
     }
 }
 </style>
