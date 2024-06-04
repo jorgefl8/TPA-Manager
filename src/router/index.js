@@ -8,14 +8,14 @@ const routes = [
         component: Home,
     },
     {
-        path: "/visualization/:courseId?/:projectId?",
-        name: "visualization",
-        component: () => import("@/views/TpaDetails.vue"),
+        path: '/tpa-template/:templateId?',
+        name: 'tpa-template',
+        component: () => import('@/views/TPA-Template.vue'),
     },
     {
-        path: "/edition/:courseId?/:projectId?",
-        name: "edition",
-        component: () => import("@/views/TpaDetails.vue"),
+        path: "/tpa/:classId?/:projectId?",
+        name: "tpa",
+        component: () => import("@/views/TPA.vue"),
     },
     {
         path: "/catalogue",
@@ -28,24 +28,24 @@ const routes = [
         component: () => import("@/views/NotFound.vue"),
     },
     {
-        path: "/about",
-        name: "about",
-        component: () => import("@/views/About.vue"),
-    },
-    {
-        path: "/templates-management",
-        name: "templates-management",
-        component: () => import("@/views/TemplatesManagement.vue"),
+        path: '/templates-management',
+        name: 'templates-management',
+        component: () => import('@/views/TemplatesManagement.vue'),
     },
     {
         path: "/new-class",
         name: "new-class",
         component: () => import("@/views/NewClass.vue"),
+    },
+    {
+        path: "/tpa-list/:classId?",
+        name: "tpa-list",
+        component: () => import("@/views/TPA-list.vue"),
     }
 ]
 
 const router = createRouter({
-    history: createWebHistory(), // Since this is a SPA, we need to manage this in the server by redirecting all the routes to index.html.
+    history: createWebHistory(), 
     routes,
 })
 
