@@ -1,10 +1,16 @@
 import _ from 'lodash'
 import axios from 'axios'
-import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import * as prettier from "prettier";
+import { bluejayInfraStore } from '@/stores/bluejayInfra';
+import { useTPAMode } from '@/utils/tpaMode.js';
+
+
 let prettierPluginGraphql;
+const bluejayInfra = bluejayInfraStore();
+const { tpaEditMode } = useTPAMode();
+
 
 if (process.env.NODE_ENV !== 'test') {
   import('https://unpkg.com/prettier@3.0.3/plugins/graphql.mjs').then((module) => {
@@ -16,20 +22,11 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   const originalTpa = ref(null)
   const modifiedTpa = ref(null)
   const discardButtonClicked = ref(false)
-  const REGISTRY_URL = process.env.REGISTRY_URL || 'http://localhost:5400'
-  const COLLECTOR_EVENTS_URL = process.env.COLLECTOR_EVENTS_URL || 'http://localhost:5500'
+  const REGISTRY_URL = bluejayInfra.REGISTRY_URL
+  const COLLECTOR_EVENTS_URL = bluejayInfra.COLLECTOR_EVENTS_URL 
   const isProductionEnvironment = ref(localStorage.getItem('isProductionEnvironment') === 'true')
 
-  const ASSETS_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-assets-manager" : "http://host.docker.internal:5200"
-  const SCOPE_MANAGER_URL = () => isProductionEnvironment.value ? "http://bluejay-scope-manager" : "http://host.docker.internal:5700"
   
-  const route = useRoute();
-  const isEditionMode = ref(route.path.includes('edition'))
-
-  watch(() => route, (newRoute) => {
-    isEditionMode.value = newRoute.path.includes('edition')
-  }, { deep: true })
-
   const BLOCK_TYPES = [
     'correlated',
     'divider-changer',
@@ -102,39 +99,32 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
     modifiedTpa.value = _.cloneDeep(tpa)
   }
   
-  async function saveTpaChanges() {
-
+  async function saveTpaChanges(tpa_type) {
     // Remove "member" from scope if checkbox is not checked
     if (modifiedTpa.value.context.definitions.scopes.development?.member?.default !== "*") {
       deleteTpaField('context.definitions.scopes.development.member')
     }
 
-    // Production or development environment transformation
-    modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value)
-      .replace(/http:\/\/(host\.docker\.internal:5700|[^\/]+-scope-manager)/g, SCOPE_MANAGER_URL())
-      .replace(/http:\/\/(host\.docker\.internal:5200|[^\/]+-assets-manager)/g, ASSETS_MANAGER_URL()))
-    
+    //not working
+    // // Production or development environment transformation
+    // modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value)
+    //   .replace(/http:\/\/(host\.docker\.internal:5700|[^\/]+-scope-manager)/g, SCOPE_MANAGER_URL())
+    //   .replace(/http:\/\/(host\.docker\.internal:5200|[^\/]+-assets-manager)/g, ASSETS_MANAGER_URL()))
     try {
-      // If "Project ID" or "Course ID" are modified, replace in the TPA and reload the page to update the app values with the new ones
-      const areIdsModified = originalTpa.value.context.definitions.scopes.development.project.default !== modifiedTpa.value.context.definitions.scopes.development.project.default
-        || originalTpa.value.context.definitions.scopes.development.class.default !== modifiedTpa.value.context.definitions.scopes.development.class.default
-      
-      if (areIdsModified) {
-        modifiedTpa.value.id = "tpa-" + modifiedTpa.value.context.definitions.scopes.development.project.default
-        modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value).replace(new RegExp('\"' + originalTpa.value.context.definitions.scopes.development.project.default + '\"', "g"), '\"' + modifiedTpa.value.context.definitions.scopes.development.project.default + '\"'))
-        modifiedTpa.value = JSON.parse(JSON.stringify(modifiedTpa.value).replace(new RegExp('\"' + originalTpa.value.context.definitions.scopes.development.class.default + '\"', "g"), '\"' + modifiedTpa.value.context.definitions.scopes.development.class.default + '\"'))
-      }
-      
+      if(tpa_type == "agreement"){
       // Delete and create the TPA to update it
       await axios.delete(`${REGISTRY_URL}/api/v6/agreements/${originalTpa.value.id}`).catch(error => console.log("Error deleting agreement: ", error))
       await axios.post(`${REGISTRY_URL}/api/v6/agreements`, modifiedTpa.value).catch(error => console.log("Error creating agreement: ", error))
-      
-      if (areIdsModified) {
-        this.router.push({ name: 'edition', params: { courseId: modifiedTpa.value.context.definitions.scopes.development.class.default, projectId: modifiedTpa.value.context.definitions.scopes.development.project.default } })
+      tpaEditMode.value = false
       }
-
+      if(tpa_type == "template"){
+        // Delete and create the Template to update it
+        await axios.delete(`${REGISTRY_URL}/api/v6/templates/${originalTpa.value.id}`).catch(error => console.log("Error deleting template: ", error))
+        await axios.post(`${REGISTRY_URL}/api/v6/templates`, modifiedTpa.value).catch(error => console.log("Error creating template: ", error))
+        tpaEditMode.value = false
+      }
     } catch (error) {
-      console.log("Error when saving TPA changes: ", error)
+      console.log("Error when saving TPA or Template changes: ", error)
     }
   }
 
@@ -211,7 +201,7 @@ export const useTpaEditionStore = defineStore('tpaEdition', () => {
   }
 
   return { 
-    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, isEditionMode, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS, COLLECTOR_ELEMENT_TYPES,
+    originalTpa, modifiedTpa, discardButtonClicked, isProductionEnvironment, BLOCK_TYPES, COLLECTOR_EVENT_SOURCES, COLLECTOR_EVENT_ENDPOINTS, STEP_TYPES, WINDOW_PERIOD_OPTIONS, COLLECTOR_ELEMENT_TYPES,
     setInitialTpaData, saveTpaChanges, discardTpaChanges, getTpaField, updateTpaField, deleteTpaField, updateGuaranteeWithNewObjective, testMetric, formatQueryGraphQL, unformatQueryGraphQL
   }
 })
