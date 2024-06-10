@@ -33,9 +33,9 @@ const routes = [
         component: () => import('@/views/TemplatesManagement.vue'),
     },
     {
-        path: "/new-class",
-        name: "new-class",
-        component: () => import("@/views/NewClass.vue"),
+        path: "/new-course",
+        name: "new-course",
+        component: () => import("@/views/NewCourse.vue"),
     },
     {
         path: "/tpa-list/:classId?",
