@@ -2,7 +2,6 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import axios from 'axios';
 import Divider from 'primevue/divider';
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 import NavMenu from '@/components/NavMenu.vue';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
@@ -20,15 +19,25 @@ const coursesURL = ref(bluejayInfra.SCOPE_MANAGER_URL + "/api/v1/scopes/developm
 const updateIsMobile = () => {
     isMobile.value = window.innerWidth <= 768;
 };
-onMounted(() => {
-    getCourses();
+onMounted(async () => {
+    await getCourses();
+    const successMessage = sessionStorage.getItem('successMessage');
+    if (successMessage) {
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: successMessage,
+            life: 3000
+        });
+        sessionStorage.removeItem('successMessage');
+    }
     window.addEventListener('resize', updateIsMobile);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', updateIsMobile);
 });
 watch(showHiddenCourses, () => {
-    getCourses();  // Recargar cursos cuando showHiddenCourses cambia
+    getCourses();
 });
 async function getCourses() {
     await axios.get(coursesURL.value, {
@@ -38,22 +47,19 @@ async function getCourses() {
     }).then(async (response) => {
         courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
         courses.value = [{
-            "name": "Classes",
-            "children": courses.value //.filter(course => course.hidden === showHiddenCourses.value)
+            "name": "Courses",
+            "children": courses.value.filter(course => !course.hidden || (course.hidden && showHiddenCourses.value))
         }];
-        setTimeout(() => {
-            loading.value = false;
-        }, 500);
     })
         .catch(error => {
             console.log("Error: ", error);
         });
+        setTimeout(() => {
+            loading.value = false;
+        }, 500);
 }
 
 
-const showAlert = (message, severity) => {
-    toast.add({ severity: severity, summary: message, life: 3000 });
-};
 </script>
 <template>
     <div style="display: grid; justify-items: center;">
@@ -64,8 +70,7 @@ const showAlert = (message, severity) => {
                 <ProgressSpinner class="text-center" strokeWidth="4" />
                 <h3 class="text-center">Loading...</h3>
             </div>
-            <TreeBrowser v-else :nodes="courses"/>
-            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
+            <TreeBrowser @course-updated="getCourses" v-else :nodes="courses" />
         </div>
     </div>
 </template>
