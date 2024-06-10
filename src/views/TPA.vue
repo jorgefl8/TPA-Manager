@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted, onBeforeUnmount } from 'vue'
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 import NavMenu from '@/components/NavMenu.vue';
 import Divider from 'primevue/divider';
@@ -22,12 +21,13 @@ import { useConfirm } from "primevue/useconfirm";
 import ConfirmPopup from 'primevue/confirmpopup';
 import ToggleButton from 'primevue/togglebutton';
 import Dialog from 'primevue/dialog';
-
+import RadioButton from 'primevue/radiobutton';
+import InputText from 'primevue/inputtext';
+import InlineMessage from 'primevue/inlinemessage';
 
 
 const tpaEditionStore = useTpaEditionStore();
 const displaySaveChanges = ref(false);
-const displayChangeVersion = ref(false);
 const { originalTpa, modifiedTpa, discardButtonClicked } = storeToRefs(tpaEditionStore);
 const { isProductionEnvironment } = storeToRefs(tpaEditionStore);
 const { tpaEditMode } = useTPAMode();
@@ -47,18 +47,25 @@ const expandedMetrics = ref(false);
 const dashboardBlocks = ref();
 const guarantees = ref();
 const metrics = ref();
+const newTemplateVersion = ref('');
+const authorization = ref('');
+const exampleVersion = ref('');
+
 const updateIsMobile = () => {
     isMobile.value = window.innerWidth <= 768;
 };
-onMounted(() => {
-    getTpa();
+onMounted(async () => {
+    await getTpa();
+    if (localStorage.getItem('auth')) {
+        authorization.value = localStorage.getItem('auth');
+    }
     window.addEventListener('resize', updateIsMobile);
 });
 onUnmounted(() => {
     window.removeEventListener('resize', updateIsMobile);
 });
 function handlePageUnload(event) {
-    if (!discardButtonClicked.value && originalTpa.value && modifiedTpa.value && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
+    if (saveOption.value === 'one-tpa' && !discardButtonClicked.value && originalTpa.value && modifiedTpa.value && JSON.stringify(originalTpa.value) !== JSON.stringify(modifiedTpa.value)) {
         event.returnValue = 'There are unsaved changes. Are you sure you want to leave?';
         // Web apps cannot prevent the user from leaving the page.
         // All we can do is warn them to save their work if they want to.
@@ -72,6 +79,20 @@ onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handlePageUnload);
 });
 
+async function createExampleVersion(templateId) {
+    if (templateId) {
+        const versionRegex = /v(\d+)-(\d+)-(\d+)/;
+        const match = templateId.match(versionRegex);
+        if (match && match.length >= 4) {
+            const major = parseInt(match[1], 10);
+            const minor = parseInt(match[2], 10);
+            const patch = parseInt(match[3], 10);
+            const newMajor = major + 1;
+            const newTemplateId = templateId.replace(versionRegex, `v${newMajor}-${minor}-${patch}`);
+            exampleVersion.value = newTemplateId;
+        }
+    }
+}
 async function getTpa() {
     await axios.get(agreementURL, {
         headers: {
@@ -80,6 +101,7 @@ async function getTpa() {
     }).then(async (response) => {
         agreement.value = response.data;
         tpaEditionStore.setInitialTpaData(agreement.value);
+        createExampleVersion(agreement.value.templateId);
         setTimeout(() => {
             loading.value = false;
         }, 500);
@@ -89,22 +111,67 @@ async function getTpa() {
             toast.add({ severity: 'error', summary: 'Error', detail: 'Error fetching agreement' });
         });
 }
-function saveTpaChanges() {
+const saveOption = ref('');
+const loadingChanges = ref(false);
+
+async function saveTpaChanges() {
     tpaEditionStore.saveTpaChanges('agreement').then(() => {
         toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
     }).catch(error => {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
     });
 }
-function saveTpasChanges() {
-    tpaEditionStore.saveTpaChanges('agreement').then(() => {
-        toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
-    }).catch(error => {
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
-    });
+async function saveTpasChanges() {
+    if (agreement.value.templateId) {
+        tpaEditionStore.saveTpasChanges(newTemplateVersion.value, authorization).then(() => {
+            setTimeout(() => {
+                loadingChanges.value = false;
+                displaySaveChanges.value = false;
+                window.location.reload();
+            }, 3000);
+            toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
+        }).catch(error => {
+            toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
+        });
+    } else {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Template ID not found in agreement.', life: 3000 });
+    }
+
 }
 
+function handleSaveChanges() {
+    if (saveOption.value === 'all-tpas') {
+        const isVersionValid = validateVersion();
+        if (!isVersionValid) return;
+        loadingChanges.value = true;
+        saveTpasChanges();
+    } else {
+        saveTpaChanges();
+    }
+}
 
+function validateVersion() {
+    const baseRegex = /^template-(.+?)-v(\d+)-(\d+)-(\d+)$/;
+    const currentMatch = agreement.value.templateId.match(baseRegex);
+    const newMatch = newTemplateVersion.value.match(baseRegex);
+    if (!newMatch) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Invalid format for the template version.', life: 3000 });
+        return false;
+    }
+
+    if (newMatch[1] !== currentMatch[1]) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'You can\'t change name, only update the version.', life: 3000 });
+        return false;
+    }
+    const newVersionNumbers = newMatch.slice(2, 5).map(Number);
+    const currentVersionNumbers = currentMatch.slice(2, 5).map(Number);
+    const isVersionIncreased = newVersionNumbers.some((num, idx) => num > currentVersionNumbers[idx]);
+    if (!isVersionIncreased) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'At least one part of the version number must be greater.', life: 3000 });
+        return false;
+    }
+    return true;
+}
 function confirmDiscardTpaChanges(event) {
     confirm.require({
         target: event.currentTarget,
@@ -151,16 +218,7 @@ function collapseAll() {
     guarantees.value.collapseAll();
     metrics.value.collapseAll();
 }
-const saveOption = ref('');
-function saveOptions() {
-    console.log(saveOption.value);
-    if (saveOption === 'one-tpa') {
-        confirmSaveTpaChanges($event);
-    }
-    if (saveOption === 'all-tpas') {
 
-    }
-}
 </script>
 <template>
     <div style="display: grid; justify-items: center;">
@@ -226,24 +284,35 @@ function saveOptions() {
                                 <span class="p-text-secondary block mb-3">Choose your save option:</span>
                                 <div class="flex flex-column  gap-3 mb-3" style="width: 300px;">
                                     <div>
-                                        <input type="radio" id="one-tpa" value="one-tpa" v-model="saveOption">
-                                        <label for="one-tpa">This TPA</label>
+                                        <RadioButton id="one-tpa" value="one-tpa" v-model="saveOption"
+                                            label="This TPA" /> <label for="one-tpa">This TPA</label>
                                     </div>
                                     <div>
-                                        <input type="radio" id="all-tpas" value="all-tpas" v-model="saveOption">
-                                        <label for="all-tpas">All course TPAs</label>
+                                        <RadioButton id="all-tpas" value="all-tpas" v-model="saveOption"
+                                            label="All course TPAs" /> <label for="all-tpas">All course TPAs</label>
                                     </div>
+
                                     <div v-if="saveOption === 'all-tpas'">
-                                        <span class="p-text-secondary block mb-3">Previous template version:</span>
-                                        <span class="p-text-secondary text-center block mb-3"> {{ agreement.templateId ? agreement.templateId : 'templateid-here' }}</span>
-                                        <span class="p-text-secondary block mb-3">New template version:</span>
-                                        <InputOtp v-model="tpaEditionStore.newTemplateId" :length="3" />
+                                        <span class="p-text-secondary block mb-3">Current template version:</span>
+                                        <span class="p-text-secondary text-center block mb-3"> {{ agreement.templateId ?
+                                agreement.templateId : 'no-templateId found' }}</span>
+                                        <InlineMessage class="mb-2" severity="warn">New version must be above current
+                                        </InlineMessage>
+                                        <label for="new-version" class="p-text-secondary block mb-3">New template
+                                            version:</label>
+                                        <p>Example: {{ exampleVersion }}</p>
+                                        <InputText class="w-full" id="new-version" v-model="newTemplateVersion" />
                                     </div>
                                 </div>
                                 <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
-                                    <Button label="Save"
-                                        @click="saveOption === 'all-tpas' ? saveTpasChanges() : saveTpaChanges()"
-                                        :pt="{ root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' } }" />
+                                    <Button :label="loadingChanges && saveOption === 'all-tpas' ? '' : 'Save'"
+                                        @click="handleSaveChanges"
+                                        :disabled="loadingChanges && saveOption === 'all-tpas'"
+                                        class="bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600">
+                                        <template v-if="loadingChanges && saveOption === 'all-tpas'">
+                                            <i class="pi pi-spin pi-spinner"></i>
+                                        </template>
+                                    </Button>
                                     <Button label="Cancel" @click="displaySaveChanges = false"
                                         :pt="{ root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' } }" />
                                 </div>
@@ -317,12 +386,16 @@ function saveOptions() {
                     <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="agreement.terms.guarantees" />
                 </div>
             </div>
-            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
         </div>
     </div>
 </template>
 
 <style scoped>
+p {
+    color: #8e8e8e;
+    font-size: 15px !important;
+}
+
 .buttons {
     display: flex;
     justify-content: center;
