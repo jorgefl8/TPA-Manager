@@ -40,7 +40,6 @@ const isMobile = ref(window.innerWidth <= 768);
 const agreementURL = `${bluejayInfra.REGISTRY_URL}/api/v6/agreements/tpa-${projectId}`;
 const agreement = ref({});
 const loading = ref(true);
-const emits = defineEmits(['collapseAllClick', 'expandAllClick', 'tpaChange']);
 const expandedDashboardBlocks = ref(false);
 const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);

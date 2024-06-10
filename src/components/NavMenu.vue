@@ -4,7 +4,7 @@ import SpeedDial from 'primevue/speeddial';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import { useAppThemeStore } from '@/stores/appTheme';
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from "primevue/usetoast";
 import { useRoute } from 'vue-router';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
@@ -189,8 +189,8 @@ async function addTemplate() {
 
         </div>
         <div class="header-top">
-            <img v-if="!(pageHeader.title === 'TPA')" :src="pageHeader.img" width="50" />
-            <span v-if="!(pageHeader.title === 'TPA')">{{ pageHeader.title }}</span>
+            <img v-if="pageHeader.title !== 'TPA'" :src="pageHeader.img" width="50" />
+            <span v-if="pageHeader.title !== 'TPA'">{{ pageHeader.title }}</span>
             <span v-if="pageHeader.title === 'TPA list for'" style="color: #4CD07D;"> {{ classId }}</span>
         </div>
 

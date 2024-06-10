@@ -48,7 +48,7 @@ async function getCourses() {
         courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
         courses.value = [{
             "name": "Courses",
-            "children": courses.value.filter(course => !course.hidden || (course.hidden && showHiddenCourses.value))
+            "children": courses.value.filter(course => !course.hidden || showHiddenCourses.value)
         }];
     })
         .catch(error => {

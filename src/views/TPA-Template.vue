@@ -29,7 +29,6 @@ const toast = useToast();
 const confirm = useConfirm();
 const isMobile = ref(window.innerWidth <= 768);
 const loading = ref(true);
-const emits = defineEmits(['collapseAllClick', 'expandAllClick', 'tpaChange']);
 const expandedDashboardBlocks = ref(false);
 const expandedGuarantees = ref(false);
 const expandedMetrics = ref(false);
