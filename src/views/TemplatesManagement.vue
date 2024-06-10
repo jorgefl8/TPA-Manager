@@ -46,7 +46,7 @@ async function getTemplates() {
         .catch(error => {
             templates.value = [];
             console.log('Error: ', error.message);
-            toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error, life: 3000 });
+            toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error || 'Unspecified error occurred', life: 3000 });
         });
     try {
         const response = await axios.get('/templates.config.json');
@@ -90,7 +90,7 @@ const deletePopup = (event, templateId) => {
                 await getTemplates();
             }).catch(error => {
                 console.log('Error: ', error.response);
-                toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error, life: 3000 });
+                toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error || 'Unspecified error occurred', life: 3000 });
             });
 
         },
