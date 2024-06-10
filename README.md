@@ -88,4 +88,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Badges
 
-[![DeepScan grade](https://deepscan.io/api/teams/21971/projects/25327/branches/790692/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=21971&pid=25327&bid=790692)
+[![DeepScan grade](https://deepscan.io/api/teams/24171/projects/27402/branches/875329/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=24171&pid=27402&bid=875329)
