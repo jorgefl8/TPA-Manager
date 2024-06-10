@@ -156,7 +156,7 @@ async function addTemplate() {
                     <div v-if="!isMobile">
                         <img v-tooltip.bottom="'Read mode'" v-if="item.label === 'TPA'" :src="pageHeader.img.read_mode"
                             width="30" />
-                        <span v-if="!(item.label === 'TPA')" class="text-color">{{ item.label }}</span>
+                        <span v-if="item.label !== 'TPA'" class="text-color">{{ item.label }}</span>
                         <span v-if="item.label === 'TPA'">
                             <InputSwitch v-if="item.label === 'TPA'" v-model="tpaEditMode" :pt="{
             slider: ({ props }) => ({
