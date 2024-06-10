@@ -116,7 +116,7 @@ async function validatejsonInput(parsedData) {
 async function addCredentialorIdent() {
     try {
         const parsedData = JSON.parse(jsonInput.value.trim());
-        if (validatejsonInput(parsedData)) {
+        if (await validatejsonInput(parsedData)) {
             if (visible_addCredentials.value) {
                 new_course.value.credentials.push(parsedData);
             }
@@ -176,7 +176,7 @@ async function addCredentialorIdent() {
                             <div class="flex flex-row gap-2"
                                 style="width: 45%; align-items: center; justify-content: center;">
                                 <label for="identities">Identities:</label>
-                                <Button id="identities" class="no-hover" label="Add"
+                                <Button id="identities"  label="Add"
                                     @click="visible_addIdentities = true" icon="pi pi-user-plus" :pt="{
                 root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-400', style: 'min-width: 93px' }
             }" />
@@ -188,10 +188,10 @@ async function addCredentialorIdent() {
                                             placeholder="Enter JSON here..." />
                                     </div>
                                     <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
-                                        <Button class="no-hover" label="Add" @click="addCredentialorIdent" :pt="{
+                                        <Button label="Add" @click="addCredentialorIdent" :pt="{
                 root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
             }" />
-                                        <Button class="no-hover" label="Cancel" @click="visible_addIdentities = false"
+                                        <Button label="Cancel" @click="visible_addIdentities = false"
                                             :pt="{
                 root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' }
             }" />
@@ -201,7 +201,7 @@ async function addCredentialorIdent() {
                             <div class="flex flex-row gap-2"
                                 style="width: 45%; align-items: center; justify-content: center;">
                                 <label for="credentials">Credentials:</label>
-                                <Button id="credentials" class="no-hover" label="Add"
+                                <Button id="credentials" label="Add"
                                     @click="visible_addCredentials = true" icon="pi pi-key" :pt="{
                 root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-400', style: 'min-width: 93px' }
             }" />
@@ -213,10 +213,10 @@ async function addCredentialorIdent() {
                                             placeholder="Enter JSON here..." />
                                     </div>
                                     <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
-                                        <Button class="no-hover" label="Add" @click="addCredentialorIdent" :pt="{
+                                        <Button  label="Add" @click="addCredentialorIdent" :pt="{
                 root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
             }" />
-                                        <Button class="no-hover" label="Cancel" @click="visible_addCredentials = false"
+                                        <Button  label="Cancel" @click="visible_addCredentials = false"
                                             :pt="{
                 root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' }
             }" />
@@ -245,11 +245,11 @@ async function addCredentialorIdent() {
                     </div>
 
                     <div class="buttons">
-                        <Button class="no-hover" label="Create" @click="createClass" icon="pi pi-check"
+                        <Button label="Create" @click="createClass" icon="pi pi-check"
                             :disabled="isCreateDisabled" :pt="{
                 root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
             }" />
-                        <Button class="no-hover" icon="pi pi-times" @click="clearData" :pt="{
+                        <Button icon="pi pi-times" @click="clearData" :pt="{
                 root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' }
             }" />
                     </div>

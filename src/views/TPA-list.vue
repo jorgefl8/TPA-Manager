@@ -102,7 +102,7 @@ const showTpa = (courseId, projectId) => {
                                 </div>
                             </li>
                         </ul>
-                        <ScrollTop target="parent" :threshold="200" class="no-hover" style="margin-right: 15px;"
+                        <ScrollTop target="parent" :threshold="200" style="margin-right: 15px;"
                             icon="pi pi-angle-up" />
                     </ScrollPanel>
                 </div>

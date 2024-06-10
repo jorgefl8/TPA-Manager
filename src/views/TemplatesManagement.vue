@@ -73,7 +73,7 @@ const deletePopup = (event, templateId) => {
         rejectClass: 'p-button-secondary p-button-outlined p-button-sm',
         acceptClass: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600',
         rejectLabel: 'Cancel',
-        acceptLabel: 'Save',
+        acceptLabel: 'Yes',
         accept: () => {
             axios.delete(`${templatesURL}/${templateId}`, {
                 headers: {
@@ -155,7 +155,7 @@ async function createTemplateFromSample() {
     try {
         const response = await axios.get(apiGitHubUrl);
         const tpaTemplate = JSON.parse(atob(response.data.content));
-        tpaTemplate.id = `template-${newTemplateId.value}`;
+        tpaTemplate.id = `${newTemplateId.value}`;
         tpaTemplate.type = "template";
 
         await axios.post(templatesURL, tpaTemplate, {
@@ -224,7 +224,7 @@ const editTemplate = (templateId) => {
                                     </Dropdown>
                                 </div>
                                 <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
-                                    <Button label="Create" @click="createTemplateFromSample"
+                                    <Button label="Add" @click="createTemplateFromSample"
                                         :pt="{ root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' } }" />
                                     <Button label="Cancel" @click="displayCreateFromSample = false"
                                         :pt="{ root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' } }" />
@@ -253,7 +253,7 @@ const editTemplate = (templateId) => {
                 course.classId }}</span>
                                         </li>
                                     </ul>
-                                    <ScrollTop target="parent" :threshold="200" class="no-hover"
+                                    <ScrollTop target="parent" :threshold="200" 
                                         style="margin-right: 15px;" icon="pi pi-angle-up" />
                                 </ScrollPanel>
                             </div>

@@ -36,7 +36,6 @@ const bluejayInfra = bluejayInfraStore();
 const router = useRouter();
 const toast = useToast();
 const displayDialogEditClass = ref(false);
-const isMobile = ref(window.innerWidth <= 768);
 const SCOPES_URL = `${bluejayInfra.SCOPE_MANAGER_URL}/api/v1/scopes/development/`;
 const emit = defineEmits(['courseUpdated']);
 const editedCourseValues = ref({});
@@ -134,15 +133,11 @@ const showGithubRepository = (identities) => {
 };
 
 
-const showDialog = ref(false);
-
-
 </script>
 
 <template>
   <div class="node-container">
     <!-- Root node -->
-
     <div class="node-root-content">
       <div class="node-head-root">
         <span style="font-size: 20px !important;cursor: pointer;" @click="toggleNode('Courses')">

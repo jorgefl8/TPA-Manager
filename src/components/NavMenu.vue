@@ -109,7 +109,7 @@ const items = computed(() => [
     {
         label: authenticated.value ? 'Logout' : 'Add Auth',
         icon: authenticated.value ? 'pi pi-sign-out' : 'pi pi-user-plus',
-        command: () => authenticated.value ? clearAuth() : visible_addAuth.value = true
+        command: () => authenticated.value ? clearAuth() : visible_addAuth.value = true,
     }
 ]);
 async function addTemplate() {
@@ -118,7 +118,7 @@ async function addTemplate() {
     } else {
         let tpaTemplate = null;
         tpaTemplate = await axios.get(assetsURL)
-        const template = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/"id":\s*"tpa-1010101010"/g, `"id": "template-${newTemplateId.value}"`).replace(/"type":\s*"agreement"/g, `"type": "template"`));
+        const template = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/"id":\s*"tpa-1010101010"/g, `"id": "${newTemplateId.value}"`).replace(/"type":\s*"agreement"/g, `"type": "template"`));
         await axios.post(templatesURL, template, {
             headers: {
                 'Content-Type': 'application/json'
@@ -175,7 +175,7 @@ async function addTemplate() {
 
             </template>
         </Breadcrumb>
-        <div v-if="isMobile & pageHeader.title === 'TPA'">
+        <div v-if="isMobile && pageHeader.title === 'TPA'">
             <img v-tooltip.bottom="'Read mode'" :src="pageHeader.img.read_mode" width="30" />
             <span>
                 <InputSwitch v-model="tpaEditMode" :pt="{
@@ -214,16 +214,16 @@ async function addTemplate() {
             root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
         }" />
             <Dialog v-model:visible="displayDialogNewTemplate" modal header="Add a new Template" :style="{}">
-                <span class="p-text-secondary block mb-3">Fill the fields please.</span>
                 <div class="flex flex-column align-items-center gap-3 mb-3">
                     <label for="newTemplateId">Template ID</label>
+                    <span class="p-text-secondary block mb-3">Example id: template-my-string-example-v1-0-0</span>
                     <InputText id="newTemplateId" v-model="newTemplateId" />
                 </div>
                 <div class="flex justify-content-center gap-2" style="margin-bottom: 10px;">
-                    <Button class="no-hover" label="Add" @click="addTemplate" :pt="{
+                    <Button label="Add" @click="addTemplate" :pt="{
             root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
         }" />
-                    <Button class="no-hover" label="Cancel" @click="displayDialogNewTemplate = false" :pt="{
+                    <Button label="Cancel" @click="displayDialogNewTemplate = false" :pt="{
             root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' }
         }" />
                 </div>

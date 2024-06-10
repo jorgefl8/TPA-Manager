@@ -18,7 +18,7 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateIsMobile);
 });
 
-//THIS VIEW FOLLOWS THE DESIGN OF TPA MANAGER FOR CREATING A NEW VIEW
+//THIS VIEW FOLLOWS THE DESIGN OF TPA MANAGER IN ORDER TO CREATING A NEW VIEW
 
 </script>
 <template>
