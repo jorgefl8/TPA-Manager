@@ -86,7 +86,7 @@ describe("Clone TPA template", () => {
   describe("Delete cloned Template", () => {
     it("Delete clone template", () => {
       cy.intercept("GET", Cypress.env("REGISTRY_URL") + "/api/v6/templates", {
-        fixture: "alltemplates.json",
+        fixture: "allTemplates.json",
       }).as("templatesCheck");
       cy.get("button").contains("Templates Management").click();
       cy.get(".template-card .text-header")
