@@ -3,7 +3,6 @@ import { ref, watch } from 'vue';
 import { useTpaEditionStore } from '@/stores/tpaEdition';
 import { useTPAMode } from '@/utils/tpaMode.js';
 
-import EditContent from './EditContent.vue';
 import Checkbox from 'primevue/checkbox';
 import Calendar from 'primevue/calendar';
 
@@ -37,6 +36,10 @@ watch(validityInitial, (newValue) => {
     <div class="flex align-items-center gap-2">
       <span>Course:</span>
       <span>{{ tpaEditionStore.getTpaField(fieldName + '.class.default') }}</span>
+    </div>
+    <div class="flex align-items-center gap-2">
+      <span>Template:</span>
+      <span>{{ tpaEditionStore.getTpaField('templateId') }}</span>
     </div>
 
     <div class="flex gap-2">
