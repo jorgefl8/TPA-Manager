@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted, } from 'vue'
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 import NavMenu from '@/components/NavMenu.vue';
 import Divider from 'primevue/divider';
@@ -24,10 +23,9 @@ onUnmounted(() => {
 </script>
 <template>
     <div style="display: grid; justify-items: center;">
-        <div class="card ">
+        <div class="card">
             <NavMenu />
             <Divider layout="horizontal" />
-            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
         </div>
     </div>
 </template>

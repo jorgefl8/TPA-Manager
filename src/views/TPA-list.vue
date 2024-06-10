@@ -2,17 +2,20 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import Divider from 'primevue/divider';
 import axios from 'axios'
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import NavMenu from '@/components/NavMenu.vue';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
 import ProgressSpinner from 'primevue/progressspinner';
+import { useTPAMode } from '@/utils/tpaMode';
+
+const { tpaEditMode } = useTPAMode();
 
 const bluejayInfra = bluejayInfraStore();
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 const loading = ref(true)
 const isMobile = ref(window.innerWidth <= 768);
@@ -65,6 +68,11 @@ async function findClassTPAs(classId) {
         });
 }
 
+const showTpa = (courseId, projectId) => {
+  tpaEditMode.value = false;
+  router.push({ name: 'tpa', params: { classId: courseId, projectId: projectId} });
+};
+
 </script>
 
 <template>
@@ -88,7 +96,7 @@ async function findClassTPAs(classId) {
                             <li v-for="agreement in agreements" :key="agreement.id">
                                 <div class="agreement-item">
                                     <span class="agreement-span"
-                                        @click="$router.push({ name: 'tpa', params: { classId: agreement.context.definitions.scopes.development.class.default, projectId: agreement.context.definitions.scopes.development.project.default } })">
+                                        @click="showTpa(agreement.context.definitions.scopes.development.class.default, agreement.context.definitions.scopes.development.project.default)">
                                         {{ agreement.id }}
                                     </span>
                                 </div>
@@ -101,7 +109,6 @@ async function findClassTPAs(classId) {
             </div>
         </div>
     </div>
-    <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
 </template>
 
 
@@ -186,7 +193,7 @@ li span {
 .tpas-card {
     width: 80%;
     max-height: 390px;
-    border: 1px solid #10B981;
+    border: 1px solid #ccc;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;

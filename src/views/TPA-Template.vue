@@ -1,11 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted, onBeforeUnmount } from 'vue'
-import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 import NavMenu from '@/components/NavMenu.vue';
 import Divider from 'primevue/divider';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import Dashboard from '@/components/Dashboard.vue';
 import Guarantees from '@/components/Guarantees.vue';
 import Metrics from '@/components/Metrics.vue';
@@ -21,10 +20,10 @@ import { useConfirm } from "primevue/useconfirm";
 import ConfirmPopup from 'primevue/confirmpopup';
 import ToggleButton from 'primevue/togglebutton';
 import InputSwitch from 'primevue/inputswitch';
-
-
+import InputText from 'primevue/inputtext';
 
 const route = useRoute();
+const router = useRouter();
 const bluejayInfra = bluejayInfraStore();
 const toast = useToast();
 const confirm = useConfirm();
@@ -38,12 +37,14 @@ const dashboardBlocks = ref();
 const guarantees = ref();
 const metrics = ref();
 const templatesURL = `${bluejayInfra.REGISTRY_URL}/api/v6/templates`;
+const coursesURL = bluejayInfra.SCOPE_MANAGER_URL + '/api/v1/scopes/development/courses';
 const template = ref({});
 const templateId = route.params.templateId;
 const tpaEditionStore = useTpaEditionStore();
 const { originalTpa, modifiedTpa, discardButtonClicked } = storeToRefs(tpaEditionStore);
 const { isProductionEnvironment } = storeToRefs(tpaEditionStore);
 const { tpaEditMode } = useTPAMode();
+const onlyVisualize = ref(false);
 
 const updateIsMobile = () => {
     isMobile.value = window.innerWidth <= 768;
@@ -69,11 +70,13 @@ window.addEventListener('beforeunload', handlePageUnload);
 onBeforeUnmount(() => {
     window.removeEventListener('beforeunload', handlePageUnload);
 });
+
 async function getTemplate() {
     await axios.get(templatesURL + `/${templateId}`)
         .then(async (response) => {
             template.value = response.data;
             tpaEditionStore.setInitialTpaData(template.value);
+            checkTemplateBeingUsed();
             setTimeout(() => {
                 loading.value = false;
             }, 500);
@@ -82,6 +85,26 @@ async function getTemplate() {
             toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
         });
 }
+async function checkTemplateBeingUsed() {
+    let courses = [];
+    await axios.get(coursesURL, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(async (response) => {
+        courses = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
+        const coursesWithTPAtemplate = courses.filter(course => course.templateId === templateId);
+        if (coursesWithTPAtemplate.length > 0) {
+            onlyVisualize.value = true;
+            tpaEditMode.value = false;
+            toast.add({ severity: 'info', summary: 'Info', detail: 'This TPA is being used in a course. You can only read it.', life: 5000 });
+        }
+    })
+        .catch(error => {
+            console.log('Error: ', error);
+        });
+}
+
 function confirmSaveTpaChanges(event) {
     confirm.require({
         target: event.currentTarget,
@@ -89,6 +112,7 @@ function confirmSaveTpaChanges(event) {
         icon: 'pi pi-exclamation-triangle',
         accept: () => {
             tpaEditionStore.saveTpaChanges('template').then(() => {
+                router.push({ name: 'templates-management'});
                 toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
             }).catch(error => {
                 toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
@@ -143,6 +167,10 @@ function collapseAll() {
     metrics.value.collapseAll();
 }
 
+const openCatalogue = () => {
+    const routePath = router.resolve({ name: 'catalogue' });
+    window.open(routePath.href, '_blank');
+};
 </script>
 <template>
     <div style="display: grid; justify-items: center;">
@@ -183,7 +211,7 @@ function collapseAll() {
                         This catalogue can also be consulted inside the TPA Designer by clicking the button below.</p>
                     <div class="flex justify-content-center">
                         <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" severity="secondary"
-                            @click="$router.push({ name: 'catalogue' })" />
+                            @click="openCatalogue" />
                     </div>
                     <p>
                         This tool has been developed following the guidelines of the <a
@@ -220,65 +248,83 @@ function collapseAll() {
                                 </template>
                             </Button>
                         </a>
-                        <img v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
-                        <InputSwitch v-model="tpaEditMode" :pt="{
+                        <div v-if="!onlyVisualize && !isMobile" class="flex align-items-center gap-1">
+                            <img v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
+                            <InputSwitch v-model="tpaEditMode" :pt="{
                                 slider: ({ props }) => ({
                                     class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
                                 })
                             }" />
-                        <img v-tooltip.bottom="'Edit mode'" :src="'/tpa-edit.svg'" width="30" />
+                            <img v-tooltip.bottom="'Edit mode'" :src="'/tpa-edit.svg'" width="30" />
+                        </div>
+                        <img v-if="onlyVisualize" v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
+                    </div>
+                    <div >
+                        <div v-if="!onlyVisualize && isMobile" class="flex align-items-center gap-1 justify-content-center mt-2">
+                            <img v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
+                            <InputSwitch v-model="tpaEditMode" :pt="{
+                                slider: ({ props }) => ({
+                                    class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
+                                })
+                            }" />
+                            <img v-tooltip.bottom="'Edit mode'" :src="'/tpa-edit.svg'" width="30" />
+                        </div>
                     </div>
                     <ToggleButton v-if="tpaEditMode" id="selectEnvironmentButton"
                         v-model="tpaEditionStore.isProductionEnvironment" v-tooltip="'Change environment'"
                         onLabel="Production environment" offLabel="Development environment" onIcon="pi pi-cloud"
                         offIcon="pi pi-cog" @click="updateLocalStorageEnvironment" style="margin-top: 5px;" />
                 </div>
-
             </Fieldset>
             <div v-if="loading" class="flex flex-column m-5">
                 <ProgressSpinner class="text-center" strokeWidth="4" />
                 <h3 class="text-center">Loading...</h3>
             </div>
             <div class="content" v-else>
-                <Divider layout="horizontal" />
-                <div>
-                    <div class="flex align-items-center gap-2">
-                        <h2>Dashboard blocks</h2>
-                        <ToggleButton class="expandButton" v-model="expandedDashboardBlocks"
-                            @click="toggleExpandedDashboardBlocks" onLabel="" offLabel="" onIcon="pi pi-angle-down"
-                            offIcon="pi pi-angle-right" />
-                    </div>
-                    <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config"
-                        :key="template.context.definitions.dashboards.main.config" />
+                <Divider v-if="tpaEditMode" layout="horizontal" />
+                <div v-if="tpaEditMode" class="flex flex-column">
+                    <h4>Change TPA Template id</h4>
+                    <p>Example id: template-my-string-example-v1-0-0</p>
+                    <InputText v-model="tpaEditionStore.modifiedTpa.id" :class="isMobile ? 'w-full' : 'w-3'" autofocus="true"/>
                 </div>
+                <Divider layout="horizontal" />
+                <div class="flex align-items-center gap-2">
+                    <h2>Dashboard blocks</h2>
+                    <ToggleButton class="expandButton" v-model="expandedDashboardBlocks"
+                        @click="toggleExpandedDashboardBlocks" onLabel="" offLabel="" onIcon="pi pi-angle-down"
+                        offIcon="pi pi-angle-right" />
+                </div>
+                <Dashboard ref="dashboardBlocks" fieldName="context.definitions.dashboards.main.config"
+                    :key="template.context.definitions.dashboards.main.config" />
+
+
                 <Divider layout="horizontal" />
 
-                <div>
-                    <div class="flex align-items-baseline gap-2">
-                        <h2>Metrics</h2>
-                        <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics"
-                            onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
-                    </div>
-                    <Metrics ref="metrics" fieldName="terms.metrics" :key="template.terms.metrics" />
+                <div class="flex align-items-baseline gap-2">
+                    <h2>Metrics</h2>
+                    <ToggleButton class="expandButton" v-model="expandedMetrics" @click="toggleExpandedMetrics"
+                        onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
                 </div>
+                <Metrics ref="metrics" fieldName="terms.metrics" :key="template.terms.metrics" />
                 <Divider layout="horizontal" />
 
-                <div>
-                    <div class="flex align-items-baseline gap-2">
-                        <h2>Guarantees</h2>
-                        <ToggleButton class="expandButton" v-model="expandedGuarantees"
-                            @click="toggleExpandedGuarantees" onLabel="" offLabel="" onIcon="pi pi-angle-down"
-                            offIcon="pi pi-angle-right" />
-                    </div>
-                    <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="template.terms.guarantees" />
+                <div class="flex align-items-baseline gap-2">
+                    <h2>Guarantees</h2>
+                    <ToggleButton class="expandButton" v-model="expandedGuarantees" @click="toggleExpandedGuarantees"
+                        onLabel="" offLabel="" onIcon="pi pi-angle-down" offIcon="pi pi-angle-right" />
                 </div>
+                <Guarantees ref="guarantees" fieldName="terms.guarantees" :key="template.terms.guarantees" />
             </div>
-            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
         </div>
     </div>
 </template>
 
 <style scoped>
+p {
+  color: #8e8e8e;
+  font-size: 15px !important;
+}
+
 .buttons {
     display: flex;
     justify-content: center;

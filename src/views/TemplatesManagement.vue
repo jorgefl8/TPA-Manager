@@ -1,6 +1,5 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue';
-import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import NavMenu from '@/components/NavMenu.vue';
 import Divider from 'primevue/divider';
@@ -216,6 +215,7 @@ const editTemplate = (templateId) => {
                                 modal>
                                 <div class="flex flex-column  gap-3 mb-3" style="width: 300px;">
                                     <label for="newTemplateId">Template ID</label>
+                                    <p>Example id: template-my-string-example-v1-0-0</p>
                                     <InputText id="newTemplateId" v-model="newTemplateId" />
 
                                     <label for="sampleTemplate">Select Template Sample</label>
@@ -239,11 +239,11 @@ const editTemplate = (templateId) => {
                                 <span class="text-header" v-tooltip.bottom="'Visualize'" @click="visualizeTemplate(template.id)">{{ template.id }}</span>
                                 <Button v-if="!template.id.endsWith('-clone')" label="Clone"
                                     @click="cloneTemplate(template)" icon="pi pi-clone" :pt="{
-                root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600', style: 'height: 27px; width: 105px ;padding: 0 10px; margin-left: 10px' },
+                root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600', style: 'height: 27px; min-width: 105px ;max-width: 105px ;padding: 0 10px; margin-left: 10px' },
             }" />
                             </div>
                             <div v-if="courses.some(course => course.templateId === template.id)">
-                                <span style="margin-left: 15px; font-size: min(max(15px, 4vw), 18px) !important;">In use in these classes:</span>
+                                <span style="margin-left: 15px; font-size: min(max(15px, 4vw), 18px) !important;">In use in these courses:</span>
                                 <ScrollPanel style="width: 100%; height: 125px"
                                     :pt="{ bary: 'hover:bg-green-400 bg-green-400 opacity-70' }">
                                     <ul>
@@ -276,13 +276,16 @@ const editTemplate = (templateId) => {
                     </template>
                 </TransitionGroup>
             </div>
-            <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
         </div>
     </div>
 </template>
 
 
 <style scoped>
+p {
+  color: #8e8e8e;
+  font-size: 15px !important;
+}
 .card-checkout {
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -380,6 +383,7 @@ li span {
     cursor: pointer;
     font-size: min(max(20px, 4vw), 22px) !important;
     transition: 0.4s;
+    margin-left: 5px;
 }
 .text-header:hover {
     color: #10B981;
@@ -389,7 +393,7 @@ li span {
 
 .template-card {
     flex: 0 1 calc(50% - 10px);
-    border: 1px solid #10B981;
+    border: 1px solid #ccc;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 15px;
