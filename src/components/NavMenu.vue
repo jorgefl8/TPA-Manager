@@ -4,9 +4,8 @@ import SpeedDial from 'primevue/speeddial';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import { useAppThemeStore } from '@/stores/appTheme';
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useToast } from "primevue/usetoast";
-import Toast from 'primevue/toast';
 import { useRoute } from 'vue-router';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
 import axios from 'axios';
@@ -42,12 +41,12 @@ const pageHeader = computed(() => {
             content.title = 'Templates Management';
             content.img = '/templates-logo.png';
             break;
-        case '/new-class':
+        case '/new-course':
             content.title = 'Create new Course';
-            content.img = '/new-class.svg';
+            content.img = '/new-course.svg';
             break;
         case '/tpa-list/' + classId:
-            content.title = 'TPA List for';
+            content.title = 'TPA list for';
             content.img = '/tpa-list.svg';
             break;
         case '/catalogue':
@@ -192,7 +191,7 @@ async function addTemplate() {
         <div class="header-top">
             <img v-if="!(pageHeader.title === 'TPA')" :src="pageHeader.img" width="50" />
             <span v-if="!(pageHeader.title === 'TPA')">{{ pageHeader.title }}</span>
-            <span v-if="pageHeader.title === 'TPA List for'" style="color: #4CD07D;"> {{ classId }}</span>
+            <span v-if="pageHeader.title === 'TPA list for'" style="color: #4CD07D;"> {{ classId }}</span>
         </div>
 
         <div class="buttons">
@@ -229,7 +228,7 @@ async function addTemplate() {
         }" />
                 </div>
             </Dialog>
-            <Button v-if="!isMobile" label="Classes" icon="pi pi-folder-open" @click="$router.push({ name: 'home' })"
+            <Button v-if="!isMobile" label="Courses" icon="pi pi-folder-open" @click="$router.push({ name: 'home' })"
                 outlined />
             <Button label="Templates Management" @click="$router.push({ name: 'templates-management' })"
                 icon="pi pi-wrench" outlined />
@@ -261,17 +260,14 @@ async function addTemplate() {
             </Dialog>
         </div>
     </div>
-    <Toast ref="toast" :position="isMobile ? 'bottom-left' : 'bottom-right'" :baseZIndex="10000" />
 </template>
 
 <style scoped>
 .link-content {
     display: flex;
     align-items: center;
-    /* Alinea los hijos verticalmente al centro */
     justify-content: center;
     gap: 10px;
-    /* Espacio entre los elementos internos */
 }
 
 .header {
@@ -298,7 +294,7 @@ async function addTemplate() {
     font-size: min(max(25px, 4vw), 35px) !important;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 800px) {
     .header {
         flex-direction: column;
     }
@@ -313,8 +309,6 @@ async function addTemplate() {
     }
 
 }
-
-@media screen and (max-width: 545px) {}
 
 @media screen and (max-width: 1350px) {
     .header {
