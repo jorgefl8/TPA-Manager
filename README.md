@@ -1,6 +1,6 @@
 # TPA Manager extension
 
-TPA Manager is a web application that allows users to navigate through their scope, manage classes, Team Practices Agreements (TPAs), and TPA templates. It has been developed using Vue.js 3, Vite, and PrimeVue.
+TPA Manager is a web application that allows users to navigate through their scope, in order to manage classes, Team Practices Agreements (TPAs), and TPA templates. It has been developed using Vue.js 3, Vite, and PrimeVue.
 
 ## Table of contents
 
