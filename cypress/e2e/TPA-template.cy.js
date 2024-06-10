@@ -1,4 +1,14 @@
 beforeEach(() => {
+  cy.intercept("GET", Cypress.env("SCOPE_MANAGER_URL") +'/api/v1/scopes/development/courses', {
+    fixture: "courses.json",
+  }).as("coursesCheck");
+  cy.intercept("DELETE", Cypress.env("REGISTRY_URL") +'/api/v6/templates/template-test_showcase-v1-0-0-clone', {
+    statusCode: 200, 
+    body: {
+      message: 'Template deleted successfully'
+    }
+  }).as('deleteTemplate');
+
   cy.visit(Cypress.env("BASE_URL"));
 });
 describe("Navigate to templates-management and create template from sample", () => {

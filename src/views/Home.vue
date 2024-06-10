@@ -53,6 +53,10 @@ async function getCourses() {
     })
         .catch(error => {
             console.log("Error: ", error);
+            courses.value = [{
+            "name": "Courses",
+            "children": []
+        }];
         });
         setTimeout(() => {
             loading.value = false;

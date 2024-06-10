@@ -14,6 +14,7 @@ import Fieldset from 'primevue/fieldset';
 import Checkbox from 'primevue/checkbox';
 import InputText from 'primevue/inputtext';
 
+import highlight from 'highlight.js';
 import CodeEditor from 'simple-code-editor';
 
 const props = defineProps({

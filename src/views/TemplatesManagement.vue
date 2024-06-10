@@ -41,17 +41,21 @@ async function getTemplates() {
     await axios.get(templatesURL)
         .then(async (response) => {
             templates.value = response.data.sort((a, b) => a.id.localeCompare(b.id));
-            try {
-                const response = await axios.get('/templates.config.json');
-                templatesConfig.value = response.data;
-                showNoTemplatesMessage.value = templatesConfig.value.length === 0;
-            } catch (error) {
-                toast.add({ severity: 'error', summary: 'Error', detail: 'Error fetching templates config', life: 3000 });
-            }
+
         })
         .catch(error => {
-            toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
+            templates.value = [];
+            console.log('Error: ', error.message);
+            toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error, life: 3000 });
         });
+    try {
+        const response = await axios.get('/templates.config.json');
+        templatesConfig.value = response.data;
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Error fetching templates config', life: 3000 });
+    }
+    showNoTemplatesMessage.value = templatesConfig.value.length === 0;
+
 }
 async function getCourses() {
     await axios.get(coursesURL, {
@@ -62,6 +66,7 @@ async function getCourses() {
         courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
     })
         .catch(error => {
+            courses.value = [];
             console.log('Error: ', error);
         });
 }
@@ -85,7 +90,7 @@ const deletePopup = (event, templateId) => {
                 await getTemplates();
             }).catch(error => {
                 console.log('Error: ', error.response);
-                toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
+                toast.add({ severity: 'error', summary: 'Error', detail: error?.response?.data?.error, life: 3000 });
             });
 
         },
@@ -236,14 +241,16 @@ const editTemplate = (templateId) => {
                     <template v-else>
                         <div v-for="template in templates" :key="template.id" class="template-card">
                             <div class="card-header">
-                                <span class="text-header" v-tooltip.bottom="'Visualize'" @click="visualizeTemplate(template.id)">{{ template.id }}</span>
+                                <span class="text-header" v-tooltip.bottom="'Visualize'"
+                                    @click="visualizeTemplate(template.id)">{{ template.id }}</span>
                                 <Button v-if="!template.id.endsWith('-clone')" label="Clone"
                                     @click="cloneTemplate(template)" icon="pi pi-clone" :pt="{
                 root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600', style: 'height: 27px; min-width: 105px ;max-width: 105px ;padding: 0 10px; margin-left: 10px' },
             }" />
                             </div>
                             <div v-if="courses.some(course => course.templateId === template.id)">
-                                <span style="margin-left: 15px; font-size: min(max(15px, 4vw), 18px) !important;">In use in these courses:</span>
+                                <span style="margin-left: 15px; font-size: min(max(15px, 4vw), 18px) !important;">In use
+                                    in these courses:</span>
                                 <ScrollPanel style="width: 100%; height: 125px"
                                     :pt="{ bary: 'hover:bg-green-400 bg-green-400 opacity-70' }">
                                     <ul>
@@ -253,8 +260,8 @@ const editTemplate = (templateId) => {
                 course.classId }}</span>
                                         </li>
                                     </ul>
-                                    <ScrollTop target="parent" :threshold="200" 
-                                        style="margin-right: 15px;" icon="pi pi-angle-up" />
+                                    <ScrollTop target="parent" :threshold="200" style="margin-right: 15px;"
+                                        icon="pi pi-angle-up" />
                                 </ScrollPanel>
                             </div>
                             <div v-else style="display: grid; justify-items: center; align-items: center;">
@@ -283,9 +290,10 @@ const editTemplate = (templateId) => {
 
 <style scoped>
 p {
-  color: #8e8e8e;
-  font-size: 15px !important;
+    color: #8e8e8e;
+    font-size: 15px !important;
 }
+
 .card-checkout {
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -379,12 +387,14 @@ li span {
     display: flex;
     justify-content: space-between;
 }
+
 .text-header {
     cursor: pointer;
     font-size: min(max(20px, 4vw), 22px) !important;
     transition: 0.4s;
     margin-left: 5px;
 }
+
 .text-header:hover {
     color: #10B981;
     transform: scale(1.1);
