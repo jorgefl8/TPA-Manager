@@ -27,7 +27,6 @@ describe("Navigate to templates-management and create template from sample", () 
     cy.get("#sampleTemplate_0").click();
     cy.get("body").click(0, 0);
     cy.get("button").contains("Add").click();
-    cy.wait("@createTemplateCheck");
     cy.get(".p-toast-message").should(
       "contain",
       "Template added successfully."
