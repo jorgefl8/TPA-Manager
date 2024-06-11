@@ -45,7 +45,7 @@ async function getTemplates() {
         })
         .catch(error => {
             templates.value = [];
-            console.log('Error: ', error.message);
+            console.log('Error: ', error);
             const errorMessage = error?.response?.data?.error || 'Unspecified error occurred';
             toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
         });
@@ -90,7 +90,7 @@ const deletePopup = (event, templateId) => {
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Template deleted successfully.', life: 3000 });
                 await getTemplates();
             }).catch(error => {
-                console.log('Error: ', error.response);
+                console.log('Error: ', error);
                 const errorMessage = error?.response?.data?.error || 'Unspecified error occurred';
                 toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
             });
