@@ -88,7 +88,7 @@ async function updateCourse() {
         'Authorization': authorization.value,
       }
     });
-    if (response.status === 200) {
+    if (response.data.code === 200) {
       toast.add({ severity: 'success', summary: 'Success', detail: 'Course updated successfully', life: 3000 });
       editedCourseValues.value = {};
       originalCourseValues.value = {};

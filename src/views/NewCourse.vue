@@ -133,6 +133,8 @@ async function addCredentialorIdent() {
         toast.add({ severity: 'error', summary: 'Error', detail: "Invalid JSON format or missing source field.", life: 3000 });
     }
 }
+
+
 </script>
 
 <template>
@@ -163,6 +165,8 @@ async function addCredentialorIdent() {
                             <div class="row" v-if="templates.length === 0">
                                 <InlineMessage class="mb-2" severity="error">A template must be created in order to
                                     create a new course.</InlineMessage>
+                                    <Button label="Create one!" class="p-button-raised p-button-primary mt-2" @click="$router.push({ name: 'templates-management' })" outlined/>
+
                             </div>
                             <div class="flex flex-column gap-2" style="width: 45%;">
                                 <label for="join-code">Join code<span class="required-asterisk">*</span></label>

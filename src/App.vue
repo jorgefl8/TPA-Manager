@@ -25,7 +25,7 @@ onMounted(() => {
         <RouterView />
         <ScrollTop target="parent" :threshold="200" style="margin-right: 15px;" icon="pi pi-angle-up" />
       </ScrollPanel>
-      <Toast ref="toast" :class="isMobile ? 'w-full max-w-none px-4 py-2 bottom-0' :''" :position="isMobile ? 'bottom-center' : 'bottom-right'" :baseZIndex="10000"/>
+      <Toast ref="toast" :class="isMobile ? 'w-full max-w-none px-4 py-2 bottom-0' : '  '" :position="isMobile ? 'bottom-center' : 'bottom-right'" :baseZIndex="10000"/>
     </div>
   </main>
 </template>

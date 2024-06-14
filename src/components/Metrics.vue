@@ -17,7 +17,6 @@ import Fieldset from 'primevue/fieldset';
 import Dropdown from 'primevue/dropdown';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
-import Toast from 'primevue/toast';
 import Tag from 'primevue/tag';
 import { useTPAMode } from '@/utils/tpaMode.js';
 
@@ -541,7 +540,6 @@ async function changeElementType(metricIndex) {
         </template> 
     </Dialog>
 
-    <Toast ref="toast" position="bottom-right" :baseZIndex="10000" />
 
 </template>
 

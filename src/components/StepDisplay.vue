@@ -7,7 +7,6 @@ import { useAppThemeStore } from '@/stores/appTheme';
 
 import Tag from 'primevue/tag';
 import Chips from 'primevue/chips';
-import Toast from 'primevue/toast';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import Fieldset from 'primevue/fieldset';
@@ -332,7 +331,6 @@ function moveStep(event, stepNumber, direction) {
     <Button v-if="tpaEditionStore.isEditionMode" icon="pi pi-plus" class="p-button-rounded p-button-primary" @click="addNewStep" label="Add new step" />
   </Fieldset>
 
-  <Toast ref="toast" position="bottom-right" :baseZIndex="10000" />
 
 </template>
 
