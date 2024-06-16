@@ -10,7 +10,6 @@ import InputText from 'primevue/inputtext';
 import { useToast } from "primevue/usetoast";
 import Dropdown from 'primevue/dropdown';
 import InputSwitch from 'primevue/inputswitch';
-import axios from 'axios';
 import { useTPAMode } from '@/utils/tpaMode.js';
 import { changeShowHidden } from '@/utils/showHiddenCourses.js';
 
@@ -40,9 +39,17 @@ const SCOPES_URL = `${bluejayInfra.SCOPE_MANAGER_URL}/api/v1/scopes/development/
 const emit = defineEmits(['courseUpdated']);
 const editedCourseValues = ref({});
 const originalCourseValues = ref({});
-const authorization = computed(() => localStorage.getItem('auth'));
+const authorization = ref(localStorage.getItem('auth'));
 const templatesURL = bluejayInfra.REGISTRY_URL + "/api/v6/templates";
 const templates = ref([]);
+
+
+watch(authorization, (newVal) => {
+  if (!newVal) {
+    showToast('No hay información de autenticación. Por favor, inicie sesión.');
+  }
+});
+
 
 watch(showHiddenCourses, (newValue, oldValue) => {
   if (newValue === true) {
@@ -82,6 +89,8 @@ async function openEditDialog(node) {
 
 async function updateCourse() {
   try {
+    const module = await import('axios');
+    const axios = module.default; 
     const response = await axios.put(SCOPES_URL + originalCourseValues.value.classId, editedCourseValues.value, {
       headers: {
         'Content-Type': 'application/json',
@@ -103,6 +112,8 @@ async function updateCourse() {
   displayDialogEditClass.value = false;
 }
 async function getTemplates() {
+  const module = await import('axios');
+    const axios = module.default; 
   await axios.get(templatesURL)
     .then(async (response) => {
       templates.value = response.data.sort((a, b) => a.id.localeCompare(b.id));
@@ -122,6 +133,10 @@ const showDashboard = (projectId) => {
 };
 
 const showGithubRepository = (identities) => {
+  if(!authorization.value) {
+    toast.add({ severity: 'info', summary: 'Info', detail: 'Please add auth to view the GitHub repository.', life: 3000 });
+    return;
+  }
   const githubIdentity = identities.find(identity => identity.source === 'github');
   if (githubIdentity) {
     const { repoOwner, repository } = githubIdentity;
@@ -145,14 +160,14 @@ const showGithubRepository = (identities) => {
             :style="{ color: isExpanded('Courses') ? '#10B981' : '#43A5F4' }"></i>
           {{ nodes[0].name }}
         </span>
-        <Button label="New Course" @click.stop @click="$router.push({ name: 'new-course' })" icon="pi pi-plus" :pt="{
-          root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600', style: 'height: 27px; padding: 0 10px; margin-left: 10px' },
+        <Button label="New Course" severity="success" @click.stop @click="$router.push({ name: 'new-course' })" icon="pi pi-plus" :pt="{
+          root: { style: 'height: 27px; padding: 0 10px; margin-left: 10px' },
         }" raised />
       </div>
 
       <div class="flex align-items-center gap-2">
         <span> Show hidden courses: </span>
-        <InputSwitch v-model="showHiddenCourses" :pt="{
+        <InputSwitch v-model="showHiddenCourses" aria-label="showHiddenCourses" :pt="{
           slider: ({ props }) => ({
             class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
           })
@@ -172,17 +187,13 @@ const showGithubRepository = (identities) => {
             {{ course.classId }}
           </span>
           <div class="flex gap-2">
-            <Button label="Edit" icon="pi pi-pencil" @click="openEditDialog(course)" :pt="{
-          root: { class: 'bg-bluegray-400 border-bluegray-400 hover:bg-bluegray-600 hover:border-bluegray-600', style: 'margin-left: 10px' }
-        }" raised />
+            <Button label="Edit" severity="contrast" icon="pi pi-pencil" @click="openEditDialog(course)" :pt="{
+          root: { style: 'margin-left: 10px' }
+        }"  outlined/>
             <Button label="TPA Template"
-              @click="$router.push({ name: 'tpa-template', params: { templateId: course.templateId } })" :pt="{
-          root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-700 hover:border-blue-700'},
-        }" raised />
+              @click="$router.push({ name: 'tpa-template', params: { templateId: course.templateId } })"  raised />
             <Button label="TPA List" @click="$router.push({ name: 'tpa-list', params: { classId: course.classId } })"
-              :pt="{
-          root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-700 hover:border-blue-700' },
-        }" raised />
+              raised />
           </div>
 
         </div>
@@ -195,14 +206,14 @@ const showGithubRepository = (identities) => {
               <span style="font-size: 20px !important;cursor: pointer;" @click.stop="toggleNode(project.projectId)">
                 <i :class="['pi', 'pi-angle-double-right', { 'rotate-down': isExpanded(project.projectId), 'rotate-right': !isExpanded(project.projectId) }]"
                   :style="{ color: isExpanded(project.projectId) ? '#10B981' : '#43A5F4' }"></i>
-                {{ project.projectId }}
+                {{ project.name }}
               </span>
               <div class="flex align-items-center gap-2" @click.stop>
                 <Button label="TPA" @click="showTpa(course.classId, project.projectId)" :pt="{
-          root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-500 hover:border-yellow-500', style: 'height: 27px; padding: 0 10px; margin-left: 10px' },
+          root: { class: 'bg-yellow-400 border-yellow-400 hover:bg-yellow-600 hover:border-yellow-600', style: 'height: 27px; padding: 0 10px; margin-left: 10px' },
         }" raised />
                 <Button label="Dashboard" @click="showDashboard(project.projectId)" :pt="{
-          root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-500 hover:border-yellow-500', style: 'height: 27px;' },
+          root: { class: 'bg-yellow-400 border-yellow-400 hover:bg-yellow-600 hover:border-yellow-600', style: 'height: 27px;' },
         }" raised />
                 <Button class="github-button" @click="showGithubRepository(project.identities)"
                   icon="pi pi-github"
@@ -491,8 +502,7 @@ ul {
     margin-bottom: 15px;
   }
 
-  .github-icon,
-  .flex.align-items-center {
+  .github-icon{
     justify-content: flex-start;
   }
 
