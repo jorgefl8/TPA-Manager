@@ -65,6 +65,11 @@ The following table shows the tools that must be deployed and the corresponding 
 | REGISTRY_URL | process.env.REGISTRY_URL | http://localhost:5400 | https://registry.bluejay.governify.io/ |
 | SCOPE_MANAGER_URL | process.env.SCOPE_MANAGER_URL | http://localhost:5700 | https://scopes.bluejay.governify.io |
 | COLLECTOR_EVENTS_URL | process.env.COLLECTOR_EVENTS_URL | http://localhost:5500 | https://event-collector.bluejay.governify.io/ |
+| DASHBOARD_URL | process.env.DASHBOARD_URL | http://localhost:5600 | https://dashboard.bluejay.governify.io/ |
+| REPORTER | process.env.DASHBOARD_URL | http://localhost:5300 | https://reporter.bluejay.governify.io/ |
+
+
+
 
 To set the environment variables:
 
