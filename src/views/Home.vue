@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import axios from 'axios';
 import Divider from 'primevue/divider';
 import { useToast } from "primevue/usetoast";
 import NavMenu from '@/components/NavMenu.vue';
@@ -40,6 +39,8 @@ watch(showHiddenCourses, () => {
     getCourses();
 });
 async function getCourses() {
+    const module = await import('axios');
+    const axios = module.default;
     await axios.get(coursesURL.value, {
         headers: {
             'Content-Type': 'application/json', 'Authorization': `${localStorage.getItem('auth')}`
@@ -48,19 +49,23 @@ async function getCourses() {
         courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
         courses.value = [{
             "name": "Courses",
-            "children": courses.value.filter(course => !course.hidden || showHiddenCourses.value)
+            "children": courses.value.filter(course => {
+                if (course.hidden != undefined) {
+                    return course.hidden === showHiddenCourses.value;
+                }   
+                return true;
+            })
+
         }];
     })
         .catch(error => {
             console.log("Error: ", error);
             courses.value = [{
-            "name": "Courses",
-            "children": []
-        }];
+                "name": "Courses",
+                "children": []
+            }];
         });
-        setTimeout(() => {
-            loading.value = false;
-        }, 500);
+    loading.value = false;
 }
 
 

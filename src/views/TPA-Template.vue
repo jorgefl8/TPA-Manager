@@ -76,13 +76,12 @@ async function getTemplate() {
             template.value = response.data;
             tpaEditionStore.setInitialTpaData(template.value);
             checkTemplateBeingUsed();
-            setTimeout(() => {
-                loading.value = false;
-            }, 500);
         })
         .catch(error => {
             toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
         });
+    loading.value = false;
+
 }
 async function checkTemplateBeingUsed() {
     let courses = [];
@@ -111,7 +110,7 @@ function confirmSaveTpaChanges(event) {
         icon: 'pi pi-exclamation-triangle',
         accept: () => {
             tpaEditionStore.saveTpaChanges('template').then(() => {
-                router.push({ name: 'templates-management'});
+                router.push({ name: 'templates-management' });
                 toast.add({ severity: 'success', summary: 'Confirmed', detail: 'Changes saved!', life: 3000 });
             }).catch(error => {
                 toast.add({ severity: 'error', summary: 'Error', detail: 'Changes could not be saved.', life: 3000 });
@@ -176,7 +175,7 @@ const openCatalogue = () => {
         <div class="card ">
             <NavMenu />
             <Divider layout="horizontal" />
-            <Panel header="TPA Information" toggleable collapsed>
+            <Panel header="TPA Information" aria-label="TPaInfo" toggleable collapsed>
                 <div class="content">
                     <p>A TPA is a document that describes the practices a team should follow during the development of a
                         project
@@ -198,7 +197,8 @@ const openCatalogue = () => {
                         JSON
                         file
                         that can be used by the <a href="https://www.governify.io/" target="_blank">Governify
-                            platform</a>.
+                            platform <img src="/governify.ico" width="20" height="20"
+                            alt="governify-img" loading="lazy" />  </a>.
                     </p>
                     <p><a href="https://github.com/governify" target="_blank">Governify</a> also provides a <a
                             href="https://github.com/governify/governify-examples/tree/master/metrics"
@@ -209,8 +209,8 @@ const openCatalogue = () => {
                         that can be used for reference as a starting point.
                         This catalogue can also be consulted inside the TPA Designer by clicking the button below.</p>
                     <div class="flex justify-content-center">
-                        <Button class="mr-3 mb-3" label="Catalogue" icon="pi pi-book" severity="secondary"
-                            @click="openCatalogue" />
+                        <Button aria-label="open-catalogue" class="mr-3 mb-3" label="Catalogue" icon="pi pi-book"
+                            severity="secondary" @click="openCatalogue" />
                     </div>
                     <p>
                         This tool has been developed following the guidelines of the <a
@@ -226,47 +226,50 @@ const openCatalogue = () => {
                 <div style="display: flex; justify-content: center; flex-direction: column;">
                     <div class="buttons">
                         <template v-if="tpaEditMode">
-                            <Button icon="pi pi-save" @click="confirmSaveTpaChanges($event)"
-                                v-tooltip.left="'Save changes'" :pt="{
+                            <Button aria-label="confirm-changes" icon="pi pi-save"
+                                @click="confirmSaveTpaChanges($event)" v-tooltip.left="'Save changes'" :pt="{
                                 root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
                             }" />
-                            <Button title="Discard changes" icon="pi pi-times" @click="confirmDiscardTpaChanges"
+                            <Button aria-label="discard-changes" icon="pi pi-times" @click="confirmDiscardTpaChanges"
                                 v-tooltip.bottom="'Discard changes'" :pt="{
                                 root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600' }
                             }" />
                         </template>
-                        <Button icon="pi pi-angle-double-up" @click="collapseAll" style="grid-area: collapseAll;"
-                            v-tooltip.bottom="'Collapse all'" outlined />
-                        <Button icon="pi pi-angle-double-down" @click="expandAll" style="grid-area: expandAll;"
-                            v-tooltip.top="'Expand all'" outlined />
+                        <Button aria-label="collapseAll" icon="pi pi-angle-double-up" @click="collapseAll"
+                            style="grid-area: collapseAll;" v-tooltip.bottom="'Collapse all'" outlined />
+                        <Button aria-label="expandAll" icon="pi pi-angle-double-down" @click="expandAll"
+                            style="grid-area: expandAll;" v-tooltip.top="'Expand all'" outlined />
                         <a :href="bluejayInfra.REGISTRY_URL + '/api/v6/templates/' + templateId" target="_blank"
                             style="grid-area: viewTpaJson;">
-                            <Button class="view-tpa-button" v-tooltip.right="'View TPA in JSON'">
+                            <Button aria-label="view-tpa-in-json" class="view-tpa-button"
+                                v-tooltip.right="'View TPA in JSON'">
                                 <template #icon>
                                     <img src="/json.svg" alt="View TPA in JSON" width="20" height="20" />
                                 </template>
                             </Button>
                         </a>
                         <div v-if="!onlyVisualize && !isMobile" class="flex align-items-center gap-1">
-                            <img v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
-                            <InputSwitch v-model="tpaEditMode" :pt="{
+                            <img v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'" width="30" />
+                            <InputSwitch v-model="tpaEditMode" aria-label="toggleEditMode" :pt="{
                                 slider: ({ props }) => ({
                                     class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
                                 })
                             }" />
-                            <img v-tooltip.bottom="'Edit mode'" :src="'/tpa-edit.svg'" width="30" />
+                            <img v-tooltip.bottom="'Edit mode'" alt="Edit mode" :src="'/tpa-edit.svg'" width="30" />
                         </div>
-                        <img v-if="onlyVisualize" v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
+                        <img v-if="onlyVisualize" v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'"
+                            width="30" />
                     </div>
-                    <div >
-                        <div v-if="!onlyVisualize && isMobile" class="flex align-items-center gap-1 justify-content-center mt-2">
-                            <img v-tooltip.bottom="'Read mode'" :src="'/tpa-read.svg'" width="30" />
-                            <InputSwitch v-model="tpaEditMode" :pt="{
+                    <div>
+                        <div v-if="!onlyVisualize && isMobile"
+                            class="flex align-items-center gap-1 justify-content-center mt-2">
+                            <img v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'" width="30" />
+                            <InputSwitch v-model="tpaEditMode" aria-label="toggleEditMode" :pt="{
                                 slider: ({ props }) => ({
                                     class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
                                 })
                             }" />
-                            <img v-tooltip.bottom="'Edit mode'" :src="'/tpa-edit.svg'" width="30" />
+                            <img v-tooltip.bottom="'Edit mode'" alt="Edit mode" :src="'/tpa-edit.svg'" width="30" />
                         </div>
                     </div>
                     <ToggleButton v-if="tpaEditMode" id="selectEnvironmentButton"
@@ -283,8 +286,9 @@ const openCatalogue = () => {
                 <Divider v-if="tpaEditMode" layout="horizontal" />
                 <div v-if="tpaEditMode" class="flex flex-column">
                     <h4>Change TPA Template id</h4>
-                    <p>Example id: template-my-string-example-v1-0-0</p>
-                    <InputText v-model="tpaEditionStore.modifiedTpa.id" :class="isMobile ? 'w-full' : 'w-3'" autofocus="true"/>
+                    <p style="color: #8e8e8e;font-size: 15px !important;"  >Example id: template-my-string-example-v1-0-0</p>
+                    <InputText v-model="tpaEditionStore.modifiedTpa.id" :aria-label="tpaEditionStore.modifiedTpa.id" :class="isMobile ? 'w-full' : 'w-3'"
+                        autofocus="true" />
                 </div>
                 <Divider layout="horizontal" />
                 <div class="flex align-items-center gap-2">
@@ -319,10 +323,7 @@ const openCatalogue = () => {
 </template>
 
 <style scoped>
-p {
-  color: #8e8e8e;
-  font-size: 15px !important;
-}
+
 
 .buttons {
     display: flex;

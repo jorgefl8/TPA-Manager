@@ -134,7 +134,7 @@ function deleteBlock(index) {
   
   <div class="flex gap-2">
     <p>Use the default dashboard?</p>
-    <Checkbox v-model="useDefaultDashboard" :binary="true" :disabled="!tpaEditMode" :readonly="!tpaEditMode" @change="refreshLocalStorageInfo" />
+    <Checkbox v-model="useDefaultDashboard" aria-label="useDefaultDashboard" :binary="true" :disabled="!tpaEditMode" :readonly="!tpaEditMode" @change="refreshLocalStorageInfo" />
   </div>
   
   <DataView v-if="!useDefaultDashboard" :value="dashboardBlocks" dataKey="id">

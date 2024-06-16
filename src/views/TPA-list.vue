@@ -11,13 +11,13 @@ import { bluejayInfraStore } from '@/stores/bluejayInfra';
 import ProgressSpinner from 'primevue/progressspinner';
 import { useTPAMode } from '@/utils/tpaMode';
 
-const { tpaEditMode } = useTPAMode();
 
+const { tpaEditMode } = useTPAMode();
+const loading = ref(true);
 const bluejayInfra = bluejayInfraStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
-const loading = ref(true)
 const isMobile = ref(window.innerWidth <= 768);
 const course = ref();
 const classId = route.params.classId;
@@ -60,12 +60,12 @@ async function findClassTPAs(classId) {
     }).then(async (response) => {
         let allAgreements = response.data.sort((a, b) => a.id.localeCompare(b.id));
         agreements.value = allAgreements.filter(agreement => agreement.context.definitions.scopes.development.class.default === classId);
-        loading.value = false
     })
         .catch(error => {
             console.log("Error: ", error);
             toast.add({ severity: 'error', summary: 'Error', detail: error.response.data.error, life: 3000 });
         });
+        loading.value = false
 }
 
 const showTpa = (courseId, projectId) => {

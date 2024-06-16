@@ -101,14 +101,12 @@ async function getTpa() {
         agreement.value = response.data;
         tpaEditionStore.setInitialTpaData(agreement.value);
         createExampleVersion(agreement.value.templateId);
-        setTimeout(() => {
-            loading.value = false;
-        }, 500);
     })
         .catch(error => {
             console.log("Error: ", error);
             toast.add({ severity: 'error', summary: 'Error', detail: 'Error fetching agreement' });
         });
+    loading.value = false;
 }
 const saveOption = ref('');
 const loadingChanges = ref(false);
@@ -246,7 +244,8 @@ function collapseAll() {
                         JSON
                         file
                         that can be used by the <a href="https://www.governify.io/" target="_blank">Governify
-                            platform</a>.
+                            platform <img src="/governify.ico" width="20" height="20" alt="governify-img"
+                                loading="lazy" /> </a>.
                     </p>
                     <p><a href="https://github.com/governify" target="_blank">Governify</a> also provides a <a
                             href="https://github.com/governify/governify-examples/tree/master/metrics"

@@ -229,7 +229,7 @@ function moveStep(event, stepNumber, direction) {
               </div>
               <div v-else-if="stepKey === 'cache'" class="flex align-items-center gap-2">
                 <strong>Cache:</strong>
-                <Checkbox v-model="props.data.steps[stepNumber].cache" :binary="true" :trueValue="true" :falseValue="false" @change="updateStepData(stepNumber, stepKey, !stepValue)" />
+                <Checkbox v-model="props.data.steps[stepNumber].cache"  aria-label="cache" :binary="true" :trueValue="true" :falseValue="false" @change="updateStepData(stepNumber, stepKey, !stepValue)" />
               </div>
             </template>
 
@@ -280,7 +280,7 @@ function moveStep(event, stepNumber, direction) {
               </div>
               <div v-else-if="stepKey === 'cache'" class="flex align-items-center gap-2">
                 <strong>Cache:</strong>
-                <Checkbox v-model="stepData.cache" :binary="true" :trueValue="true" :falseValue="false" :readonly="true" />
+                <Checkbox v-model="stepData.cache" aria-label="cache" :binary="true" :trueValue="true" :falseValue="false" :readonly="true" />
               </div>
             </template>
 

@@ -41,7 +41,6 @@ async function getTemplates() {
     await axios.get(templatesURL)
         .then(async (response) => {
             templates.value = response.data.sort((a, b) => a.id.localeCompare(b.id));
-
         })
         .catch(error => {
             templates.value = [];
@@ -216,8 +215,8 @@ const editTemplate = (templateId) => {
                                     </div>
                                 </li>
                             </ul>
-                            <Button label="Create new template from sample" @click="displayCreateFromSample = true"
-                                :pt="{ root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600', style: 'width: 280px; padding: 0 10px; margin-top: 10px' } }" />
+                            <Button label="Create new template from sample" severity="success" @click="displayCreateFromSample = true"
+                                :pt="{ root: { style: 'width: 280px; padding: 0 10px; margin-top: 10px' } }" />
                             <Dialog v-model:visible="displayCreateFromSample" header="Add new template from sample"
                                 modal>
                                 <div class="flex flex-column  gap-3 mb-3" style="width: 300px;">
@@ -247,7 +246,7 @@ const editTemplate = (templateId) => {
                                     @click="visualizeTemplate(template.id)">{{ template.id }}</span>
                                 <Button v-if="!template.id.endsWith('-clone')" label="Clone"
                                     @click="cloneTemplate(template)" icon="pi pi-clone" :pt="{
-                root: { class: 'bg-blue-500 border-blue-500 hover:bg-blue-600 hover:border-blue-600', style: 'height: 27px; min-width: 105px ;max-width: 105px ;padding: 0 10px; margin-left: 10px' },
+                root: { style: 'height: 27px; min-width: 105px ;max-width: 105px ;padding: 0 10px; margin-left: 10px' },
             }" />
                             </div>
                             <div v-if="courses.some(course => course.templateId === template.id)">
@@ -270,13 +269,13 @@ const editTemplate = (templateId) => {
                                 <span>Not in use</span>
                                 <div class="buttons">
                                     <Button label="Edit" @click="editTemplate(template.id)" icon="pi pi-pencil" :pt="{
-                root: { class: 'bg-yellow-300 border-yellow-300 hover:bg-yellow-400 hover:border-yellow-400', style: 'min-width: 93px' }
+                root: { class: 'bg-yellow-400 border-yellow-400 hover:bg-yellow-600 hover:border-yellow-600', style: 'min-width: 93px' }
             }" />
 
                                     <ConfirmPopup></ConfirmPopup>
                                     <Button label="Delete" @click="deletePopup($event, template.id)" icon="pi pi-trash"
                                         :pt="{
-                root: { class: 'bg-red-400 border-red-400 hover:bg-red-600 hover:border-red-600', style: 'min-width: 93px' }
+                root: { class: 'bg-red-500 border-red-500 hover:bg-red-600 hover:border-red-600', style: 'min-width: 93px' }
             }" />
 
                                 </div>

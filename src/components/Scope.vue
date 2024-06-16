@@ -44,7 +44,7 @@ watch(validityInitial, (newValue) => {
 
     <div class="flex gap-2">
       <span>Will calculations by member be required?</span>
-      <Checkbox v-model="isMemberNeeded" :disabled="!tpaEditMode" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(fieldName + '.member.default', isMemberNeeded)" />
+      <Checkbox v-model="isMemberNeeded" :disabled="!tpaEditMode" aria-label="memberNeeded" :binary="true" trueValue="*" falseValue="null" @change="tpaEditionStore.updateTpaField(fieldName + '.member.default', isMemberNeeded)" />
     </div>
 
     <div class="flex align-items-center gap-2">

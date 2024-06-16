@@ -8,7 +8,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useToast } from "primevue/usetoast";
 import { useRoute } from 'vue-router';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
-import axios from 'axios';
 import { useTPAMode } from '@/utils/tpaMode.js';
 import Breadcrumb from 'primevue/breadcrumb';
 import InputSwitch from 'primevue/inputswitch';
@@ -31,15 +30,16 @@ const newTemplateId = ref('');
 const templatesURL = bluejayInfra.REGISTRY_URL + "/api/v6/templates";
 const assetsURL = bluejayInfra.REGISTRY_URL + "/api/v6/assets/tpa-1010101010";
 
+
 const pageHeader = computed(() => {
     let content = {
         title: 'Development Scopes',
-        img: '/favicon.ico'
+        img: '/appicon.svg'
     };
     switch (route.path) {
         case '/templates-management':
             content.title = 'Templates Management';
-            content.img = '/templates-logo.png';
+            content.img = '/templates-management.svg';
             break;
         case '/new-course':
             content.title = 'Create new Course';
@@ -117,6 +117,8 @@ async function addTemplate() {
         toast.add({ severity: 'error', summary: 'Error', detail: 'Please fill the field.', life: 3000 });
     } else {
         let tpaTemplate = null;
+        const module = await import('axios');
+        const axios = module.default;
         tpaTemplate = await axios.get(assetsURL)
         const template = JSON.parse(JSON.stringify(tpaTemplate.data).replace(/"id":\s*"tpa-1010101010"/g, `"id": "${newTemplateId.value}"`).replace(/"type":\s*"agreement"/g, `"type": "template"`));
         await axios.post(templatesURL, template, {
@@ -155,7 +157,7 @@ async function addTemplate() {
                 <div v-else class="link-content">
                     <div v-if="!isMobile">
                         <img v-tooltip.bottom="'Read mode'" v-if="item.label === 'TPA'" :src="pageHeader.img.read_mode"
-                            width="30" />
+                            :alt="pageHeader.img.read_mode" width="30" />
                         <span v-if="item.label !== 'TPA'" class="text-color">{{ item.label }}</span>
                         <span v-if="item.label === 'TPA'">
                             <InputSwitch v-if="item.label === 'TPA'" v-model="tpaEditMode" :pt="{
@@ -165,7 +167,7 @@ async function addTemplate() {
         }" />
                         </span>
                         <img v-tooltip.bottom="'Edit mode'" v-if="item.label === 'TPA'" :src="pageHeader.img.edit_mode"
-                            width="30" />
+                            :alt="pageHeader.img.edit_mode" width="30" />
                     </div>
                     <div v-else class="link-content">
                         <span class="text-color">{{ item.label }}</span>
@@ -176,7 +178,8 @@ async function addTemplate() {
             </template>
         </Breadcrumb>
         <div v-if="isMobile && pageHeader.title === 'TPA'">
-            <img v-tooltip.bottom="'Read mode'" :src="pageHeader.img.read_mode" width="30" />
+            <img v-tooltip.bottom="'Read mode'" :src="pageHeader.img.read_mode" :alt="pageHeader.img.read_mode"
+                width="30" />
             <span>
                 <InputSwitch v-model="tpaEditMode" :pt="{
             slider: ({ props }) => ({
@@ -184,12 +187,14 @@ async function addTemplate() {
             })
         }" />
             </span>
-            <img v-tooltip.bottom="'Edit mode'" :src="pageHeader.img.edit_mode" width="30" />
+            <img v-tooltip.bottom="'Edit mode'" :src="pageHeader.img.edit_mode" :alt="pageHeader.img.edit_mode"
+                width="30" />
 
 
         </div>
         <div class="header-top">
-            <img v-if="pageHeader.title !== 'TPA'" :src="pageHeader.img" width="50" />
+            <img v-if="pageHeader.title !== 'TPA'" :src="pageHeader.img" width="50" height="50"
+                alt="header-img" loading="lazy" />
             <span v-if="pageHeader.title !== 'TPA'">{{ pageHeader.title }}</span>
             <span v-if="pageHeader.title === 'TPA list for'" style="color: #4CD07D;"> {{ classId }}</span>
         </div>
@@ -199,20 +204,20 @@ async function addTemplate() {
                 <Button label="Classes" icon="pi pi-folder-open" @click="$router.push({ name: 'home' })" outlined />
                 <div :style="{ height: '50px' }" class="flex align-items-center justify-content-center">
                     <SpeedDial :model="items" :radius="60" type="quarter-circle" direction="down-right"
-                        showIcon="pi pi-cog" class="relative" :style="{ height: '50px' }"
+                        showIcon="pi pi-cog" class="relative" :style="{ height: '50px' }" aria-label="speedDial-button"
                         buttonClass="p-button-outlined">
                         <template #item="slotProps">
                             <Button v-tooltip="slotProps.item.label" :icon="slotProps.item.icon"
-                                class="speeddial-button" @click="slotProps.item.command" />
+                                :aria-label="slotProps.item.label" class="speeddial-button"
+                                @click="slotProps.item.command" />
                         </template>
                     </SpeedDial>
                 </div>
             </div>
 
             <Button v-if="!isMobile && pageHeader.title === 'Templates Management' && !templateId" label="New Template"
-                icon="pi pi-plus" @click="displayDialogNewTemplate = true" :pt="{
-            root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
-        }" />
+                aria-label="new-template" severity="success" icon="pi pi-plus"
+                @click="displayDialogNewTemplate = true" />
             <Dialog v-model:visible="displayDialogNewTemplate" modal header="Add a new Template" :style="{}">
                 <div class="flex flex-column align-items-center gap-3 mb-3">
                     <label for="newTemplateId">Template ID</label>
@@ -239,10 +244,11 @@ async function addTemplate() {
 
             <div v-if="!isMobile" :style="{ height: '50px' }" class="flex align-items-center justify-content-center">
                 <SpeedDial :model="items" :radius="60" type="quarter-circle" direction="down-right" showIcon="pi pi-cog"
-                    class="relative" :style="{ height: '50px' }" buttonClass="p-button-outlined">
+                    aria-label="speedDial-button" class="relative" :style="{ height: '50px' }"
+                    buttonClass="p-button-outlined">
                     <template #item="slotProps">
                         <Button v-tooltip="slotProps.item.label" :icon="slotProps.item.icon" class="speeddial-button"
-                            @click="slotProps.item.command" />
+                            :aria-label="slotProps.item.label" @click="slotProps.item.command" />
                     </template>
                 </SpeedDial>
             </div>

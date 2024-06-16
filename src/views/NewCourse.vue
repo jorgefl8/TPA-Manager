@@ -57,13 +57,11 @@ async function getTemplates() {
     await axios.get(templatesURL)
         .then(async (response) => {
             templates.value = response.data.sort((a, b) => a.id.localeCompare(b.id));
-            setTimeout(() => {
-                loading.value = false;
-            }, 500);
         })
         .catch(error => {
             console.log("Error: ", error);
         });
+        loading.value = false;
 }
 
 async function createClass() {

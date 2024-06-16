@@ -144,7 +144,7 @@ function scrollToMetric(metric) {
             <span class="flex align-items-center gap-2">
               <i class="pi pi-users"></i>
               <span class="font-semibold">Is guarantee by member?</span>
-              <Checkbox v-model="isGuaranteeByMember[slotProps.index]" :disabled="!tpaEditMode" :readonly="!tpaEditMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
+              <Checkbox v-model="isGuaranteeByMember[slotProps.index]" aria-label="guaranteeByMember" :disabled="!tpaEditMode" :readonly="!tpaEditMode" :binary="true" trueValue="*" :falseValue="undefined" @change="updateGuaranteeMember(slotProps.index)" />
             </span>
   
             <span class="flex align-items-center gap-2">
