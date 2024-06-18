@@ -80,6 +80,8 @@ ASSETS_MANAGER_URL=https://assets.bluejay.governify.io/
 REGISTRY_URL=https://registry.bluejay.governify.io/
 SCOPE_MANAGER_URL=https://scopes.bluejay.governify.io
 COLLECTOR_EVENTS_URL=https://event-collector.bluejay.governify.io/
+DASHBOARD_URL=https://dashboard.bluejay.governify.io/
+REPORTER_URL=https://reporter.bluejay.governify.io/
 ```
 
 ## Contributing
