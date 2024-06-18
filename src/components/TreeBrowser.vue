@@ -4,7 +4,7 @@ import Button from 'primevue/button';
 import ScrollPanel from 'primevue/scrollpanel';
 import ScrollTop from 'primevue/scrolltop';
 import { bluejayInfraStore } from '@/stores/bluejayInfra';
-import { reactive, ref, computed, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import { useToast } from "primevue/usetoast";
@@ -42,13 +42,6 @@ const originalCourseValues = ref({});
 const authorization = ref(localStorage.getItem('auth'));
 const templatesURL = bluejayInfra.REGISTRY_URL + "/api/v6/templates";
 const templates = ref([]);
-
-
-watch(authorization, (newVal) => {
-  if (!newVal) {
-    showToast('No hay información de autenticación. Por favor, inicie sesión.');
-  }
-});
 
 
 watch(showHiddenCourses, (newValue, oldValue) => {
