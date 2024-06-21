@@ -49,23 +49,31 @@ async function getCourses() {
         courses.value = response.data.scope.sort((a, b) => a.classId.localeCompare(b.classId));
         courses.value = [{
             "name": "Courses",
-            "children": courses.value.filter(course => {
-                if (course.hidden != undefined) {
-                    return course.hidden === showHiddenCourses.value;
-                }   
-                return true;
-            })
-
+            "children": await filterCourses(courses.value)
         }];
-    })
-        .catch(error => {
-            console.log("Error: ", error);
-            courses.value = [{
-                "name": "Courses",
-                "children": []
-            }];
-        });
+    }).catch(error => {
+        console.log("Error: ", error);
+        courses.value = [{
+            "name": "Courses",
+            "children": []
+        }];
+    });
     loading.value = false;
+}
+
+
+async function filterCourses(courses) {
+    let filteredCourses = [];
+    for (let course of courses) {
+        if (!course.hidden) {
+            filteredCourses.push(course);
+        }
+        if (showHiddenCourses.value && course.hidden) {
+            filteredCourses.push(course);
+        }
+
+    }
+    return filteredCourses;
 }
 
 
