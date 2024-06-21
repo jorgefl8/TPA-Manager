@@ -385,7 +385,7 @@ async function changeElementType(metricIndex) {
                     <div class="flex align-items-center gap-2 metric-legend">
                         {{  slotProps.data[0] }}
                         <Tag v-if="metricEntries.filter(metric => metric[0] === slotProps.data[0]).length > 1" severity="warning" class="pi pi-exclamation-triangle" title="This metric ID is duplicated and only the last one will be persisted!" />
-                        <Button class="p-button-text" icon="pi pi-play" severity="success" @click="showSelectWindowPanel($event)" />
+                        <Button class="p-button-text" aria-label="playMetric" icon="pi pi-play" severity="success" @click="showSelectWindowPanel($event)" />
 
                         <OverlayPanel ref="selectWindowOverlayPanel">
                             <div class="flex flex-column gap-4">
@@ -403,10 +403,10 @@ async function changeElementType(metricIndex) {
                                         <Calendar v-model="windowComputation.end" inputId="windowEnd" placeholder="Select an end date" />
                                     </div>
                                 </div>
-                                <Button label="Compute metric" @click="computeMetric(slotProps.data[1])" />
+                                <Button label="Compute metric" aria-label="computeMetric" click="computeMetric(slotProps.data[1])" />
                             </div>
                         </OverlayPanel>
-                        <Button v-if="tpaEditMode" class="p-button-text" icon="pi pi-trash" severity="danger" @click="deleteMetric($event, slotProps.index)" />
+                        <Button v-if="tpaEditMode" class="p-button-text" aria-label="deleteMetric" icon="pi pi-trash" severity="danger" @click="deleteMetric($event, slotProps.index)" />
                     </div>
                 </template>
 
@@ -457,7 +457,7 @@ async function changeElementType(metricIndex) {
                                     {{ Object.keys(Object.values(slotProps.data[1].measure.event)?.[0])?.[0] }}
                                 </Tag>
                             </div>
-                            <Button v-if="tpaEditMode" icon="pi pi-pencil" class="p-button-warning p-button-text" />
+                            <Button v-if="tpaEditMode" icon="pi pi-pencil" aria-label="editMetric" class="p-button-warning p-button-text" />
                         </div>
                     </span>
                     
@@ -497,7 +497,7 @@ async function changeElementType(metricIndex) {
         </template>
         
         <template #footer v-if="tpaEditMode">
-            <Button label="Add new metric" icon="pi pi-plus" @click="addNewMetric" />
+            <Button label="Add new metric" aria-label="addMetric" icon="pi pi-plus" @click="addNewMetric" />
         </template>
     </DataView>
 
@@ -519,8 +519,8 @@ async function changeElementType(metricIndex) {
         
         <template #footer>
             <div class="flex justify-content-end">
-                <Button icon="pi pi-check" label="Save" severity="success" @click="confirmEventEdit" :disabled="!(currentEditingSource && currentEditingEndpoint && tpaEditionStore.COLLECTOR_EVENT_ENDPOINTS?.[currentEditingSource] && tpaEditionStore.COLLECTOR_EVENT_ENDPOINTS?.[currentEditingSource].includes(currentEditingEndpoint))" />
-                <Button icon="pi pi-times" label="Cancel" severity="danger" @click="showEditEventDialog = false" />
+                <Button icon="pi pi-check" label="Save" aria-label="save" severity="success" @click="confirmEventEdit" :disabled="!(currentEditingSource && currentEditingEndpoint && tpaEditionStore.COLLECTOR_EVENT_ENDPOINTS?.[currentEditingSource] && tpaEditionStore.COLLECTOR_EVENT_ENDPOINTS?.[currentEditingSource].includes(currentEditingEndpoint))" />
+                <Button icon="pi pi-times" label="Cancel" aria-label="cancel" severity="danger" @click="showEditEventDialog = false" />
             </div>
         </template>
     </Dialog>

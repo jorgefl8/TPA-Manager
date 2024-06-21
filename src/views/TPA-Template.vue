@@ -175,7 +175,7 @@ const openCatalogue = () => {
         <div class="card ">
             <NavMenu />
             <Divider layout="horizontal" />
-            <Panel header="TPA Information" aria-label="TPaInfo" toggleable collapsed>
+            <Panel header="TPA Information" aria-label="TPAInfo" toggleable collapsed>
                 <div class="content">
                     <p>A TPA is a document that describes the practices a team should follow during the development of a
                         project
@@ -249,13 +249,13 @@ const openCatalogue = () => {
                             </Button>
                         </a>
                         <div v-if="!onlyVisualize && !isMobile" class="flex align-items-center gap-1">
-                            <img v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'" width="30" />
+                            <img v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'" width="30" height="30" />
                             <InputSwitch v-model="tpaEditMode" aria-label="toggleEditMode" :pt="{
                                 slider: ({ props }) => ({
                                     class: props.modelValue ? 'bg-green-400' : 'bg-gray-300'
                                 })
                             }" />
-                            <img v-tooltip.bottom="'Edit mode'" alt="Edit mode" :src="'/tpa-edit.svg'" width="30" />
+                            <img v-tooltip.bottom="'Edit mode'" alt="Edit mode" :src="'/tpa-edit.svg'" width="30" height="30" />
                         </div>
                         <img v-if="onlyVisualize" v-tooltip.bottom="'Read mode'" alt="Read mode" :src="'/tpa-read.svg'"
                             width="30" />
