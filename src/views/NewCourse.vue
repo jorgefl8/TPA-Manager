@@ -64,7 +64,7 @@ async function getTemplates() {
         loading.value = false;
 }
 
-async function createClass() {
+async function createCourse() {
     if (new_course.value.classId != "" && new_course.value.classId !== null && new_course.value.joinCode != "" && new_course.value.joinCode !== null) {
         await axios.post(scopesURL, new_course.value, {
             headers: {
@@ -247,7 +247,7 @@ async function addCredentialorIdent() {
                     </div>
 
                     <div class="buttons">
-                        <Button label="Create" @click="createClass" icon="pi pi-check"
+                        <Button label="Create" @click="createCourse" icon="pi pi-check"
                             :disabled="isCreateDisabled" :pt="{
                 root: { class: 'bg-green-400 border-green-400 hover:bg-green-600 hover:border-green-600' }
             }" />
