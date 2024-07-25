@@ -90,7 +90,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## Authors
 
 * **Jorge Florentino Serra** - [jorgefl8](https://github.com/jorgefl8)
-* **Mariano Manuel Torrado Sánchez** - [MaToSan24](https://github.com/MaToSan24)
 
 ## License
 
